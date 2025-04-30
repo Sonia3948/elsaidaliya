@@ -1,14 +1,15 @@
-
 package main
 
 import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -16,12 +17,32 @@ import (
 var client *mongo.Client
 
 func main() {
+	// Chargement des variables d'environnement
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: .env file not found, using environment variables")
+	}
+	
 	// Configuration de MongoDB
+	mongoURI := os.Getenv("MONGODB_URI")
+	if mongoURI == "" {
+		mongoURI = "mongodb://localhost:27017/elsaidaliya"
+	}
+	
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:5173"
+	}
+	
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	
-	// Connectez-vous à MongoDB - remplacez l'URL par votre chaîne de connexion MongoDB
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	// Connexion à MongoDB
+	clientOptions := options.Client().ApplyURI(mongoURI)
 	var err error
 	client, err = mongo.Connect(ctx, clientOptions)
 	if err != nil {
@@ -41,7 +62,7 @@ func main() {
 	
 	// Configuration CORS
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // URL de votre frontend
+		AllowOrigins:     []string{frontendURL},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -69,8 +90,8 @@ func main() {
 	// Routes pour les offres
 	setupOfferRoutes(r)
 	
-	log.Println("Serveur démarré sur le port 8080")
-	r.Run(":8080")
+	log.Printf("Serveur démarré sur le port %s", port)
+	r.Run(":" + port)
 }
 
 func setupUserRoutes(r *gin.Engine) {

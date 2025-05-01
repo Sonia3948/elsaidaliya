@@ -30,7 +30,7 @@ const OfferCard: React.FC<OfferCardProps> = ({
   highlighted = false,
   offerId
 }) => {
-  return <Card className="bg-green-50">
+  return <Card className="bg-white rounded-lg">
       {highlighted && <div className="bg-pharmacy-dark text-center px-0 mx-0 py-0">
           
         </div>}

@@ -14,9 +14,7 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/register">
-                <Button size="lg" className="bg-pharmacy hover:bg-pharmacy-dark">
-                  S'inscrire maintenant <ArrowRight size={16} className="ml-2" />
-                </Button>
+                
               </Link>
               <Link to="/about">
                 <Button size="lg" variant="outline">

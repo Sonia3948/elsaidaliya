@@ -2,39 +2,7 @@ import { Link } from "react-router-dom";
 const Footer = () => {
   return <footer className="bg-white shadow-inner mt-auto">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            
-            <div className="mt-4 space-y-2">
-              <Link to="/about" className="text-base text-gray-600 hover:text-medical-dark block">
-                Notre mission
-              </Link>
-              
-            </div>
-          </div>
-          
-          <div>
-            
-            <div className="mt-4 space-y-2">
-              <Link to="/contact" className="text-base text-gray-600 hover:text-medical-dark block">
-                Contact
-              </Link>
-              
-            </div>
-          </div>
-          
-          <div>
-            
-            <div className="mt-4 space-y-2">
-              <Link to="/about" className="text-base text-gray-600 hover:text-medical-dark block">
-                Conditions d'utilisation
-              </Link>
-              <Link to="/about" className="text-base text-gray-600 hover:text-medical-dark block">
-                Politique de confidentialité
-              </Link>
-            </div>
-          </div>
-        </div>
+        
         
         <div className="mt-8 border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center">

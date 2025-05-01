@@ -1,9 +1,6 @@
-
 import { Link } from "react-router-dom";
-
 const Footer = () => {
-  return (
-    <footer className="bg-white shadow-inner mt-auto">
+  return <footer className="bg-white shadow-inner mt-auto">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
@@ -31,7 +28,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Légal</h3>
+            
             <div className="mt-4 space-y-2">
               <Link to="/about" className="text-base text-gray-600 hover:text-medical-dark block">
                 Conditions d'utilisation
@@ -55,8 +52,6 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;

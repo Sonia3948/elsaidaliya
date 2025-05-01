@@ -34,7 +34,7 @@ const OfferCard: React.FC<OfferCardProps> = ({
       {highlighted && <div className="bg-pharmacy-dark text-center px-0 mx-0 py-0">
           
         </div>}
-      <CardHeader className={`pb-4 ${highlighted ? "bg-pharmacy-light bg-opacity-40" : ""}`}>
+      <CardHeader className="bg-pharmacy-light py-[15px] px-0 mx-0 my-0">
         <CardTitle className="text-xl font-bold text-center">{title}</CardTitle>
       </CardHeader>
       <CardContent className="pt-4">

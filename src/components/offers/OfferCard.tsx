@@ -48,7 +48,7 @@ const OfferCard: React.FC<OfferCardProps> = ({
       </CardContent>
       <CardFooter>
         <Link to={`/payment/${offerId}`} className="w-full">
-          <Button className={`w-full ${highlighted ? "bg-pharmacy-dark hover:bg-pharmacy" : "bg-pharmacy hover:bg-pharmacy-dark"}`}>Choisir </Button>
+          <Button className="rounded-xl bg-pharmacy-accent">Choisir </Button>
         </Link>
       </CardFooter>
     </Card>;

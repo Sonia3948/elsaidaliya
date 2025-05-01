@@ -17,11 +17,11 @@ const AboutPage = () => {
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Comment nous aidons</h2>
             <div className="space-y-4">
               <div className="p-6 border border-gray-100 rounded-lg shadow-sm">
-                <h3 className="text-xl font-semibold text-medical-dark mb-2">Pour les pharmaciens</h3>
+                <h3 className="text-xl font-semibold text-medical-dark mb-2 text-pharmacy-dark">Pour les pharmaciens</h3>
                 <p>Nous offrons aux pharmaciens un accès rapide aux catalogues produits des fournisseurs, facilitant une recherche efficace des médicaments nécessaires. Notre plateforme permet également de découvrir de nouvelles offres et de trouver facilement des fournisseurs à proximité de votre pharmacie.</p>
               </div>
               <div className="p-6 border border-gray-100 rounded-lg shadow-sm">
-                <h3 className="text-xl font-semibold text-medical-dark mb-2">Pour les fournisseurs</h3>
+                <h3 className="text-xl font-semibold text-medical-dark mb-2 text-pharmacy-dark">Pour les fournisseurs</h3>
                 <p>Nous offrons aux fournisseurs une vitrine numérique pour présenter leurs catalogues de produits et leurs offres spéciales. Notre plateforme leur permet d'atteindre un réseau plus large de pharmacies et de faciliter la distribution de leurs produits.</p>
               </div>
             </div>

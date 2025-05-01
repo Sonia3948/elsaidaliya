@@ -1,17 +1,19 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, CreditCard } from "lucide-react";
+import { ArrowLeft, CreditCard, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import Layout from "@/components/layout/Layout";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const PaymentPage = () => {
   const { offerId } = useParams<{ offerId: string }>();
   const [paymentType, setPaymentType] = useState<"monthly" | "yearly">("monthly");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "bank">("card");
   
   const offerDetails = {
     bronze: {
@@ -60,9 +62,17 @@ const PaymentPage = () => {
 
   const handlePayment = () => {
     // Ici nous pourrions implémenter l'intégration avec une passerelle de paiement
-    console.log(`Traitement du paiement pour l'offre ${offerId} (${paymentType})`);
+    console.log(`Traitement du paiement pour l'offre ${offerId} (${paymentType}) via ${paymentMethod}`);
     // Redirection vers la page de succès de paiement
     window.location.href = "/payment-success";
+  };
+
+  const ribDetails = {
+    bank: "Banque Nationale d'Algérie (BNA)",
+    accountName: "Elsaidaliya SARL",
+    rib: "007 00076 0300000266 80",
+    swift: "BNAADZALXXX",
+    address: "123 Boulevard Mohammed V, Alger, Algérie"
   };
 
   return (
@@ -137,13 +147,65 @@ const PaymentPage = () => {
                 <CardDescription>Choisissez votre méthode de paiement préférée</CardDescription>
               </CardHeader>
               <CardContent>
-                <RadioGroup defaultValue="card" className="space-y-4">
+                <RadioGroup defaultValue="card" className="space-y-4" onValueChange={(value) => setPaymentMethod(value as "card" | "bank")}>
                   <div className="flex items-center space-x-2 border p-3 rounded-md">
                     <RadioGroupItem value="card" id="card" />
                     <Label htmlFor="card">Carte bancaire</Label>
                     <CreditCard className="ml-auto" size={20} />
                   </div>
+                  <div className="flex items-center space-x-2 border p-3 rounded-md">
+                    <RadioGroupItem value="bank" id="bank" />
+                    <Label htmlFor="bank">Virement bancaire</Label>
+                    <Wallet className="ml-auto" size={20} />
+                  </div>
                 </RadioGroup>
+                
+                {paymentMethod === "bank" && (
+                  <div className="mt-6 p-4 bg-pharmacy-light bg-opacity-20 rounded-md">
+                    <h3 className="font-semibold mb-2">Coordonnées bancaires:</h3>
+                    <div className="space-y-2 text-sm">
+                      <p><span className="font-semibold">Banque:</span> {ribDetails.bank}</p>
+                      <p><span className="font-semibold">Nom du compte:</span> {ribDetails.accountName}</p>
+                      <p><span className="font-semibold">RIB:</span> {ribDetails.rib}</p>
+                      <p><span className="font-semibold">Code SWIFT:</span> {ribDetails.swift}</p>
+                      <p><span className="font-semibold">Adresse:</span> {ribDetails.address}</p>
+                    </div>
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <p className="text-sm text-yellow-800">
+                        <span className="font-bold">Important:</span> Après avoir effectué votre virement, veuillez nous envoyer une confirmation par email à finance@elsaidaliya.dz avec votre numéro de référence.
+                      </p>
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="mt-4 bg-white">
+                          Afficher RIB complet
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Relevé d'Identité Bancaire (RIB)</DialogTitle>
+                          <DialogDescription>
+                            Utilisez ces coordonnées pour effectuer votre virement bancaire.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="p-4 border rounded-md bg-gray-50 font-mono text-sm">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="font-semibold">Banque:</div>
+                            <div>{ribDetails.bank}</div>
+                            <div className="font-semibold">Nom du compte:</div>
+                            <div>{ribDetails.accountName}</div>
+                            <div className="font-semibold">RIB:</div>
+                            <div className="break-all">{ribDetails.rib}</div>
+                            <div className="font-semibold">Code SWIFT:</div>
+                            <div>{ribDetails.swift}</div>
+                            <div className="font-semibold">Adresse:</div>
+                            <div>{ribDetails.address}</div>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                )}
                 
                 <div className="mt-8 space-y-4">
                   <h3 className="font-semibold">Détails de facturation</h3>
@@ -157,7 +219,7 @@ const PaymentPage = () => {
                   onClick={handlePayment}
                   className="w-full bg-pharmacy-dark hover:bg-pharmacy"
                 >
-                  Procéder au paiement
+                  {paymentMethod === "card" ? "Procéder au paiement" : "Confirmer la commande"}
                 </Button>
               </CardFooter>
             </Card>

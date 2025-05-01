@@ -98,7 +98,7 @@ const RegisterPage = () => {
           </div>
           
           <div className="mt-8 bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 bg-white">
               <div>
                 <label htmlFor="businessName" className="block text-sm font-medium text-gray-700">
                   Raison sociale
@@ -197,7 +197,7 @@ const RegisterPage = () => {
                 </label>
               </div>
               
-              <Button type="submit" disabled={isLoading} className="w-full bg-medical hover:bg-medical-dark text-white bg-pharmacy-accent">
+              <Button type="submit" disabled={isLoading} className="w-full bg-medical hover:bg-medical-dark text-white font-normal bg-pharmacy-accent rounded-xl">
                 {isLoading ? "Inscription en cours..." : "S'inscrire"}
               </Button>
             </form>

@@ -1,8 +1,14 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Home, Info, Phone, LogIn, UserPlus } from "lucide-react";
+import { Menu, X, Home, Info, Phone, LogIn, UserPlus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,10 +19,10 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center">
-              <div className="h-10 w-10 rounded-full bg-medical-dark flex items-center justify-center">
-                <span className="text-white font-bold text-xl">MS</span>
+              <div className="h-10 w-10 rounded-full bg-pharmacy-dark flex items-center justify-center">
+                <span className="text-white font-bold text-xl">E</span>
               </div>
-              <span className="ml-2 text-xl font-bold text-medical-dark">Med-Supply-Link</span>
+              <span className="ml-2 text-xl font-bold text-pharmacy-dark">Elsaidaliya</span>
             </Link>
           </div>
           
@@ -24,42 +30,54 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             <Link 
               to="/" 
-              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-medical hover:bg-medical-light transition-colors"
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-pharmacy hover:bg-pharmacy-light transition-colors"
             >
               <Home size={20} className="mr-1" />
               Accueil
             </Link>
             <Link 
               to="/about" 
-              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-medical hover:bg-medical-light transition-colors"
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-pharmacy hover:bg-pharmacy-light transition-colors"
             >
               <Info size={20} className="mr-1" />
               À propos
             </Link>
             <Link 
               to="/contact" 
-              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-medical hover:bg-medical-light transition-colors"
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-pharmacy hover:bg-pharmacy-light transition-colors"
             >
               <Phone size={20} className="mr-1" />
               Contact
             </Link>
-            <Link to="/login">
-              <Button variant="outline" className="ml-2 flex items-center">
-                <LogIn size={18} className="mr-1" /> Se connecter
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button className="ml-2 bg-medical hover:bg-medical-dark flex items-center">
-                <UserPlus size={18} className="mr-1" /> S'inscrire
-              </Button>
-            </Link>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-2 flex items-center">
+                  <LogIn size={18} className="mr-1" /> Se connecter <ChevronDown size={16} className="ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link to="/login" className="w-full flex items-center">
+                    <LogIn size={16} className="mr-2" />
+                    Se connecter
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/register" className="w-full flex items-center">
+                    <UserPlus size={16} className="mr-2" />
+                    S'inscrire
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-medical hover:bg-medical-light"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-pharmacy hover:bg-pharmacy-light"
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -73,7 +91,7 @@ const Navbar = () => {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <Link 
               to="/" 
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-medical hover:bg-medical-light"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-pharmacy hover:bg-pharmacy-light"
               onClick={() => setIsMenuOpen(false)}
             >
               <Home size={20} className="mr-2" />
@@ -81,7 +99,7 @@ const Navbar = () => {
             </Link>
             <Link 
               to="/about" 
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-medical hover:bg-medical-light"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-pharmacy hover:bg-pharmacy-light"
               onClick={() => setIsMenuOpen(false)}
             >
               <Info size={20} className="mr-2" />
@@ -89,7 +107,7 @@ const Navbar = () => {
             </Link>
             <Link 
               to="/contact" 
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-medical hover:bg-medical-light"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-pharmacy hover:bg-pharmacy-light"
               onClick={() => setIsMenuOpen(false)}
             >
               <Phone size={20} className="mr-2" />
@@ -97,7 +115,7 @@ const Navbar = () => {
             </Link>
             <Link 
               to="/login" 
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-medical hover:bg-medical-light"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-pharmacy hover:bg-pharmacy-light"
               onClick={() => setIsMenuOpen(false)}
             >
               <LogIn size={20} className="mr-2" />
@@ -105,7 +123,7 @@ const Navbar = () => {
             </Link>
             <Link 
               to="/register" 
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-medical hover:bg-medical-light"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-pharmacy hover:bg-pharmacy-light"
               onClick={() => setIsMenuOpen(false)}
             >
               <UserPlus size={20} className="mr-2" />

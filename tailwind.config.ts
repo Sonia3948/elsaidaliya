@@ -63,11 +63,13 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				medical: {
-					light: '#E3F2FD',
-					DEFAULT: '#2196F3',
-					dark: '#1565C0',
-					accent: '#00BCD4',
+				pharmacy: {
+					light: '#E8F5E9',
+					DEFAULT: '#4CAF50',
+					dark: '#2E7D32',
+					accent: '#81C784',
+					gray: '#8E9196',
+					lightGray: '#F1F0FB',
 				},
 			},
 			borderRadius: {

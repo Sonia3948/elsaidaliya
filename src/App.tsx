@@ -9,6 +9,7 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import PaymentPage from "./pages/PaymentPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import SupplierListings from "./pages/supplier/SupplierListings";
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/payment/:offerId" element={<PaymentPage />} />
           
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />

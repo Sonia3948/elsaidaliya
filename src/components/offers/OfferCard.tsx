@@ -47,8 +47,8 @@ const OfferCard: React.FC<OfferCardProps> = ({
         </div>
       </CardContent>
       <CardFooter className="bg-pharmacy-DEFAULT">
-        <Link to={`/payment/${offerId}`} className="w-full py-[10px]">
-          <Button className="bg-pharmacy-DEFAULT text-base text-white">Choisir </Button>
+        <Link to={`/payment/${offerId}`} className="w-full py-0">
+          <Button className="bg-pharmacy-DEFAULT text-base font-normal text-black">Choisir </Button>
         </Link>
       </CardFooter>
     </Card>;

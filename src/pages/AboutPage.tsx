@@ -27,9 +27,7 @@ const AboutPage = () => {
             </div>
             
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Notre engagement</h2>
-            <p>
-              Med-Supply-Link s'engage à fournir une plateforme sécurisée, fiable et facile à utiliser. Nous valorisons:
-            </p>
+            <p className="mx-0">Elsaidaliya s'engage à fournir une plateforme sécurisée, fiable et facile à utiliser. Nous valorisons:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>La transparence dans toutes les interactions entre utilisateurs</li>
               <li>La sécurité des données et des informations commerciales</li>

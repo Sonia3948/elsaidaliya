@@ -130,7 +130,7 @@ const Index = () => {
             Inscrivez-vous aujourd'hui et commencez à optimiser votre chaîne d'approvisionnement pharmaceutique.
           </p>
           <Link to="/register">
-            <Button size="lg" className="bg-white text-pharmacy-dark hover:bg-gray-100">
+            <Button size="lg" className="bg-white text-pharmacy-dark hover:bg-gray-100 rounded-xl">
               S'inscrire maintenant
             </Button>
           </Link>

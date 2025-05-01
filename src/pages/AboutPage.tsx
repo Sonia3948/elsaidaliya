@@ -4,7 +4,7 @@ const AboutPage = () => {
       <div className="bg-white">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">À propos de Med-Supply-Link</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">À propos d'Elsaidaliya</h1>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Facilitant l'approvisionnement pharmaceutique à travers une plateforme innovante et sécurisée.
             </p>
@@ -12,7 +12,7 @@ const AboutPage = () => {
           
           <div className="prose prose-lg max-w-3xl mx-auto text-gray-600">
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Notre mission</h2>
-            <p>Elsaidaliya a été créé pour résoudre les défis d'approvisionnement dans le secteur pharmaceutique. Notre plateforme met en relation les pharmaciens et les fournisseurs de produits pharmaceutiques de manière simple et efficace.</p>
+            <p>Elsaidaliya a été développée pour optimiser les processus d’approvisionnement pharmaceutique. Notre plateforme établit un lien direct, structuré et fiable entre pharmaciens et fournisseurs."</p>
             
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Comment nous aidons</h2>
             <div className="space-y-4">
@@ -27,9 +27,7 @@ const AboutPage = () => {
             </div>
             
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Notre engagement</h2>
-            <p>
-              Med-Supply-Link s'engage à fournir une plateforme sécurisée, fiable et facile à utiliser. Nous valorisons:
-            </p>
+            <p className="mx-0">Elsaidaliya s'engage à fournir une plateforme sécurisée, fiable et facile à utiliser. Nous valorisons:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>La transparence dans toutes les interactions entre utilisateurs</li>
               <li>La sécurité des données et des informations commerciales</li>

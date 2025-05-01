@@ -17,7 +17,7 @@ const Index = () => {
                 
               </Link>
               <Link to="/about">
-                <Button size="lg" variant="outline">
+                <Button size="lg" variant="outline" className="rounded-xl bg-pharmacy-accent">
                   En savoir plus
                 </Button>
               </Link>

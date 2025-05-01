@@ -12,9 +12,12 @@ import (
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	
+	"elsaidaliya/handlers"
 )
 
 var client *mongo.Client
+var database *mongo.Database
 
 func main() {
 	// Chargement des variables d'environnement
@@ -56,6 +59,12 @@ func main() {
 	}
 	
 	log.Println("Connecté à MongoDB!")
+	
+	// Initialize database and collections
+	database = client.Database("elsaidaliya")
+	
+	// Initialize handlers with database connection
+	handlers.InitAuthHandlers(database)
 	
 	// Configuration de Gin
 	r := gin.Default()
@@ -109,7 +118,7 @@ func setupAuthRoutes(r *gin.Engine) {
 	auth := r.Group("/api/auth")
 	{
 		auth.POST("/register", registerUser)
-		auth.POST("/login", loginUser)
+		auth.POST("/login", handlers.LoginUser)
 		auth.POST("/forgot-password", forgotPassword)
 	}
 }
@@ -164,10 +173,6 @@ func deleteUser(c *gin.Context) {
 // Définitions des handlers pour l'authentification
 func registerUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Utilisateur enregistré"})
-}
-
-func loginUser(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Connexion réussie"})
 }
 
 func forgotPassword(c *gin.Context) {

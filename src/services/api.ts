@@ -1,4 +1,3 @@
-
 // API service pour communiquer avec le backend Go
 import { toast } from "sonner";
 
@@ -39,7 +38,7 @@ export const authService = {
     }
   },
   
-  // Connexion d'un utilisateur
+  // Connexion d'un utilisateur (including admin)
   login: async (credentials: { email: string; password: string }) => {
     try {
       const response = await fetch(`${API_URL}/auth/login`, {

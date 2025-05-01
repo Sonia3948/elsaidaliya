@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Layout from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
+import { authService } from "@/services/api";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -14,45 +15,74 @@ const LoginPage = () => {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    setError("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
     
-    // Simulate API call with timeout
-    setTimeout(() => {
-      // Mock authentication - in a real app, this would call an API
-      const mockUser = {
-        id: "123",
-        name: "Utilisateur Test",
-        email: formData.identifier,
-        role: "pharmacien", // or "fournisseur" or "admin"
-      };
-      
-      // Store user in localStorage for demo purposes
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue sur Med-Supply-Link!",
-      });
-      
-      // Redirect based on role
-      if (mockUser.role === "admin") {
+    try {
+      // In development mode, check for the hardcoded admin account
+      if (import.meta.env.DEV && 
+          formData.identifier === "0549050018" && 
+          formData.password === "Ned@0820") {
+        // Simulate successful login with admin account
+        const adminUser = {
+          id: "admin-id",
+          role: "admin",
+        };
+        
+        localStorage.setItem("user", JSON.stringify(adminUser));
+        
+        toast({
+          title: "Connexion réussie",
+          description: "Bienvenue sur le tableau de bord administrateur!",
+        });
+        
         navigate("/admin/dashboard");
-      } else if (mockUser.role === "fournisseur") {
-        navigate("/supplier/dashboard");
-      } else {
-        navigate("/pharmacist/dashboard");
+        setIsLoading(false);
+        return;
       }
       
+      // Call the API for real login
+      const response = await authService.login({
+        email: formData.identifier, // The backend will check if this is email or phone
+        password: formData.password,
+      });
+      
+      if (response && !response.error) {
+        // Store user data in localStorage
+        localStorage.setItem("user", JSON.stringify(response.user));
+        
+        toast({
+          title: "Connexion réussie",
+          description: "Bienvenue sur Med-Supply-Link!",
+        });
+        
+        // Redirect based on role
+        if (response.user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (response.user.role === "fournisseur") {
+          navigate("/supplier/dashboard");
+        } else {
+          navigate("/pharmacist/dashboard");
+        }
+      } else {
+        setError(response?.error || "Une erreur est survenue lors de la connexion");
+      }
+    } catch (error) {
+      setError("Erreur de connexion au serveur");
+      console.error("Login error:", error);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -78,6 +108,12 @@ const LoginPage = () => {
           </div>
           
           <div className="mt-8 bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
+            {error && (
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                {error}
+              </div>
+            )}
+            
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label

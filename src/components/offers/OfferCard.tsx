@@ -37,7 +37,7 @@ const OfferCard: React.FC<OfferCardProps> = ({
       <CardHeader className="bg-pharmacy-light py-[15px] px-0 mx-0 my-0">
         <CardTitle className="text-xl font-bold text-center">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent className="pt-4 bg-white py-[10px]">
         <div className="text-center mb-4">
           <p className="text-2xl font-bold text-gray-800">{priceMonthly} <span className="text-sm font-normal">/ mois</span></p>
           <p className="text-sm text-gray-600">ou {priceYearly} / an</p>

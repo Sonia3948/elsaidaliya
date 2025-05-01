@@ -11,11 +11,14 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import PaymentPage from "./pages/PaymentPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProfile from "./pages/admin/AdminProfile";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import SupplierListings from "./pages/supplier/SupplierListings";
 import SupplierOffers from "./pages/supplier/SupplierOffers";
+import SupplierProfile from "./pages/supplier/SupplierProfile";
 import PharmacistDashboard from "./pages/pharmacist/PharmacistDashboard";
 import PharmacistMedicines from "./pages/pharmacist/PharmacistMedicines";
+import PharmacistProfile from "./pages/pharmacist/PharmacistProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,15 +39,18 @@ const App = () => (
           
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
           
           {/* Supplier Routes */}
           <Route path="/supplier/dashboard" element={<SupplierDashboard />} />
           <Route path="/supplier/listings" element={<SupplierListings />} />
           <Route path="/supplier/offers" element={<SupplierOffers />} />
+          <Route path="/supplier/profile" element={<SupplierProfile />} />
           
           {/* Pharmacist Routes */}
           <Route path="/pharmacist/dashboard" element={<PharmacistDashboard />} />
           <Route path="/pharmacist/medicines" element={<PharmacistMedicines />} />
+          <Route path="/pharmacist/profile" element={<PharmacistProfile />} />
           
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />

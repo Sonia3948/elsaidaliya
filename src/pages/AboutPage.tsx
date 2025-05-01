@@ -12,7 +12,7 @@ const AboutPage = () => {
           
           <div className="prose prose-lg max-w-3xl mx-auto text-gray-600">
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Notre mission</h2>
-            <p>Elsaidaliya a été créé pour résoudre les défis d'approvisionnement dans le secteur pharmaceutique. Notre plateforme met en relation les pharmaciens et les fournisseurs de produits pharmaceutiques de manière simple et efficace.</p>
+            <p>Elsaidaliya a été développée pour optimiser les processus d’approvisionnement pharmaceutique. Notre plateforme établit un lien direct, structuré et fiable entre pharmaciens et fournisseurs."</p>
             
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Comment nous aidons</h2>
             <div className="space-y-4">

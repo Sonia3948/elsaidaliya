@@ -1,19 +1,14 @@
-
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import OffersSection from "@/components/offers/OffersSection";
-
 const Index = () => {
-  return (
-    <Layout>
+  return <Layout>
       <section className="bg-gradient-to-b from-pharmacy-light to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Plateforme d'Approvisionnement Pharmaceutique
-            </h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Approvisionnement Pharmaceutique en un Clic!</h1>
             <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Connectez-vous avec des fournisseurs de médicaments fiables et trouvez rapidement les produits dont vous avez besoin.
             </p>
@@ -143,8 +138,6 @@ const Index = () => {
           </Link>
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Index;

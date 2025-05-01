@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, CreditCard, Wallet } from "lucide-react";
@@ -9,64 +8,44 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import Layout from "@/components/layout/Layout";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-
 const PaymentPage = () => {
-  const { offerId } = useParams<{ offerId: string }>();
+  const {
+    offerId
+  } = useParams<{
+    offerId: string;
+  }>();
   const [paymentType, setPaymentType] = useState<"monthly" | "yearly">("monthly");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "bank">("card");
-  
   const offerDetails = {
     bronze: {
       title: "Offre Bronze",
       description: "Accès standard à la plateforme Elsaidaliya",
       monthlyPrice: "10 000 DZ",
       yearlyPrice: "100 000 DZ",
-      features: [
-        "Visibilité dans les résultats de recherche",
-        "Une semaine d'essai gratuite",
-        "Accès à toutes les fonctionnalités de base"
-      ]
+      features: ["Visibilité dans les résultats de recherche", "Une semaine d'essai gratuite", "Accès à toutes les fonctionnalités de base"]
     },
     silver: {
       title: "Offre Argent",
       description: "Visibilité améliorée pour votre entreprise",
       monthlyPrice: "15 000 DZ",
       yearlyPrice: "150 000 DZ",
-      features: [
-        "Mise en avant dans les résultats de recherche",
-        "Notification aux pharmaciens pour les nouveaux produits",
-        "Une semaine d'essai gratuite",
-        "Support prioritaire"
-      ]
+      features: ["Mise en avant dans les résultats de recherche", "Notification aux pharmaciens pour les nouveaux produits", "Une semaine d'essai gratuite", "Support prioritaire"]
     },
     gold: {
       title: "Offre Or",
       description: "Visibilité maximale et fonctionnalités premium",
       monthlyPrice: "25 000 DZ",
       yearlyPrice: "250 000 DZ",
-      features: [
-        "Priorité maximale dans les résultats",
-        "Mise à jour quotidienne des listings",
-        "Notifications aux pharmaciens pour les nouveaux produits",
-        "Annonces sur la page d'accueil",
-        "Newsletter mensuelle aux pharmaciens"
-      ]
+      features: ["Priorité maximale dans les résultats", "Mise à jour quotidienne des listings", "Notifications aux pharmaciens pour les nouveaux produits", "Annonces sur la page d'accueil", "Newsletter mensuelle aux pharmaciens"]
     }
   };
-
-  const offer = offerId === 'gold' 
-    ? offerDetails.gold 
-    : offerId === 'silver' 
-      ? offerDetails.silver 
-      : offerDetails.bronze;
-
+  const offer = offerId === 'gold' ? offerDetails.gold : offerId === 'silver' ? offerDetails.silver : offerDetails.bronze;
   const handlePayment = () => {
     // Ici nous pourrions implémenter l'intégration avec une passerelle de paiement
     console.log(`Traitement du paiement pour l'offre ${offerId} (${paymentType}) via ${paymentMethod}`);
     // Redirection vers la page de succès de paiement
     window.location.href = "/payment-success";
   };
-
   const ribDetails = {
     bank: "Banque Nationale d'Algérie (BNA)",
     accountName: "Elsaidaliya SARL",
@@ -74,9 +53,7 @@ const PaymentPage = () => {
     swift: "BNAADZALXXX",
     address: "123 Boulevard Mohammed V, Alger, Algérie"
   };
-
-  return (
-    <Layout>
+  return <Layout>
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="mb-8">
           <Link to="/" className="flex items-center text-pharmacy hover:underline">
@@ -98,7 +75,7 @@ const PaymentPage = () => {
                 <CardDescription>Détails de l'offre sélectionnée</CardDescription>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="monthly" onValueChange={(value) => setPaymentType(value as "monthly" | "yearly")}>
+                <Tabs defaultValue="monthly" onValueChange={value => setPaymentType(value as "monthly" | "yearly")}>
                   <TabsList className="grid w-full grid-cols-2 mb-4">
                     <TabsTrigger value="monthly">Mensuel</TabsTrigger>
                     <TabsTrigger value="yearly">Annuel</TabsTrigger>
@@ -126,14 +103,12 @@ const PaymentPage = () => {
                 <div className="mt-6">
                   <h3 className="font-semibold mb-2">Fonctionnalités incluses:</h3>
                   <ul className="space-y-2">
-                    {offer.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
+                    {offer.features.map((feature, index) => <li key={index} className="flex items-start">
                         <div className="flex-shrink-0 h-5 w-5 rounded-full bg-pharmacy-light flex items-center justify-center mt-0.5">
                           <span className="text-pharmacy-dark font-bold text-xs">✓</span>
                         </div>
                         <p className="ml-2 text-gray-700">{feature}</p>
-                      </li>
-                    ))}
+                      </li>)}
                   </ul>
                 </div>
               </CardContent>
@@ -147,7 +122,7 @@ const PaymentPage = () => {
                 <CardDescription>Choisissez votre méthode de paiement préférée</CardDescription>
               </CardHeader>
               <CardContent>
-                <RadioGroup defaultValue="card" className="space-y-4" onValueChange={(value) => setPaymentMethod(value as "card" | "bank")}>
+                <RadioGroup defaultValue="card" className="space-y-4" onValueChange={value => setPaymentMethod(value as "card" | "bank")}>
                   <div className="flex items-center space-x-2 border p-3 rounded-md">
                     <RadioGroupItem value="card" id="card" />
                     <Label htmlFor="card">Carte bancaire</Label>
@@ -160,8 +135,7 @@ const PaymentPage = () => {
                   </div>
                 </RadioGroup>
                 
-                {paymentMethod === "bank" && (
-                  <div className="mt-6 p-4 bg-pharmacy-light bg-opacity-20 rounded-md">
+                {paymentMethod === "bank" && <div className="mt-6 p-4 bg-pharmacy-light bg-opacity-20 rounded-md">
                     <h3 className="font-semibold mb-2">Coordonnées bancaires:</h3>
                     <div className="space-y-2 text-sm">
                       <p><span className="font-semibold">Banque:</span> {ribDetails.bank}</p>
@@ -204,8 +178,7 @@ const PaymentPage = () => {
                         </div>
                       </DialogContent>
                     </Dialog>
-                  </div>
-                )}
+                  </div>}
                 
                 <div className="mt-8 space-y-4">
                   <h3 className="font-semibold">Détails de facturation</h3>
@@ -215,10 +188,7 @@ const PaymentPage = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button 
-                  onClick={handlePayment}
-                  className="w-full bg-pharmacy-dark hover:bg-pharmacy"
-                >
+                <Button onClick={handlePayment} className="w-full bg-pharmacy-accent rounded-xl">
                   {paymentMethod === "card" ? "Procéder au paiement" : "Confirmer la commande"}
                 </Button>
               </CardFooter>
@@ -226,8 +196,6 @@ const PaymentPage = () => {
           </div>
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default PaymentPage;

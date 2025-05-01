@@ -37,7 +37,7 @@ const OfferCard: React.FC<OfferCardProps> = ({
       <CardHeader className="bg-pharmacy-light py-[15px] px-0 mx-0 my-0">
         <CardTitle className="text-xl font-bold text-center">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="pt-4 bg-white py-[10px]">
+      <CardContent className="pt-4">
         <div className="text-center mb-4">
           <p className="text-2xl font-bold text-gray-800">{priceMonthly} <span className="text-sm font-normal">/ mois</span></p>
           <p className="text-sm text-gray-600">ou {priceYearly} / an</p>
@@ -47,8 +47,10 @@ const OfferCard: React.FC<OfferCardProps> = ({
         </div>
       </CardContent>
       <CardFooter>
-        <Link to={`/payment/${offerId}`} className="w-full py-[10px]">
-          <Button className="bg-pharmacy-DEFAULT text-base text-white">Choisir </Button>
+        <Link to={`/payment/${offerId}`} className="w-full">
+          <Button className={`w-full ${highlighted ? "bg-pharmacy-dark hover:bg-pharmacy" : "bg-pharmacy hover:bg-pharmacy-dark"}`}>
+            Choisir cette offre
+          </Button>
         </Link>
       </CardFooter>
     </Card>;

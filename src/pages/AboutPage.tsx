@@ -1,13 +1,10 @@
-
 import Layout from "@/components/layout/Layout";
-
 const AboutPage = () => {
-  return (
-    <Layout>
+  return <Layout>
       <div className="bg-white">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">À propos de Med-Supply-Link</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">À propos d'Elsaidaliya</h1>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Facilitant l'approvisionnement pharmaceutique à travers une plateforme innovante et sécurisée.
             </p>
@@ -15,20 +12,14 @@ const AboutPage = () => {
           
           <div className="prose prose-lg max-w-3xl mx-auto text-gray-600">
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Notre mission</h2>
-            <p>
-              Med-Supply-Link a été créé pour résoudre les défis d'approvisionnement dans le secteur pharmaceutique.
-              Notre plateforme met en relation les pharmaciens et les fournisseurs de produits pharmaceutiques de manière simple et efficace.
-            </p>
+            <p>Elsaidaliya a été créé pour résoudre les défis d'approvisionnement dans le secteur pharmaceutique. Notre plateforme met en relation les pharmaciens et les fournisseurs de produits pharmaceutiques de manière simple et efficace.</p>
             
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Comment nous aidons</h2>
             <div className="space-y-4">
               <div className="p-6 border border-gray-100 rounded-lg shadow-sm">
                 <h3 className="text-xl font-semibold text-medical-dark mb-2">Pour les pharmaciens</h3>
                 <p>
-                  Nous offrons aux pharmaciens un accès rapide aux catalogues de produits des fournisseurs, 
-                  permettant une recherche efficace des médicaments nécessaires. Notre plateforme facilite 
-                  également la découverte de nouvelles offres et l'évaluation des fournisseurs.
-                </p>
+              </p>
               </div>
               <div className="p-6 border border-gray-100 rounded-lg shadow-sm">
                 <h3 className="text-xl font-semibold text-medical-dark mb-2">Pour les fournisseurs</h3>
@@ -60,8 +51,6 @@ const AboutPage = () => {
           </div>
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default AboutPage;

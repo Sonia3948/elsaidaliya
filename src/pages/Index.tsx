@@ -19,7 +19,9 @@ const Index = () => {
                 </Button>
               </Link>
               <Link to="/about">
-                
+                <Button size="lg" variant="outline">
+                  En savoir plus
+                </Button>
               </Link>
             </div>
           </div>

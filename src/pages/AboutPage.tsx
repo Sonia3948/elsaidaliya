@@ -22,11 +22,7 @@ const AboutPage = () => {
               </div>
               <div className="p-6 border border-gray-100 rounded-lg shadow-sm">
                 <h3 className="text-xl font-semibold text-medical-dark mb-2">Pour les fournisseurs</h3>
-                <p>
-                  Pour les fournisseurs, nous offrons une vitrine numérique pour présenter leurs catalogues de produits
-                  et leurs offres spéciales. Notre plateforme leur permet d'atteindre un réseau plus large de pharmacies 
-                  et de faciliter la distribution de leurs produits.
-                </p>
+                <p>Nous offrons aux fournisseurs une vitrine numérique pour présenter leurs catalogues de produits et leurs offres spéciales. Notre plateforme leur permet d'atteindre un réseau plus large de pharmacies et de faciliter la distribution de leurs produits.</p>
               </div>
             </div>
             

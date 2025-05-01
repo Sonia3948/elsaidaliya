@@ -30,7 +30,7 @@ const OfferCard: React.FC<OfferCardProps> = ({
   highlighted = false,
   offerId
 }) => {
-  return <Card className={`overflow-hidden ${highlighted ? "border-pharmacy-dark border-2" : "border-gray-200"}`}>
+  return <Card className="mx-0 rounded-lg">
       {highlighted && <div className="bg-pharmacy-dark text-center py-0 px-0">
           
         </div>}

@@ -41,7 +41,7 @@ const Footer = () => {
             <div className="h-8 w-8 rounded-full bg-medical-dark flex items-center justify-center">
               <span className="text-white font-bold text-sm">MS</span>
             </div>
-            <span className="ml-2 text-lg font-bold text-gray-700">Med-Supply-Link</span>
+            <span className="ml-2 text-lg font-bold text-gray-700">Elsaidaliya</span>
           </div>
           <p className="mt-4 md:mt-0 text-gray-500 text-sm">
             &copy; {new Date().getFullYear()} Med-Supply-Link. Tous droits réservés.

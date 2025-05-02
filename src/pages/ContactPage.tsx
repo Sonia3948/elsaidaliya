@@ -1,30 +1,29 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Instagram, Link } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
+
 const ContactPage = () => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
     message: ""
   });
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const {
-      name,
-      value
-    } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value
     });
   };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
@@ -38,6 +37,7 @@ const ContactPage = () => {
       message: ""
     });
   };
+
   return <Layout>
       <div className="bg-white">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -93,6 +93,7 @@ const ContactPage = () => {
                     <div className="ml-3">
                       <p className="text-sm font-medium text-gray-900">Email</p>
                       <p className="text-sm text-gray-600">contact@elsaidaliya.com</p>
+                      <p className="text-sm text-gray-600">finance@elsaidaliya.com</p>
                     </div>
                   </div>
                   
@@ -108,26 +109,50 @@ const ContactPage = () => {
                   
                   <div className="flex items-start">
                     <div className="flex-shrink-0">
-                      
+                      <MapPin className="h-6 w-6 text-medical-dark" />
                     </div>
                     <div className="ml-3">
-                      
-                      
+                      <p className="text-sm font-medium text-gray-900">Adresse</p>
+                      <p className="text-sm text-gray-600">Alger, Algérie</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="mt-8">
-                  
-                  <div className="space-y-2 text-sm text-gray-600">
+                <div className="mt-8 border-t border-gray-200 pt-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Suivez-nous sur les réseaux sociaux</h3>
+                  <div className="flex space-x-6">
+                    <a 
+                      href="https://facebook.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center text-gray-600 hover:text-pharmacy transition-colors"
+                    >
+                      <Facebook className="h-6 w-6" />
+                      <span className="ml-2">Facebook</span>
+                    </a>
                     
+                    <a 
+                      href="https://instagram.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center text-gray-600 hover:text-pharmacy transition-colors"
+                    >
+                      <Instagram className="h-6 w-6" />
+                      <span className="ml-2">Instagram</span>
+                    </a>
                     
-                    
+                    <a 
+                      href="https://wa.me/+213553720952" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center text-gray-600 hover:text-pharmacy transition-colors"
+                    >
+                      <Phone className="h-6 w-6" />
+                      <span className="ml-2">WhatsApp</span>
+                    </a>
                   </div>
                 </div>
               </div>
-              
-              
             </div>
           </div>
         </div>

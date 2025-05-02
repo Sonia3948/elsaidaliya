@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Layout from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
-import { authService } from "@/services/api";
 
-const LoginPage = () => {
+const AdminLoginPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
@@ -31,8 +30,8 @@ const LoginPage = () => {
     setIsLoading(true);
     setError("");
     try {
-      // In development mode, check for the hardcoded admin account
-      if (import.meta.env.DEV && formData.identifier === "0549050018" && formData.password === "Ned@0820") {
+      // Check for the hardcoded admin account
+      if (formData.identifier === "0549050018" && formData.password === "Ned@0820") {
         // Simulate successful login with admin account
         const adminUser = {
           id: "admin-id",
@@ -44,36 +43,11 @@ const LoginPage = () => {
           description: "Bienvenue sur le tableau de bord administrateur!"
         });
         navigate("/admin/dashboard");
-        setIsLoading(false);
-        return;
-      }
-
-      // Call the API for real login
-      const response = await authService.login({
-        email: formData.identifier, // The backend will check if this is email or phone
-        password: formData.password
-      });
-      if (response && !response.error) {
-        // Store user data in localStorage
-        localStorage.setItem("user", JSON.stringify(response.user));
-        toast({
-          title: "Connexion réussie",
-          description: "Bienvenue sur Med-Supply-Link!"
-        });
-
-        // Redirect based on role
-        if (response.user.role === "admin") {
-          navigate("/admin/dashboard");
-        } else if (response.user.role === "fournisseur") {
-          navigate("/supplier/dashboard");
-        } else {
-          navigate("/pharmacist/dashboard");
-        }
       } else {
-        setError(response?.error || "Une erreur est survenue lors de la connexion");
+        setError("Identifiants administrateur invalides");
       }
     } catch (error) {
-      setError("Erreur de connexion au serveur");
+      setError("Erreur de connexion");
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
@@ -88,13 +62,10 @@ const LoginPage = () => {
               <span className="text-white font-bold text-lg">ES</span>
             </div>
             <h2 className="mt-6 text-3xl font-bold text-gray-900">
-              Connectez-vous à votre compte
+              Accès Administrateur
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Ou{" "}
-              <Link to="/register" className="font-medium text-medical hover:text-medical-dark">
-                créez un nouveau compte
-              </Link>
+              Veuillez vous connecter avec vos identifiants administrateur
             </p>
           </div>
           
@@ -106,42 +77,47 @@ const LoginPage = () => {
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
-                  Email ou téléphone
+                  Identifiant
                 </label>
-                <Input id="identifier" name="identifier" type="text" autoComplete="email" required value={formData.identifier} onChange={handleChange} className="mt-1" />
+                <Input 
+                  id="identifier" 
+                  name="identifier" 
+                  type="text" 
+                  required 
+                  value={formData.identifier} 
+                  onChange={handleChange} 
+                  className="mt-1" 
+                />
               </div>
 
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Mot de passe
                 </label>
-                <Input id="password" name="password" type="password" autoComplete="current-password" required value={formData.password} onChange={handleChange} className="mt-1" />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-medical focus:ring-medical-dark border-gray-300 rounded" />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                    Se souvenir de moi
-                  </label>
-                </div>
-
-                <div className="text-sm">
-                  <Link to="/forgot-password" className="font-medium text-medical hover:text-medical-dark">
-                    Mot de passe oublié ?
-                  </Link>
-                </div>
+                <Input 
+                  id="password" 
+                  name="password" 
+                  type="password" 
+                  required 
+                  value={formData.password} 
+                  onChange={handleChange} 
+                  className="mt-1" 
+                />
               </div>
 
               <div>
-                <Button type="submit" disabled={isLoading} className="w-full bg-pharmacy hover:bg-pharmacy-dark bg-pharmacy-accent">
+                <Button 
+                  type="submit" 
+                  disabled={isLoading} 
+                  className="w-full bg-pharmacy hover:bg-pharmacy-dark bg-pharmacy-accent"
+                >
                   {isLoading ? "Connexion en cours..." : "Se connecter"}
                 </Button>
               </div>
               
               <div className="text-center mt-4">
-                <Link to="/admin" className="text-sm text-gray-600 hover:text-pharmacy-accent">
-                  Espace administrateur
+                <Link to="/login" className="text-sm text-gray-600 hover:text-pharmacy-accent">
+                  Retour à la page de connexion standard
                 </Link>
               </div>
             </form>
@@ -150,4 +126,5 @@ const LoginPage = () => {
       </div>
     </Layout>;
 };
-export default LoginPage;
+
+export default AdminLoginPage;

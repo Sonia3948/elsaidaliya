@@ -1,8 +1,11 @@
+
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import OffersSection from "@/components/offers/OffersSection";
+import UsersCarousel from "@/components/home/UsersCarousel";
+
 const Index = () => {
   return <Layout>
       <section className="bg-gradient-to-b from-pharmacy-light to-white">
@@ -14,7 +17,9 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/register">
-                
+                <Button size="lg" className="rounded-xl bg-pharmacy-accent hover:bg-pharmacy-dark">
+                  S'inscrire maintenant <ArrowRight size={18} className="ml-2" />
+                </Button>
               </Link>
               <Link to="/about">
                 <Button size="lg" variant="outline" className="rounded-xl bg-pharmacy-accent">
@@ -26,40 +31,8 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="py-12 md:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12">Comment ça fonctionne</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-lg border border-gray-100 shadow-sm">
-              <div className="h-12 w-12 bg-pharmacy-light rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-pharmacy-dark font-bold text-xl">1</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Inscription</h3>
-              <p className="text-gray-600">
-                Inscrivez-vous en tant que pharmacien ou fournisseur et complétez votre profil.
-              </p>
-            </div>
-            <div className="text-center p-6 rounded-lg border border-gray-100 shadow-sm">
-              <div className="h-12 w-12 bg-pharmacy-light rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-pharmacy-dark font-bold text-xl">2</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Connexion</h3>
-              <p className="text-gray-600">
-                Les fournisseurs publient leurs listings et offres, les pharmaciens recherchent les produits.
-              </p>
-            </div>
-            <div className="text-center p-6 rounded-lg border border-gray-100 shadow-sm">
-              <div className="h-12 w-12 bg-pharmacy-light rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-pharmacy-dark font-bold text-xl">3</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Approvisionnement</h3>
-              <p className="text-gray-600">
-                Trouvez facilement les produits et contactez les fournisseurs pour passer commande.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Users Carousel - replacing "Comment ça fonctionne" section */}
+      <UsersCarousel />
 
       <OffersSection />
 

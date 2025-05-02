@@ -20,6 +20,10 @@ import PharmacistDashboard from "./pages/pharmacist/PharmacistDashboard";
 import PharmacistMedicines from "./pages/pharmacist/PharmacistMedicines";
 import PharmacistProfile from "./pages/pharmacist/PharmacistProfile";
 import NotFound from "./pages/NotFound";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsPage from "./pages/TermsPage";
+import AdminLoginPage from "./pages/AdminLoginPage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +40,10 @@ const App = () => (
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/payment/:offerId" element={<PaymentPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/admin" element={<AdminLoginPage />} />
           
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />

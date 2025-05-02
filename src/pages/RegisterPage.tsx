@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,70 +9,150 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Layout from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
 
-// Wilaya options
-const wilayaOptions = ["Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", "Blida", "Bouira", "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif", "Saïda", "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", "Constantine", "Médéa", "Mostaganem", "M'Sila", "Mascara", "Ouargla"
-// Add the rest of the wilayas as needed
+// Complete list of 58 Algerian wilayas
+const wilayaOptions = [
+  "01 - Adrar", "02 - Chlef", "03 - Laghouat", "04 - Oum El Bouaghi", "05 - Batna", 
+  "06 - Béjaïa", "07 - Biskra", "08 - Béchar", "09 - Blida", "10 - Bouira", 
+  "11 - Tamanrasset", "12 - Tébessa", "13 - Tlemcen", "14 - Tiaret", "15 - Tizi Ouzou", 
+  "16 - Alger", "17 - Djelfa", "18 - Jijel", "19 - Sétif", "20 - Saïda", 
+  "21 - Skikda", "22 - Sidi Bel Abbès", "23 - Annaba", "24 - Guelma", "25 - Constantine", 
+  "26 - Médéa", "27 - Mostaganem", "28 - M'Sila", "29 - Mascara", "30 - Ouargla", 
+  "31 - Oran", "32 - El Bayadh", "33 - Illizi", "34 - Bordj Bou Arreridj", "35 - Boumerdès", 
+  "36 - El Tarf", "37 - Tindouf", "38 - Tissemsilt", "39 - El Oued", "40 - Khenchela", 
+  "41 - Souk Ahras", "42 - Tipaza", "43 - Mila", "44 - Aïn Defla", "45 - Naâma", 
+  "46 - Aïn Témouchent", "47 - Ghardaïa", "48 - Relizane", "49 - El M'Ghair", "50 - El Meniaa", 
+  "51 - Ouled Djellal", "52 - Bordj Baji Mokhtar", "53 - Béni Abbès", "54 - Timimoun", 
+  "55 - Touggourt", "56 - Djanet", "57 - In Salah", "58 - In Guezzam"
 ];
+
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  
   const [formData, setFormData] = useState({
     businessName: "",
-    role: "pharmacien",
-    // Default role
+    role: "pharmacien", // Default role
     registerImage: null,
     wilaya: "",
     phone: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    acceptTerms: false
   });
+  
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const {
-      name,
-      value
-    } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     });
+    
+    // Clear error for this field when user changes it
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: ''
+      });
+    }
   };
+  
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFormData({
         ...formData,
         registerImage: e.target.files[0]
       });
+      
+      // Clear error for this field
+      if (errors.registerImage) {
+        setErrors({
+          ...errors,
+          registerImage: ''
+        });
+      }
     }
   };
+  
   const handleRoleChange = (value: string) => {
     setFormData({
       ...formData,
       role: value
     });
   };
+  
   const handleWilayaChange = (value: string) => {
     setFormData({
       ...formData,
       wilaya: value
     });
+    
+    // Clear error for this field
+    if (errors.wilaya) {
+      setErrors({
+        ...errors,
+        wilaya: ''
+      });
+    }
   };
+  
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    // Validate all required fields
+    if (!formData.businessName.trim()) newErrors.businessName = "La raison sociale est requise";
+    if (!formData.registerImage) newErrors.registerImage = "L'image du registre est requise";
+    if (!formData.wilaya) newErrors.wilaya = "La wilaya est requise";
+    if (!formData.phone.trim()) newErrors.phone = "Le numéro de téléphone est requis";
+    if (!formData.email.trim()) newErrors.email = "L'email est requis";
+    if (!formData.password) newErrors.password = "Le mot de passe est requis";
+    if (!formData.confirmPassword) newErrors.confirmPassword = "La confirmation du mot de passe est requise";
+    if (!formData.acceptTerms) newErrors.acceptTerms = "Vous devez accepter les conditions d'utilisation";
+    
+    // Email validation
+    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Format d'email invalide";
+    }
+    
+    // Phone validation (simple Algerian format)
+    if (formData.phone && !/^0[567][0-9]{8}$/.test(formData.phone)) {
+      newErrors.phone = "Format de téléphone invalide (doit commencer par 05, 06 ou 07 et avoir 10 chiffres)";
+    }
+    
+    // Password validation
+    if (formData.password && formData.password.length < 8) {
+      newErrors.password = "Le mot de passe doit contenir au moins 8 caractères";
+    }
+    
+    // Password confirmation validation
+    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
+    
+    if (!validateForm()) {
       toast({
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas.",
+        title: "Erreur de validation",
+        description: "Veuillez corriger les erreurs dans le formulaire",
         variant: "destructive"
       });
       return;
     }
+    
     setIsLoading(true);
-
-    // Simulate API call with timeout
+    
+    // Here we would normally make an API call to check if the email and phone are unique
+    // For now we'll simulate it with a timeout
+    
     setTimeout(() => {
       // In a real app, this would call an API to register the user
       toast({
@@ -82,6 +163,7 @@ const RegisterPage = () => {
       setIsLoading(false);
     }, 1500);
   };
+  
   return <Layout>
       <div className="bg-gray-50 py-12">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -101,14 +183,23 @@ const RegisterPage = () => {
             <form onSubmit={handleSubmit} className="space-y-6 bg-white">
               <div>
                 <label htmlFor="businessName" className="block text-sm font-medium text-gray-700">
-                  Raison sociale
+                  Raison sociale <span className="text-red-500">*</span>
                 </label>
-                <Input id="businessName" name="businessName" type="text" required value={formData.businessName} onChange={handleChange} className="mt-1" />
+                <Input 
+                  id="businessName" 
+                  name="businessName" 
+                  type="text" 
+                  required 
+                  value={formData.businessName} 
+                  onChange={handleChange} 
+                  className={`mt-1 ${errors.businessName ? 'border-red-500' : ''}`} 
+                />
+                {errors.businessName && <p className="mt-1 text-sm text-red-500">{errors.businessName}</p>}
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rôle
+                  Rôle <span className="text-red-500">*</span>
                 </label>
                 <RadioGroup value={formData.role} onValueChange={handleRoleChange} className="flex gap-6">
                   <div className="flex items-center space-x-2">
@@ -124,78 +215,137 @@ const RegisterPage = () => {
               
               <div>
                 <label htmlFor="registerImage" className="block text-sm font-medium text-gray-700 mb-1">
-                  Image du registre de commerce
+                  Image du registre de commerce <span className="text-red-500">*</span>
                 </label>
-                <Input id="registerImage" name="registerImage" type="file" accept="image/*" required onChange={handleFileChange} className="mt-1" />
+                <Input 
+                  id="registerImage" 
+                  name="registerImage" 
+                  type="file" 
+                  accept="image/*" 
+                  required 
+                  onChange={handleFileChange} 
+                  className={`mt-1 ${errors.registerImage ? 'border-red-500' : ''}`} 
+                />
                 <p className="text-xs text-gray-500 mt-1">
                   Format recommandé: JPG ou PNG, moins de 2MB
                 </p>
+                {errors.registerImage && <p className="text-sm text-red-500">{errors.registerImage}</p>}
               </div>
               
               <div>
                 <label htmlFor="wilaya" className="block text-sm font-medium text-gray-700 mb-1">
-                  Wilaya
+                  Wilaya <span className="text-red-500">*</span>
                 </label>
                 <Select value={formData.wilaya} onValueChange={handleWilayaChange}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className={`w-full ${errors.wilaya ? 'border-red-500' : ''}`}>
                     <SelectValue placeholder="Sélectionnez votre wilaya" />
                   </SelectTrigger>
                   <SelectContent>
-                    {wilayaOptions.map(wilaya => <SelectItem key={wilaya} value={wilaya}>
+                    {wilayaOptions.map(wilaya => (
+                      <SelectItem key={wilaya} value={wilaya}>
                         {wilaya}
-                      </SelectItem>)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                {errors.wilaya && <p className="mt-1 text-sm text-red-500">{errors.wilaya}</p>}
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                    Téléphone
+                    Téléphone <span className="text-red-500">*</span>
                   </label>
-                  <Input id="phone" name="phone" type="tel" required value={formData.phone} onChange={handleChange} className="mt-1" />
+                  <Input 
+                    id="phone" 
+                    name="phone" 
+                    type="tel" 
+                    required 
+                    value={formData.phone} 
+                    onChange={handleChange} 
+                    className={`mt-1 ${errors.phone ? 'border-red-500' : ''}`} 
+                    placeholder="0512345678"
+                  />
+                  {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
                 </div>
                 
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    Email
+                    Email <span className="text-red-500">*</span>
                   </label>
-                  <Input id="email" name="email" type="email" required value={formData.email} onChange={handleChange} className="mt-1" />
+                  <Input 
+                    id="email" 
+                    name="email" 
+                    type="email" 
+                    required 
+                    value={formData.email} 
+                    onChange={handleChange} 
+                    className={`mt-1 ${errors.email ? 'border-red-500' : ''}`} 
+                    placeholder="votre@email.com"
+                  />
+                  {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                    Mot de passe
+                    Mot de passe <span className="text-red-500">*</span>
                   </label>
-                  <Input id="password" name="password" type="password" required value={formData.password} onChange={handleChange} className="mt-1" />
+                  <Input 
+                    id="password" 
+                    name="password" 
+                    type="password" 
+                    required 
+                    value={formData.password} 
+                    onChange={handleChange} 
+                    className={`mt-1 ${errors.password ? 'border-red-500' : ''}`} 
+                  />
                   <p className="text-xs text-gray-500 mt-1">
                     Au moins 8 caractères, avec des lettres et des chiffres
                   </p>
+                  {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
                 </div>
                 
                 <div>
                   <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                    Confirmer le mot de passe
+                    Confirmer le mot de passe <span className="text-red-500">*</span>
                   </label>
-                  <Input id="confirmPassword" name="confirmPassword" type="password" required value={formData.confirmPassword} onChange={handleChange} className="mt-1" />
+                  <Input 
+                    id="confirmPassword" 
+                    name="confirmPassword" 
+                    type="password" 
+                    required 
+                    value={formData.confirmPassword} 
+                    onChange={handleChange} 
+                    className={`mt-1 ${errors.confirmPassword ? 'border-red-500' : ''}`} 
+                  />
+                  {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword}</p>}
                 </div>
               </div>
               
               <div className="flex items-center">
-                <input id="terms" name="terms" type="checkbox" required className="h-4 w-4 text-medical focus:ring-medical-dark border-gray-300 rounded" />
-                <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
+                <input 
+                  id="acceptTerms" 
+                  name="acceptTerms" 
+                  type="checkbox" 
+                  checked={formData.acceptTerms}
+                  onChange={handleChange}
+                  required 
+                  className={`h-4 w-4 text-medical focus:ring-medical-dark border-gray-300 rounded ${errors.acceptTerms ? 'border-red-500' : ''}`} 
+                />
+                <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-900">
                   J'accepte les{" "}
-                  <Link to="#" className="text-medical hover:text-medical-dark">
+                  <Link to="/terms" className="text-medical hover:text-medical-dark">
                     conditions d'utilisation
                   </Link>{" "}
                   et la{" "}
-                  <Link to="#" className="text-medical hover:text-medical-dark">
+                  <Link to="/privacy-policy" className="text-medical hover:text-medical-dark">
                     politique de confidentialité
                   </Link>
                 </label>
               </div>
+              {errors.acceptTerms && <p className="text-sm text-red-500">{errors.acceptTerms}</p>}
               
               <Button type="submit" disabled={isLoading} className="w-full bg-medical hover:bg-medical-dark text-white font-normal bg-pharmacy-accent rounded-xl">
                 {isLoading ? "Inscription en cours..." : "S'inscrire"}

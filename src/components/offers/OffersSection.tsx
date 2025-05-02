@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Trophy, Medal, Award } from "lucide-react";
 import OfferCard from "./OfferCard";
 
 const OffersSection = () => {
@@ -14,45 +15,60 @@ const OffersSection = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <OfferCard 
-            title="Offre Bronze" 
-            priceMonthly="10 000 DZ" 
-            priceYearly="100 000 DZ"
-            features={[
-              "Visibilité dans les résultats de recherche",
-              "Une semaine d'essai gratuite",
-              "Accès à toutes les fonctionnalités de base"
-            ]}
-            offerId="bronze"
-          />
+          <div className="relative">
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-pharmacy-light rounded-full p-3 border-4 border-white shadow-md">
+              <Award size={30} className="text-pharmacy-dark" />
+            </div>
+            <OfferCard 
+              title="Offre Bronze" 
+              priceMonthly="10 000 DZ" 
+              priceYearly="100 000 DZ"
+              features={[
+                "Visibilité dans les résultats de recherche",
+                "Une semaine d'essai gratuite",
+                "Accès à toutes les fonctionnalités de base"
+              ]}
+              offerId="bronze"
+            />
+          </div>
           
-          <OfferCard 
-            title="Offre Argent" 
-            priceMonthly="15 000 DZ" 
-            priceYearly="150 000 DZ"
-            features={[
-              "Mise en avant dans les résultats de recherche",
-              "Notification aux pharmaciens pour les nouveaux produits",
-              "Une semaine d'essai gratuite",
-              "Support prioritaire"
-            ]}
-            highlighted
-            offerId="silver"
-          />
+          <div className="relative">
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-pharmacy-light rounded-full p-3 border-4 border-white shadow-md">
+              <Medal size={30} className="text-pharmacy-dark" />
+            </div>
+            <OfferCard 
+              title="Offre Argent" 
+              priceMonthly="15 000 DZ" 
+              priceYearly="150 000 DZ"
+              features={[
+                "Mise en avant dans les résultats de recherche",
+                "Notification aux pharmaciens pour les nouveaux produits",
+                "Une semaine d'essai gratuite",
+                "Support prioritaire"
+              ]}
+              highlighted
+              offerId="silver"
+            />
+          </div>
           
-          <OfferCard 
-            title="Offre Or" 
-            priceMonthly="25 000 DZ" 
-            priceYearly="250 000 DZ"
-            features={[
-              "Priorité maximale dans les résultats",
-              "Mise à jour quotidienne des listings",
-              "Notifications aux pharmaciens pour les nouveaux produits",
-              "Annonces sur la page d'accueil",
-              "Newsletter mensuelle aux pharmaciens"
-            ]}
-            offerId="gold"
-          />
+          <div className="relative">
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-500 rounded-full p-3 border-4 border-white shadow-md">
+              <Trophy size={30} className="text-white" />
+            </div>
+            <OfferCard 
+              title="Offre Or" 
+              priceMonthly="25 000 DZ" 
+              priceYearly="250 000 DZ"
+              features={[
+                "Priorité maximale dans les résultats",
+                "Mise à jour quotidienne des listings",
+                "Notifications aux pharmaciens pour les nouveaux produits",
+                "Annonces sur la page d'accueil",
+                "Newsletter mensuelle aux pharmaciens"
+              ]}
+              offerId="gold"
+            />
+          </div>
         </div>
       </div>
     </section>

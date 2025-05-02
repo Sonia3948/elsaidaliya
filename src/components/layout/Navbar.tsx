@@ -14,7 +14,7 @@ const Navbar = () => {
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center">
               <img 
-                src="/lovable-uploads/416db742-a6a0-481e-8bf5-91b997537eae.png" 
+                src="/lovable-uploads/5a618c3d-716b-48db-996b-e11afd1235e0.png" 
                 alt="Elsaidaliya Logo" 
                 className="h-10 w-auto" 
               />

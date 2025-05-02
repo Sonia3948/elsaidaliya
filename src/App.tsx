@@ -56,11 +56,17 @@ const App = () => (
           <Route path="/supplier/listings" element={<SupplierListings />} />
           <Route path="/supplier/offers" element={<SupplierOffers />} />
           <Route path="/supplier/profile" element={<SupplierProfile />} />
+          <Route path="/supplier/:id" element={<SupplierProfile />} />
           
           {/* Pharmacist Routes */}
           <Route path="/pharmacist/dashboard" element={<PharmacistDashboard />} />
           <Route path="/pharmacist/medicines" element={<PharmacistMedicines />} />
           <Route path="/pharmacist/profile" element={<PharmacistProfile />} />
+          <Route path="/pharmacist/offers" element={<PharmacistDashboard />} />
+          <Route path="/pharmacist/offers/:id" element={<PharmacistDashboard />} />
+          <Route path="/pharmacist/suppliers" element={<PharmacistDashboard />} />
+          <Route path="/pharmacist/suppliers/:id" element={<PharmacistDashboard />} />
+          <Route path="/pharmacist/history" element={<PharmacistDashboard />} />
           
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />

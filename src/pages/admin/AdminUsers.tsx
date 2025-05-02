@@ -6,6 +6,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -30,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, MoreHorizontal, UserCheck, UserX } from "lucide-react";
+import { Eye, MoreHorizontal, UserCheck, UserX, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -46,6 +47,7 @@ interface User {
   subscription: string;
   subExpiry: string;
   createdAt: string;
+  registerNumber?: string; // Adding register of commerce
 }
 
 const AdminUsers = () => {
@@ -58,7 +60,11 @@ const AdminUsers = () => {
     businessName: "",
     isActive: false,
     subscription: "",
-    subExpiry: ""
+    subExpiry: "",
+    phone: "",
+    email: "",
+    wilaya: "",
+    registerNumber: "",
   });
 
   useEffect(() => {
@@ -82,6 +88,7 @@ const AdminUsers = () => {
           subscription: "bronze",
           subExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           createdAt: new Date().toISOString(),
+          registerNumber: "RC-9876543210",
         },
         {
           id: "2",
@@ -95,6 +102,7 @@ const AdminUsers = () => {
           subscription: "or",
           subExpiry: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
           createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+          registerNumber: "RC-1234567890",
         },
         {
           id: "3",
@@ -108,6 +116,35 @@ const AdminUsers = () => {
           subscription: "argent",
           subExpiry: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
           createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+          registerNumber: "RC-5432167890",
+        },
+        {
+          id: "4",
+          businessName: "PharmaPlus",
+          role: "pharmacist",
+          phone: "0555111222",
+          email: "contact@pharmaplus.com",
+          wilaya: "Annaba",
+          registerImageUrl: "/path/to/image.jpg",
+          isActive: true,
+          subscription: "bronze",
+          subExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+          registerNumber: "RC-1122334455",
+        },
+        {
+          id: "5",
+          businessName: "AlgMed Distribution",
+          role: "supplier",
+          phone: "0555222333",
+          email: "contact@algmed.com",
+          wilaya: "Alger",
+          registerImageUrl: "/path/to/image.jpg",
+          isActive: true,
+          subscription: "argent",
+          subExpiry: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
+          createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          registerNumber: "RC-9988776655",
         }
       ];
       setUsers(mockUsers);
@@ -130,7 +167,11 @@ const AdminUsers = () => {
       businessName: user.businessName,
       isActive: user.isActive,
       subscription: user.subscription,
-      subExpiry: new Date(user.subExpiry).toISOString().split('T')[0]
+      subExpiry: new Date(user.subExpiry).toISOString().split('T')[0],
+      phone: user.phone,
+      email: user.email,
+      wilaya: user.wilaya,
+      registerNumber: user.registerNumber || "",
     });
     setIsEditOpen(true);
   };
@@ -155,12 +196,12 @@ const AdminUsers = () => {
     }
   };
 
-  const handleUpdateSubscription = async () => {
+  const handleUpdateUser = async () => {
     if (!selectedUser) return;
     
     try {
       // In a real app, this would make an API call
-      // await userService.updateUserSubscription(selectedUser.id, editForm);
+      // await userService.updateUser(selectedUser.id, editForm);
       
       // Update the local state
       setUsers(users.map(user => 
@@ -170,7 +211,11 @@ const AdminUsers = () => {
               businessName: editForm.businessName,
               isActive: editForm.isActive,
               subscription: editForm.subscription,
-              subExpiry: new Date(editForm.subExpiry).toISOString()
+              subExpiry: new Date(editForm.subExpiry).toISOString(),
+              phone: editForm.phone,
+              email: editForm.email,
+              wilaya: editForm.wilaya,
+              registerNumber: editForm.registerNumber,
             } 
           : user
       ));
@@ -196,105 +241,128 @@ const AdminUsers = () => {
     }
   };
 
+  const renderUserTable = (role: string) => {
+    const filteredUsers = users.filter(user => user.role === role);
+    
+    return (
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>{role === "pharmacist" ? "Pharmaciens" : "Fournisseurs"}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Raison Sociale</TableHead>
+                <TableHead>Registre de Commerce</TableHead>
+                <TableHead>Téléphone</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Wilaya</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Abonnement</TableHead>
+                <TableHead>Expiration</TableHead>
+                <TableHead>Inscription</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={10} className="text-center py-4">
+                    Chargement...
+                  </TableCell>
+                </TableRow>
+              ) : filteredUsers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={10} className="text-center py-4">
+                    Aucun {role === "pharmacist" ? "pharmacien" : "fournisseur"} trouvé
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.businessName}</TableCell>
+                    <TableCell>{user.registerNumber || "N/A"}</TableCell>
+                    <TableCell>{user.phone}</TableCell>
+                    <TableCell className="max-w-[150px] truncate" title={user.email}>{user.email}</TableCell>
+                    <TableCell>{user.wilaya}</TableCell>
+                    <TableCell>
+                      <Switch 
+                        checked={user.isActive}
+                        onCheckedChange={(checked) => handleToggleStatus(user.id, checked)}
+                        className="data-[state=checked]:bg-green-500"
+                      />
+                    </TableCell>
+                    <TableCell>{getSubscriptionBadge(user.subscription)}</TableCell>
+                    <TableCell>
+                      {format(new Date(user.subExpiry), 'dd/MM/yyyy')}
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(user.createdAt), 'dd/MM/yyyy')}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleViewDetails(user)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Voir détails
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Modifier
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleToggleStatus(user.id, !user.isActive)}
+                          >
+                            {user.isActive ? (
+                              <>
+                                <UserX className="mr-2 h-4 w-4" />
+                                Désactiver
+                              </>
+                            ) : (
+                              <>
+                                <UserCheck className="mr-2 h-4 w-4" />
+                                Activer
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <DashboardLayout userRole="admin">
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-6">Gestion des Utilisateurs</h1>
-
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Utilisateurs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Abonnement</TableHead>
-                  <TableHead>Wilaya</TableHead>
-                  <TableHead>Date d'inscription</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-4">
-                      Chargement...
-                    </TableCell>
-                  </TableRow>
-                ) : users.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-4">
-                      Aucun utilisateur trouvé
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>{user.businessName}</TableCell>
-                      <TableCell>
-                        {user.role === "pharmacist" ? "Pharmacien" : "Fournisseur"}
-                      </TableCell>
-                      <TableCell>
-                        {user.isActive ? (
-                          <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-                            Actif
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
-                            Inactif
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{getSubscriptionBadge(user.subscription)}</TableCell>
-                      <TableCell>{user.wilaya}</TableCell>
-                      <TableCell>
-                        {format(new Date(user.createdAt), 'dd/MM/yyyy')}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewDetails(user)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Voir détails
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Modifier
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleToggleStatus(user.id, !user.isActive)}
-                            >
-                              {user.isActive ? (
-                                <>
-                                  <UserX className="mr-2 h-4 w-4" />
-                                  Désactiver
-                                </>
-                              ) : (
-                                <>
-                                  <UserCheck className="mr-2 h-4 w-4" />
-                                  Activer
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        
+        <Tabs defaultValue="pharmacists" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+            <TabsTrigger value="pharmacists">Pharmaciens</TabsTrigger>
+            <TabsTrigger value="suppliers">Fournisseurs</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="pharmacists">
+            {renderUserTable("pharmacist")}
+          </TabsContent>
+          
+          <TabsContent value="suppliers">
+            {renderUserTable("supplier")}
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* User Details Dialog */}
@@ -309,7 +377,7 @@ const AdminUsers = () => {
           {selectedUser && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Nom</Label>
+                <Label className="text-right">Raison Sociale</Label>
                 <div className="col-span-3">{selectedUser.businessName}</div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -317,6 +385,10 @@ const AdminUsers = () => {
                 <div className="col-span-3">
                   {selectedUser.role === "pharmacist" ? "Pharmacien" : "Fournisseur"}
                 </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Registre de Commerce</Label>
+                <div className="col-span-3">{selectedUser.registerNumber || "Non fourni"}</div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Email</Label>
@@ -333,7 +405,15 @@ const AdminUsers = () => {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Statut</Label>
                 <div className="col-span-3">
-                  {selectedUser.isActive ? "Actif" : "Inactif"}
+                  {selectedUser.isActive ? (
+                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                      Actif
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
+                      Inactif
+                    </Badge>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -374,12 +454,48 @@ const AdminUsers = () => {
           {selectedUser && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="businessName" className="text-right">Nom</Label>
+                <Label htmlFor="businessName" className="text-right">Raison Sociale</Label>
                 <Input 
                   id="businessName" 
                   className="col-span-3"
                   value={editForm.businessName}
                   onChange={(e) => setEditForm({...editForm, businessName: e.target.value})}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="registerNumber" className="text-right">Registre de Commerce</Label>
+                <Input 
+                  id="registerNumber" 
+                  className="col-span-3"
+                  value={editForm.registerNumber}
+                  onChange={(e) => setEditForm({...editForm, registerNumber: e.target.value})}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="phone" className="text-right">Téléphone</Label>
+                <Input 
+                  id="phone" 
+                  className="col-span-3"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">Email</Label>
+                <Input 
+                  id="email" 
+                  className="col-span-3"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="wilaya" className="text-right">Wilaya</Label>
+                <Input 
+                  id="wilaya" 
+                  className="col-span-3"
+                  value={editForm.wilaya}
+                  onChange={(e) => setEditForm({...editForm, wilaya: e.target.value})}
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -389,6 +505,7 @@ const AdminUsers = () => {
                     id="isActive" 
                     checked={editForm.isActive}
                     onCheckedChange={(checked) => setEditForm({...editForm, isActive: checked})} 
+                    className="data-[state=checked]:bg-green-500"
                   />
                   <Label htmlFor="isActive">
                     {editForm.isActive ? "Actif" : "Inactif"}
@@ -428,7 +545,7 @@ const AdminUsers = () => {
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
               Annuler
             </Button>
-            <Button onClick={handleUpdateSubscription}>Sauvegarder</Button>
+            <Button onClick={handleUpdateUser}>Sauvegarder</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

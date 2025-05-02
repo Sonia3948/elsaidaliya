@@ -15,6 +15,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var userCollection *mongo.Collection
+
 // InitUserHandlers initializes handlers for user management
 func InitUserHandlers(db *mongo.Database) {
 	userCollection = db.Collection("users")
@@ -182,11 +184,14 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	var update struct {
-		BusinessName string `json:"businessName"`
-		Phone        string `json:"phone"`
-		Email        string `json:"email"`
-		Wilaya       string `json:"wilaya"`
-		IsActive     bool   `json:"isActive"`
+		BusinessName   string `json:"businessName"`
+		Phone          string `json:"phone"`
+		Email          string `json:"email"`
+		Wilaya         string `json:"wilaya"`
+		IsActive       bool   `json:"isActive"`
+		RegisterNumber string `json:"registerNumber"`
+		Subscription   string `json:"subscription"`
+		SubExpiry      string `json:"subExpiry"`
 	}
 
 	if err := c.ShouldBindJSON(&update); err != nil {
@@ -209,6 +214,19 @@ func UpdateUser(c *gin.Context) {
 	}
 	if update.Wilaya != "" {
 		updateFields["wilaya"] = update.Wilaya
+	}
+	if update.RegisterNumber != "" {
+		updateFields["registerNumber"] = update.RegisterNumber
+	}
+	if update.Subscription != "" {
+		updateFields["subscription"] = update.Subscription
+	}
+	if update.SubExpiry != "" {
+		// Parse the date string to time.Time
+		expiry, err := time.Parse("2006-01-02", update.SubExpiry)
+		if err == nil {
+			updateFields["subExpiry"] = expiry
+		}
 	}
 	
 	updateFields["isActive"] = update.IsActive

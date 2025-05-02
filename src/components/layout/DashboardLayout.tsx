@@ -99,16 +99,19 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           <div className="h-16 flex items-center justify-between px-4 border-b">
             {isSidebarOpen ? (
               <Link to="/" className="flex items-center">
-                <div className="h-8 w-8 rounded-full bg-medical-dark flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">MS</span>
-                </div>
-                <span className="ml-2 font-bold text-gray-900">Med-Supply-Link</span>
+                <img 
+                  src="/lovable-uploads/5a618c3d-716b-48db-996b-e11afd1235e0.png" 
+                  alt="Elsaidaliya Logo" 
+                  className="h-8 w-auto" 
+                />
               </Link>
             ) : (
               <Link to="/" className="flex items-center justify-center w-full">
-                <div className="h-8 w-8 rounded-full bg-medical-dark flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">MS</span>
-                </div>
+                <img 
+                  src="/lovable-uploads/5a618c3d-716b-48db-996b-e11afd1235e0.png" 
+                  alt="Elsaidaliya Logo" 
+                  className="h-8 w-auto" 
+                />
               </Link>
             )}
             <button
@@ -176,10 +179,11 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           <div className="relative flex-1 flex flex-col max-w-64 w-full bg-white">
             <div className="h-16 flex items-center justify-between px-4 border-b">
               <Link to="/" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
-                <div className="h-8 w-8 rounded-full bg-medical-dark flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">MS</span>
-                </div>
-                <span className="ml-2 font-bold text-gray-900">Med-Supply-Link</span>
+                <img 
+                  src="/lovable-uploads/5a618c3d-716b-48db-996b-e11afd1235e0.png" 
+                  alt="Elsaidaliya Logo" 
+                  className="h-8 w-auto" 
+                />
               </Link>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}

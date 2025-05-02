@@ -13,8 +13,11 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center">
-              <img src="/logo.png" alt="Elsaidaliya Logo" className="h-10 w-10" />
-              <span className="ml-2 font-bold text-pharmacy-accent text-2xl">Elsaidaliya</span>
+              <img 
+                src="/lovable-uploads/5a618c3d-716b-48db-996b-e11afd1235e0.png" 
+                alt="Elsaidaliya Logo" 
+                className="h-10 w-auto" 
+              />
             </Link>
           </div>
           

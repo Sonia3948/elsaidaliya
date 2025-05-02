@@ -1,3 +1,4 @@
+
 package main
 
 import (
@@ -65,6 +66,7 @@ func main() {
 	
 	// Initialize handlers with database connection
 	handlers.InitAuthHandlers(database)
+	handlers.InitUserHandlers(database)
 	
 	// Configuration de Gin
 	r := gin.Default()
@@ -106,10 +108,12 @@ func main() {
 func setupUserRoutes(r *gin.Engine) {
 	users := r.Group("/api/users")
 	{
-		users.GET("/", getAllUsers)
-		users.GET("/:id", getUserById)
+		users.GET("/", handlers.GetAllUsers)
+		users.GET("/:id", handlers.GetUserByID)
 		users.POST("/", createUser)
-		users.PUT("/:id", updateUser)
+		users.PUT("/:id", handlers.UpdateUser)
+		users.PUT("/:id/status", handlers.UpdateUserStatus)
+		users.PUT("/:id/subscription", handlers.UpdateUserSubscription)
 		users.DELETE("/:id", deleteUser)
 	}
 }
@@ -147,22 +151,8 @@ func setupOfferRoutes(r *gin.Engine) {
 }
 
 // Définitions des handlers pour les utilisateurs
-func getAllUsers(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Récupération de tous les utilisateurs"})
-}
-
-func getUserById(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Récupération de l'utilisateur " + id})
-}
-
 func createUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Utilisateur créé"})
-}
-
-func updateUser(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Mise à jour de l'utilisateur " + id})
 }
 
 func deleteUser(c *gin.Context) {

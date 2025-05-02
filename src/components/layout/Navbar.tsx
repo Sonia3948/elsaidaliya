@@ -1,23 +1,16 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, Home, Info, Phone, LogIn, UserPlus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
   return <nav className="shadow-md w-full rounded-md bg-neutral-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center">
-              <img 
-                src="/lovable-uploads/5a618c3d-716b-48db-996b-e11afd1235e0.png" 
-                alt="Elsaidaliya Logo" 
-                className="h-10 w-auto" 
-              />
+              <img alt="Elsaidaliya Logo" className="h-10 w-auto" src="/lovable-uploads/47ab163c-4696-4b1a-8514-171da3ea7f74.png" />
             </Link>
           </div>
           

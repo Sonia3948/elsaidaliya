@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { userService } from "@/services/api";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, MoreHorizontal, UserCheck, UserX, Edit } from "lucide-react";
+import { 
+  Eye, 
+  MoreHorizontal, 
+  UserCheck, 
+  UserX, 
+  Edit, 
+  Image as ImageIcon,
+  Award, 
+  Star, 
+  Medal, 
+  Trophy 
+} from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -47,7 +57,7 @@ interface User {
   subscription: string;
   subExpiry: string;
   createdAt: string;
-  registerNumber?: string; // Adding register of commerce
+  registerNumber?: string;
 }
 
 const AdminUsers = () => {
@@ -56,6 +66,7 @@ const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isImageOpen, setIsImageOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     businessName: "",
     isActive: false,
@@ -161,6 +172,11 @@ const AdminUsers = () => {
     setIsDetailsOpen(true);
   };
 
+  const handleViewImage = (user: User) => {
+    setSelectedUser(user);
+    setIsImageOpen(true);
+  };
+
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
     setEditForm({
@@ -228,16 +244,49 @@ const AdminUsers = () => {
     }
   };
 
+  const getSubscriptionIcon = (subscription: string) => {
+    switch (subscription.toLowerCase()) {
+      case 'or':
+        return <Trophy className="h-5 w-5 text-yellow-500" />;
+      case 'argent':
+        return <Medal className="h-5 w-5 text-gray-400" />;
+      case 'bronze':
+        return <Award className="h-5 w-5 text-amber-700" />;
+      default:
+        return <Star className="h-5 w-5 text-blue-400" />;
+    }
+  };
+
   const getSubscriptionBadge = (subscription: string) => {
     switch (subscription.toLowerCase()) {
       case 'or':
-        return <Badge className="bg-yellow-500">Or</Badge>;
+        return (
+          <Badge className="bg-yellow-500 flex items-center gap-1">
+            <Trophy className="h-3 w-3" />
+            Or
+          </Badge>
+        );
       case 'argent':
-        return <Badge className="bg-gray-400">Argent</Badge>;
+        return (
+          <Badge className="bg-gray-400 flex items-center gap-1">
+            <Medal className="h-3 w-3" />
+            Argent
+          </Badge>
+        );
       case 'bronze':
-        return <Badge className="bg-amber-700">Bronze</Badge>;
+        return (
+          <Badge className="bg-amber-700 flex items-center gap-1">
+            <Award className="h-3 w-3" />
+            Bronze
+          </Badge>
+        );
       default:
-        return <Badge variant="outline">Gratuit</Badge>;
+        return (
+          <Badge variant="outline" className="flex items-center gap-1">
+            <Star className="h-3 w-3" />
+            Gratuit
+          </Badge>
+        );
     }
   };
 
@@ -282,7 +331,19 @@ const AdminUsers = () => {
                 filteredUsers.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>{user.businessName}</TableCell>
-                    <TableCell>{user.registerNumber || "N/A"}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{user.registerNumber || "N/A"}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7"
+                          onClick={() => handleViewImage(user)}
+                        >
+                          <ImageIcon className="h-4 w-4 text-blue-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
                     <TableCell>{user.phone}</TableCell>
                     <TableCell className="max-w-[150px] truncate" title={user.email}>{user.email}</TableCell>
                     <TableCell>{user.wilaya}</TableCell>
@@ -293,7 +354,10 @@ const AdminUsers = () => {
                         className="data-[state=checked]:bg-green-500"
                       />
                     </TableCell>
-                    <TableCell>{getSubscriptionBadge(user.subscription)}</TableCell>
+                    <TableCell className="flex items-center gap-2">
+                      {getSubscriptionIcon(user.subscription)}
+                      {getSubscriptionBadge(user.subscription)}
+                    </TableCell>
                     <TableCell>
                       {format(new Date(user.subExpiry), 'dd/MM/yyyy')}
                     </TableCell>
@@ -388,7 +452,20 @@ const AdminUsers = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Registre de Commerce</Label>
-                <div className="col-span-3">{selectedUser.registerNumber || "Non fourni"}</div>
+                <div className="col-span-3 flex items-center gap-2">
+                  {selectedUser.registerNumber || "Non fourni"}
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7"
+                    onClick={() => {
+                      setIsDetailsOpen(false);
+                      setTimeout(() => handleViewImage(selectedUser), 100);
+                    }}
+                  >
+                    <ImageIcon className="h-4 w-4 text-blue-500" />
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Email</Label>
@@ -418,7 +495,8 @@ const AdminUsers = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Abonnement</Label>
-                <div className="col-span-3">
+                <div className="col-span-3 flex items-center gap-2">
+                  {getSubscriptionIcon(selectedUser.subscription)}
                   {getSubscriptionBadge(selectedUser.subscription)}
                 </div>
               </div>
@@ -438,6 +516,40 @@ const AdminUsers = () => {
           )}
           <DialogFooter>
             <Button onClick={() => setIsDetailsOpen(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Registration Image Dialog */}
+      <Dialog open={isImageOpen} onOpenChange={setIsImageOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Registre de Commerce</DialogTitle>
+            <DialogDescription>
+              {selectedUser?.businessName} - {selectedUser?.registerNumber || "Non fourni"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            {selectedUser?.registerImageUrl ? (
+              <img 
+                src={selectedUser.registerImageUrl} 
+                alt="Registre de commerce"
+                className="max-h-[400px] max-w-full object-contain border rounded-md"
+                onError={(e) => {
+                  // Fallback if the image doesn't load
+                  const target = e.target as HTMLImageElement;
+                  target.src = "https://placehold.co/400x300?text=Image+Indisponible";
+                }}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center bg-gray-100 w-full h-64 rounded-md">
+                <ImageIcon className="h-16 w-16 text-gray-400" />
+                <p className="mt-2 text-gray-500">Image non disponible</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsImageOpen(false)}>Fermer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -514,20 +626,49 @@ const AdminUsers = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="subscription" className="text-right">Abonnement</Label>
-                <Select 
-                  value={editForm.subscription}
-                  onValueChange={(value) => setEditForm({...editForm, subscription: value})}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Sélectionner un abonnement" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="gratuit">Gratuit</SelectItem>
-                    <SelectItem value="bronze">Bronze</SelectItem>
-                    <SelectItem value="argent">Argent</SelectItem>
-                    <SelectItem value="or">Or</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="col-span-3">
+                  <Select 
+                    value={editForm.subscription}
+                    onValueChange={(value) => setEditForm({...editForm, subscription: value})}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Sélectionner un abonnement">
+                        <div className="flex items-center gap-2">
+                          {editForm.subscription && getSubscriptionIcon(editForm.subscription)}
+                          {editForm.subscription ? (
+                            editForm.subscription.charAt(0).toUpperCase() + editForm.subscription.slice(1)
+                          ) : 'Sélectionner'}
+                        </div>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gratuit" className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <Star className="h-4 w-4 text-blue-400" />
+                          <span>Gratuit</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="bronze" className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <Award className="h-4 w-4 text-amber-700" />
+                          <span>Bronze</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="argent" className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <Medal className="h-4 w-4 text-gray-400" />
+                          <span>Argent</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="or" className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <Trophy className="h-4 w-4 text-yellow-500" />
+                          <span>Or</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="subExpiry" className="text-right">Expiration</Label>
@@ -541,11 +682,20 @@ const AdminUsers = () => {
               </div>
             </div>
           )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditOpen(false)}>
+          <DialogFooter className="flex flex-row justify-between">
+            <Button 
+              variant="destructive" 
+              onClick={() => setIsEditOpen(false)}
+              className="px-6"
+            >
               Annuler
             </Button>
-            <Button onClick={handleUpdateUser}>Sauvegarder</Button>
+            <Button 
+              onClick={handleUpdateUser}
+              className="bg-green-600 hover:bg-green-700 px-6"
+            >
+              Sauvegarder
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

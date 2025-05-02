@@ -1,4 +1,3 @@
-
 package handlers
 
 import (
@@ -247,4 +246,34 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Utilisateur mis à jour avec succès"})
+}
+
+// GetUserRegisterImage returns the register image URL for a specific user
+func GetUserRegisterImage(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	userID, err := primitive.ObjectIDFromHex(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID utilisateur invalide"})
+		return
+	}
+
+	var user models.User
+	err = userCollection.FindOne(ctx, bson.M{"_id": userID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur non trouvé"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération de l'utilisateur"})
+		return
+	}
+
+	if user.RegisterImageURL == "" {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Image de registre de commerce non trouvée"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"imageUrl": user.RegisterImageURL})
 }

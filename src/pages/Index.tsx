@@ -40,7 +40,7 @@ const Index = () => {
                 
               </Link>
               <Link to="/about">
-                <Button size="lg" variant="outline" className="rounded-xl bg-pharmacy-accent">
+                <Button size="lg" variant="outline" className="rounded-xl bg-pharmacy-accent my-[50px]">
                   En savoir plus
                 </Button>
               </Link>

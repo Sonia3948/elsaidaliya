@@ -65,8 +65,6 @@ const UsersCarousel = () => {
     }
     return result;
   };
-  return <section className="py-12 md:py-20 bg-white overflow-hidden">
-      
-    </section>;
+  return;
 };
 export default UsersCarousel;

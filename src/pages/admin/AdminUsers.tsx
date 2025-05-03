@@ -42,10 +42,12 @@ import {
   Trophy,
   Search,
   Filter,
-  Upload 
+  Upload,
+  FileText
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { algeriasWilayas } from "@/data/wilayas";
 
 interface User {
   id: string;
@@ -71,6 +73,7 @@ const AdminUsers = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isImageOpen, setIsImageOpen] = useState(false);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [isDocumentsOpen, setIsDocumentsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterWilaya, setFilterWilaya] = useState("");
@@ -182,6 +185,11 @@ const AdminUsers = () => {
   const handleViewDetails = (user: User) => {
     setSelectedUser(user);
     setIsDetailsOpen(true);
+  };
+
+  const handleViewDocuments = (user: User) => {
+    setSelectedUser(user);
+    setIsDocumentsOpen(true);
   };
 
   const handleViewImage = (user: User) => {
@@ -374,9 +382,9 @@ const AdminUsers = () => {
                 <SelectValue placeholder="Filtrer par wilaya" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Toutes les wilayas</SelectItem>
-                {getUniqueWilayas().map(wilaya => (
-                  <SelectItem key={wilaya} value={wilaya}>{wilaya}</SelectItem>
+                <SelectItem value="">Toutes les wilayas</SelectItem>
+                {algeriasWilayas.map(wilaya => (
+                  <SelectItem key={wilaya.code} value={wilaya.name}>{wilaya.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -443,9 +451,9 @@ const AdminUsers = () => {
                           variant="ghost" 
                           size="icon" 
                           className="h-7 w-7"
-                          onClick={() => handleViewImage(user)}
+                          onClick={() => handleViewDocuments(user)}
                         >
-                          <ImageIcon className="h-4 w-4 text-blue-500" />
+                          <FileText className="h-4 w-4 text-blue-500" />
                         </Button>
                       </div>
                     </TableCell>
@@ -485,16 +493,10 @@ const AdminUsers = () => {
                             <Edit className="mr-2 h-4 w-4" />
                             Modifier
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleViewImage(user)}>
-                            <ImageIcon className="mr-2 h-4 w-4" />
-                            Voir le registre
+                          <DropdownMenuItem onClick={() => handleViewDocuments(user)}>
+                            <FileText className="mr-2 h-4 w-4" />
+                            Voir les documents
                           </DropdownMenuItem>
-                          {user.transferReceiptUrl && (
-                            <DropdownMenuItem onClick={() => handleViewReceipt(user)}>
-                              <Upload className="mr-2 h-4 w-4" />
-                              Voir le bon de virement
-                            </DropdownMenuItem>
-                          )}
                           <DropdownMenuItem 
                             onClick={() => handleToggleStatus(user.id, !user.isActive)}
                           >
@@ -662,6 +664,78 @@ const AdminUsers = () => {
           )}
           <DialogFooter>
             <Button onClick={() => setIsDetailsOpen(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Documents Dialog - New combined view */}
+      <Dialog open={isDocumentsOpen} onOpenChange={setIsDocumentsOpen}>
+        <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Documents</DialogTitle>
+            <DialogDescription>
+              {selectedUser?.businessName} - Documents officiels
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            {/* Registre de Commerce */}
+            <div className="border rounded-md p-4">
+              <h3 className="font-medium mb-2 flex items-center">
+                <ImageIcon className="mr-2 h-4 w-4" /> Registre de Commerce
+              </h3>
+              <p className="text-sm text-gray-500 mb-2">{selectedUser?.registerNumber || "Non fourni"}</p>
+              <div className="h-60 flex justify-center items-center bg-gray-50 border rounded-md overflow-hidden">
+                {selectedUser?.registerImageUrl ? (
+                  <img 
+                    src={selectedUser.registerImageUrl} 
+                    alt="Registre de commerce"
+                    className="max-h-full max-w-full object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "https://placehold.co/400x300?text=Image+Indisponible";
+                    }}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center w-full h-full">
+                    <ImageIcon className="h-12 w-12 text-gray-400" />
+                    <p className="mt-2 text-gray-500">Image non disponible</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Bon de Virement (only for suppliers) */}
+            {selectedUser?.role === 'supplier' && (
+              <div className="border rounded-md p-4">
+                <h3 className="font-medium mb-2 flex items-center">
+                  <Upload className="mr-2 h-4 w-4" /> Bon de Virement
+                </h3>
+                <p className="text-sm text-gray-500 mb-2">
+                  {selectedUser.transferReceiptUrl ? "Document fourni" : "Non fourni"}
+                </p>
+                <div className="h-60 flex justify-center items-center bg-gray-50 border rounded-md overflow-hidden">
+                  {selectedUser.transferReceiptUrl ? (
+                    <img 
+                      src={selectedUser.transferReceiptUrl} 
+                      alt="Bon de virement"
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "https://placehold.co/400x300?text=Document+Indisponible";
+                      }}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center w-full h-full">
+                      <Upload className="h-12 w-12 text-gray-400" />
+                      <p className="mt-2 text-gray-500">Document non disponible</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsDocumentsOpen(false)}>Fermer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

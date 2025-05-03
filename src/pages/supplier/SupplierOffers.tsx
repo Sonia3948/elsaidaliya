@@ -1,11 +1,13 @@
+
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus, Image, Trash2, Edit, Eye, FileUp } from "lucide-react";
+import { ImagePlus, Image, Trash2, Edit, Eye, FileUp, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
 const SupplierOffers = () => {
   const {
     toast
@@ -14,6 +16,7 @@ const SupplierOffers = () => {
   const [offerText, setOfferText] = useState("");
   const [offerTitle, setOfferTitle] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   // Mock data for existing offers
   const [offers, setOffers] = useState([{
@@ -22,22 +25,26 @@ const SupplierOffers = () => {
     description: "Réduction de 15% sur toute la gamme d'antibiotiques",
     imageUrl: null,
     date: "2025-04-01",
-    views: 78
+    views: 78,
+    published: true
   }, {
     id: 2,
     title: "Nouveaux produits disponibles",
     description: "Découvrez notre nouvelle gamme de produits dermatologiques",
     imageUrl: null,
     date: "2025-03-15",
-    views: 45
+    views: 45,
+    published: true
   }, {
     id: 3,
     title: "Offre spéciale fin de mois",
     description: "Remise exceptionnelle sur les commandes de plus de 5000 DZD",
     imageUrl: null,
     date: "2025-02-28",
-    views: 62
+    views: 62,
+    published: false
   }]);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -61,6 +68,7 @@ const SupplierOffers = () => {
       reader.readAsDataURL(file);
     }
   };
+
   const handleCreateOffer = () => {
     if (!offerTitle.trim()) {
       toast({
@@ -86,7 +94,8 @@ const SupplierOffers = () => {
       description: offerText,
       imageUrl: previewUrl,
       date: new Date().toISOString().split("T")[0],
-      views: 0
+      views: 0,
+      published: false
     };
     setOffers([newOffer, ...offers]);
 
@@ -97,9 +106,10 @@ const SupplierOffers = () => {
     setPreviewUrl(null);
     toast({
       title: "Offre créée avec succès",
-      description: "Votre nouvelle offre est maintenant disponible pour les pharmaciens."
+      description: "Votre nouvelle offre est maintenant prête à être publiée."
     });
   };
+
   const handleDelete = (id: number) => {
     setOffers(offers.filter(offer => offer.id !== id));
     toast({
@@ -107,6 +117,25 @@ const SupplierOffers = () => {
       description: "L'offre a été supprimée avec succès."
     });
   };
+
+  const handlePublish = (id: number) => {
+    setIsPublishing(true);
+    // Simulate API call with a timeout
+    setTimeout(() => {
+      setOffers(offers.map(offer => 
+        offer.id === id ? { ...offer, published: !offer.published } : offer
+      ));
+      
+      setIsPublishing(false);
+      toast({
+        title: offers.find(o => o.id === id)?.published ? "Offre dépubliée" : "Offre publiée",
+        description: offers.find(o => o.id === id)?.published 
+          ? "L'offre n'est plus visible pour les pharmaciens." 
+          : "L'offre est maintenant visible pour les pharmaciens."
+      });
+    }, 1000);
+  };
+
   return <DashboardLayout userRole="supplier">
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-6">Gestion des Offres</h1>
@@ -152,10 +181,14 @@ const SupplierOffers = () => {
                   </div>}
               </div>
               
-              <div className="flex justify-end">
-                <Button onClick={handleCreateOffer} className="bg-medical hover:bg-medical-dark bg-pharmacy-DEFAULT text-pharmacy-DEFAULT">
+              <div className="flex justify-end gap-4">
+                <Button onClick={handleCreateOffer} className="bg-blue-500 hover:bg-blue-600 text-white">
                   <ImagePlus className="mr-2 h-4 w-4" />
-                  Publier l'offre
+                  Créer l'offre
+                </Button>
+                <Button onClick={handleCreateOffer} className="bg-green-600 hover:bg-green-700 text-white">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Créer et publier l'offre
                 </Button>
               </div>
             </div>
@@ -176,7 +209,12 @@ const SupplierOffers = () => {
                     {offer.imageUrl ? <img src={offer.imageUrl} alt={offer.title} className="w-full h-full object-cover" /> : <Image className="h-12 w-12 text-gray-400" />}
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold">{offer.title}</h3>
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-semibold">{offer.title}</h3>
+                      <span className={`px-2 py-1 text-xs rounded-full ${offer.published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        {offer.published ? 'Publiée' : 'Non publiée'}
+                      </span>
+                    </div>
                     <p className="text-sm text-gray-600 line-clamp-2 mt-1">
                       {offer.description}
                     </p>
@@ -190,6 +228,16 @@ const SupplierOffers = () => {
                         </Button>
                         <Button variant="ghost" size="icon" title="Modifier">
                           <Edit size={16} />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className={offer.published ? "text-red-500 hover:text-red-700" : "text-green-500 hover:text-green-700"} 
+                          title={offer.published ? "Dépublier" : "Publier"}
+                          onClick={() => handlePublish(offer.id)}
+                          disabled={isPublishing}
+                        >
+                          <Upload size={16} />
                         </Button>
                         <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700" title="Supprimer" onClick={() => handleDelete(offer.id)}>
                           <Trash2 size={16} />

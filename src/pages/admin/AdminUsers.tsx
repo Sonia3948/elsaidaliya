@@ -382,7 +382,7 @@ const AdminUsers = () => {
                 <SelectValue placeholder="Filtrer par wilaya" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Toutes les wilayas</SelectItem>
+                <SelectItem value="all">Toutes les wilayas</SelectItem>
                 {algeriasWilayas.map(wilaya => (
                   <SelectItem key={wilaya.code} value={wilaya.name}>{wilaya.name}</SelectItem>
                 ))}

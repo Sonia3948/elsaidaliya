@@ -1,64 +1,79 @@
 
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Phone } from "lucide-react";
 
 const Footer = () => {
-  return <footer className="bg-white shadow-inner mt-auto">
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-pharmacy-dark">Elsaidaliya</h3>
-            <p className="text-gray-600">
-              Votre plateforme pour l'approvisionnement pharmaceutique en Algérie.
+  return (
+    <footer className="bg-white px-4 py-8 border-t">
+      <div className="container mx-auto">
+        <div className="md:flex md:justify-between mb-8">
+          <div className="mb-6 md:mb-0">
+            <Link to="/" className="flex items-center">
+              <img src="/lovable-uploads/416db742-a6a0-481e-8bf5-91b997537eae.png" alt="Elsaidaliya Logo" className="h-8 mr-3" />
+            </Link>
+            <p className="mt-2 text-sm text-gray-600 max-w-sm">
+              La première plateforme qui connecte pharmaciens et fournisseurs en Algérie
             </p>
           </div>
           
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-pharmacy-dark">Liens Rapides</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/" className="text-gray-600 hover:text-pharmacy-accent">Accueil</Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-gray-600 hover:text-pharmacy-accent">À propos</Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-gray-600 hover:text-pharmacy-accent">Contact</Link>
-              </li>
-              <li>
-                <Link to="/privacy-policy" className="text-gray-600 hover:text-pharmacy-accent">Politique de confidentialité</Link>
-              </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-pharmacy-dark">Réseaux Sociaux</h3>
-            <div className="flex space-x-4">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-pharmacy-accent">
-                <Facebook size={24} />
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-pharmacy-accent">
-                <Instagram size={24} />
-              </a>
-              <a href="https://wa.me/+213553720952" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-pharmacy-accent">
-                <Phone size={24} />
-              </a>
+          <div className="grid grid-cols-2 gap-8 sm:gap-12 sm:grid-cols-3">
+            <div>
+              <h2 className="mb-4 text-sm font-semibold uppercase">Ressources</h2>
+              <ul className="text-gray-600 space-y-2">
+                <li>
+                  <Link to="/about" className="hover:underline">À propos</Link>
+                </li>
+                <li>
+                  <Link to="/legal" className="hover:underline">Informations légales</Link>
+                </li>
+                <li>
+                  <Link to="/contact" className="hover:underline">Contact</Link>
+                </li>
+              </ul>
+            </div>
+            
+            <div>
+              <h2 className="mb-4 text-sm font-semibold uppercase">Suivez-nous</h2>
+              <ul className="text-gray-600 space-y-2">
+                <li>
+                  <a href="https://www.facebook.com/" className="hover:underline" target="_blank" rel="noopener noreferrer">Facebook</a>
+                </li>
+                <li>
+                  <a href="https://www.instagram.com/" className="hover:underline" target="_blank" rel="noopener noreferrer">Instagram</a>
+                </li>
+                <li>
+                  <a href="https://www.linkedin.com/" className="hover:underline" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                </li>
+              </ul>
+            </div>
+            
+            <div>
+              <h2 className="mb-4 text-sm font-semibold uppercase">Support</h2>
+              <ul className="text-gray-600 space-y-2">
+                <li>
+                  <a href="tel:+213553720952" className="hover:underline">+213 553 720 952</a>
+                </li>
+                <li>
+                  <a href="mailto:contact@elsaidaliya.com" className="hover:underline">contact@elsaidaliya.com</a>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
         
-        <div className="mt-8 border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center">
-            <div className="h-8 w-8 rounded-full bg-medical-dark flex items-center justify-center">
-              <span className="text-white font-bold text-sm">ES</span>
-            </div>
-            <span className="ml-2 text-lg font-bold text-gray-700">Elsaidaliya</span>
+        <hr className="my-6 border-gray-200 sm:mx-auto" />
+        
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <span className="text-sm text-gray-500 sm:text-center">
+            © {new Date().getFullYear()} <Link to="/" className="hover:underline">Elsaidaliya™</Link>. Tous droits réservés.
+          </span>
+          <div className="flex mt-4 space-x-6 sm:justify-center sm:mt-0">
+            <Link to="/legal?tab=terms" className="text-sm text-gray-500 hover:underline">Conditions d'Utilisation</Link>
+            <Link to="/legal?tab=privacy" className="text-sm text-gray-500 hover:underline">Politique de Confidentialité</Link>
           </div>
-          <p className="mt-4 md:mt-0 text-gray-500 text-sm">
-            &copy; {new Date().getFullYear()} Elsaidaliya tout droit reservé.
-          </p>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;

@@ -1,9 +1,3 @@
-import { ArrowRight } from "lucide-react";
-import { Trophy, Medal, Award } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import Layout from "@/components/layout/Layout";
-import OffersSection from "@/components/offers/OffersSection";
 import UsersCarousel from "@/components/home/UsersCarousel";
 
 // Featured suppliers (gold subscription)

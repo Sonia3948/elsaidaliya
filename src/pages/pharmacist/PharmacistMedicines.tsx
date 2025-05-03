@@ -1,11 +1,19 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { FileText, Search, User, ExternalLink } from "lucide-react";
-import { Link } from "react-router-dom";
+import { FileText, Search, User, ExternalLink, Star, Building } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { algeriasWilayas } from "@/data/wilayas";
 
 // Mock data for suppliers and their listings
 const mockSuppliers = [
@@ -14,7 +22,9 @@ const mockSuppliers = [
     name: "MediStock", 
     wilaya: "Alger", 
     rating: 4.8,
-    listingUrl: "#",
+    listingUrl: "/sample.pdf",
+    subscription: "gold",
+    isFavorite: true,
     medicines: ["Paracétamol", "Ibuprofène", "Amoxicilline", "Doliprane", "Aspirine", "Ventoline"]
   },
   { 
@@ -22,7 +32,9 @@ const mockSuppliers = [
     name: "PharmaPro", 
     wilaya: "Oran", 
     rating: 4.5,
-    listingUrl: "#",
+    listingUrl: "/sample.pdf",
+    subscription: "silver",
+    isFavorite: false,
     medicines: ["Paracétamol", "Ibuprofène", "Aspirine", "Augmentin", "Xanax", "Doliprane"]
   },
   { 
@@ -30,7 +42,9 @@ const mockSuppliers = [
     name: "MedPlus", 
     wilaya: "Constantine", 
     rating: 4.2,
-    listingUrl: "#",
+    listingUrl: "/sample.pdf",
+    subscription: "bronze",
+    isFavorite: true,
     medicines: ["Paracétamol", "Augmentin", "Doliprane", "Ventoline", "Lexomil"]
   },
   { 
@@ -38,7 +52,9 @@ const mockSuppliers = [
     name: "AlgeriaMed", 
     wilaya: "Annaba", 
     rating: 4.7,
-    listingUrl: "#",
+    listingUrl: "/sample.pdf",
+    subscription: "gold",
+    isFavorite: false,
     medicines: ["Ibuprofène", "Amoxicilline", "Doliprane", "Ventoline", "Aspirine"]
   },
   { 
@@ -46,25 +62,60 @@ const mockSuppliers = [
     name: "MedSupply", 
     wilaya: "Sétif", 
     rating: 4.4,
-    listingUrl: "#",
+    listingUrl: "/sample.pdf",
+    subscription: "silver",
+    isFavorite: true,
     medicines: ["Paracétamol", "Ibuprofène", "Ventoline", "Lexomil", "Xanax"]
   }
 ];
 
 const PharmacistMedicines = () => {
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedWilaya, setSelectedWilaya] = useState<string>("all");
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   
-  const handleSearch = () => {
-    if (!searchQuery.trim()) return;
+  useEffect(() => {
+    // Extract search query from URL if present
+    const params = new URLSearchParams(location.search);
+    const queryParam = params.get('query');
+    if (queryParam) {
+      setSearchQuery(queryParam);
+      handleSearch(queryParam);
+    }
+  }, [location]);
+
+  const handleSearch = (query: string = searchQuery) => {
+    if (!query?.trim()) return;
     
     // Filter suppliers that have the medicine in their list
-    const results = mockSuppliers.filter(supplier => 
+    let results = mockSuppliers.filter(supplier => 
       supplier.medicines.some(medicine => 
-        medicine.toLowerCase().includes(searchQuery.toLowerCase())
+        medicine.toLowerCase().includes(query.toLowerCase())
       )
     );
+    
+    // Apply wilaya filter
+    if (selectedWilaya !== "all") {
+      results = results.filter(supplier => supplier.wilaya === selectedWilaya);
+    }
+    
+    // Apply favorites filter
+    if (showFavoritesOnly) {
+      results = results.filter(supplier => supplier.isFavorite);
+    }
+
+    // Sort by subscription level: gold > silver > bronze
+    results.sort((a, b) => {
+      const subscriptionOrder: Record<string, number> = {
+        gold: 3,
+        silver: 2,
+        bronze: 1
+      };
+      return subscriptionOrder[b.subscription] - subscriptionOrder[a.subscription];
+    });
     
     setSearchResults(results);
     setHasSearched(true);
@@ -73,6 +124,34 @@ const PharmacistMedicines = () => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSearch();
+    }
+  };
+  
+  const toggleFavorite = (supplierId: number) => {
+    // Update the mockSuppliers list
+    const updatedSuppliers = mockSuppliers.map(supplier => 
+      supplier.id === supplierId ? { ...supplier, isFavorite: !supplier.isFavorite } : supplier
+    );
+    
+    // Update search results if they exist
+    if (hasSearched) {
+      const updatedResults = searchResults.map(supplier => 
+        supplier.id === supplierId ? { ...supplier, isFavorite: !supplier.isFavorite } : supplier
+      );
+      setSearchResults(updatedResults);
+    }
+  };
+
+  const getSubscriptionBadgeClass = (subscription: string) => {
+    switch (subscription) {
+      case "gold":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "silver":
+        return "bg-gray-100 text-gray-800 border-gray-300";
+      case "bronze":
+        return "bg-amber-100 text-amber-800 border-amber-300";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -104,7 +183,7 @@ const PharmacistMedicines = () => {
                     onKeyDown={handleKeyDown}
                   />
                   <Button 
-                    onClick={handleSearch}
+                    onClick={() => handleSearch()}
                     className="rounded-l-none bg-medical hover:bg-medical-dark"
                   >
                     <Search className="h-4 w-4 mr-2" /> Rechercher
@@ -113,6 +192,44 @@ const PharmacistMedicines = () => {
                 <p className="text-xs text-gray-500 mt-1">
                   Entrez le nom exact ou partiel du médicament que vous recherchez
                 </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
+                <div>
+                  <label htmlFor="wilayaFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                    Filtrer par wilaya
+                  </label>
+                  <Select 
+                    value={selectedWilaya} 
+                    onValueChange={(value) => {
+                      setSelectedWilaya(value);
+                      if (hasSearched) handleSearch();
+                    }}
+                  >
+                    <SelectTrigger id="wilayaFilter" className="w-full">
+                      <SelectValue placeholder="Filtrer par wilaya" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes les wilayas</SelectItem>
+                      {algeriasWilayas.map(wilaya => (
+                        <SelectItem key={wilaya.code} value={wilaya.name}>{wilaya.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end">
+                  <Button 
+                    variant={showFavoritesOnly ? "default" : "outline"}
+                    onClick={() => {
+                      setShowFavoritesOnly(!showFavoritesOnly);
+                      if (hasSearched) handleSearch();
+                    }}
+                    className={showFavoritesOnly ? "bg-medical hover:bg-medical-dark" : ""}
+                  >
+                    <Star className={`mr-2 h-4 w-4 ${showFavoritesOnly ? "fill-white" : ""}`} />
+                    {showFavoritesOnly ? "Affichage des favoris" : "Afficher les favoris uniquement"}
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -140,6 +257,7 @@ const PharmacistMedicines = () => {
                           <th scope="col" className="px-6 py-3">Fournisseur</th>
                           <th scope="col" className="px-6 py-3">Wilaya</th>
                           <th scope="col" className="px-6 py-3">Évaluation</th>
+                          <th scope="col" className="px-6 py-3">Favoris</th>
                           <th scope="col" className="px-6 py-3">Actions</th>
                         </tr>
                       </thead>
@@ -151,7 +269,12 @@ const PharmacistMedicines = () => {
                                 to={`/pharmacist/suppliers/${supplier.id}`}
                                 className="text-medical hover:text-medical-dark flex items-center"
                               >
-                                <User size={16} className="mr-2" /> {supplier.name}
+                                <User size={16} className="mr-2" /> 
+                                <span className="mr-2">{supplier.name}</span>
+                                <span className={`text-xs px-2 py-1 rounded-full border ${getSubscriptionBadgeClass(supplier.subscription)}`}>
+                                  {supplier.subscription === "gold" ? "🥇" : 
+                                   supplier.subscription === "silver" ? "🥈" : "🥉"}
+                                </span>
                               </Link>
                             </td>
                             <td className="px-6 py-4">{supplier.wilaya}</td>
@@ -180,6 +303,18 @@ const PharmacistMedicines = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4">
+                              <Button 
+                                onClick={() => toggleFavorite(supplier.id)}
+                                variant="ghost" 
+                                className="h-8 w-8 p-0"
+                              >
+                                <Star 
+                                  size={20} 
+                                  className={supplier.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-400"} 
+                                />
+                              </Button>
+                            </td>
+                            <td className="px-6 py-4">
                               <div className="flex space-x-2">
                                 <Button 
                                   asChild
@@ -187,9 +322,9 @@ const PharmacistMedicines = () => {
                                   size="sm" 
                                   className="bg-medical hover:bg-medical-dark"
                                 >
-                                  <Link to={supplier.listingUrl}>
-                                    <FileText size={14} className="mr-1" /> Voir listing
-                                  </Link>
+                                  <a href={supplier.listingUrl} target="_blank" rel="noopener noreferrer">
+                                    <FileText size={14} className="mr-1" /> PDF
+                                  </a>
                                 </Button>
                                 <Button 
                                   asChild
@@ -197,7 +332,7 @@ const PharmacistMedicines = () => {
                                   size="sm"
                                 >
                                   <Link to={`/pharmacist/suppliers/${supplier.id}`}>
-                                    <ExternalLink size={14} className="mr-1" /> Profil
+                                    <Building size={14} className="mr-1" /> Profil
                                   </Link>
                                 </Button>
                               </div>

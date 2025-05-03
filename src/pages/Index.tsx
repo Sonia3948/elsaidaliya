@@ -31,7 +31,7 @@ const Index = () => {
       <section className="bg-gradient-to-b from-pharmacy-light to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="text-center">
-            <h1 className="text-4xl text-gray-900 mb-6 my-[25px] px-[20px] py-[2px] mx-[60px] font-bold md:text-6xl">Approvisionnement Pharmaceutique en un Clic!</h1>
+            <h1 className="text-4xl text-gray-900 mb-6 font-bold md:text-6xl mx-0 py-[10px] my-0 px-[5px]">Approvisionnement Pharmaceutique en un Clic!</h1>
             <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Connectez-vous avec des fournisseurs de médicaments fiables et trouvez rapidement les produits dont vous avez besoin.
             </p>
@@ -40,7 +40,7 @@ const Index = () => {
                 
               </Link>
               <Link to="/about">
-                <Button size="lg" variant="outline" className="rounded-xl bg-pharmacy-accent my-[50px]">
+                <Button size="lg" variant="outline" className="rounded-xl bg-pharmacy-accent my-0">
                   En savoir plus
                 </Button>
               </Link>

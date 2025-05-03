@@ -42,7 +42,8 @@ import {
   Medal, 
   Trophy,
   Search,
-  Filter 
+  Filter,
+  Upload 
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";

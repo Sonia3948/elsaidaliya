@@ -1,4 +1,9 @@
+
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import Layout from "@/components/layout/Layout";
 import UsersCarousel from "@/components/home/UsersCarousel";
+import OffersSection from "@/components/offers/OffersSection";
 
 // Featured suppliers (gold subscription)
 const featuredSuppliers = [{
@@ -20,8 +25,10 @@ const featuredSuppliers = [{
   description: "Spécialiste en produits dermatologiques et cosmétiques",
   imageUrl: "/placeholder.svg"
 }];
+
 const Index = () => {
-  return <Layout>
+  return (
+    <Layout>
       <section className="bg-gradient-to-b from-pharmacy-light to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="text-center">
@@ -31,7 +38,9 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/register">
-                
+                <Button size="lg" className="rounded-xl bg-pharmacy-accent my-0">
+                  S'inscrire maintenant
+                </Button>
               </Link>
               <Link to="/about">
                 <Button size="lg" variant="outline" className="rounded-xl bg-pharmacy-accent my-0">
@@ -57,7 +66,8 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-            {featuredSuppliers.map(supplier => <div key={supplier.id} className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100 transition-transform transform hover:scale-105">
+            {featuredSuppliers.map(supplier => (
+              <div key={supplier.id} className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100 transition-transform transform hover:scale-105">
                 <div className="h-48 bg-gray-100 relative">
                   <img src={supplier.imageUrl} alt={supplier.name} className="w-full h-full object-cover" />
                   <div className="absolute top-3 right-3">
@@ -74,7 +84,8 @@ const Index = () => {
                     </Button>
                   </Link>
                 </div>
-              </div>)}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -162,6 +173,8 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </Layout>;
+    </Layout>
+  );
 };
+
 export default Index;

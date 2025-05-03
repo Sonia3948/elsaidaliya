@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -9,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -86,13 +84,6 @@ const SupplierProfile = () => {
     });
   };
 
-  const handleSwitchChange = (name: string, checked: boolean) => {
-    setProfileData({
-      ...profileData,
-      [name]: checked
-    });
-  };
-
   const handleSelectChange = (name: string, value: string) => {
     setProfileData({
       ...profileData,
@@ -166,10 +157,9 @@ const SupplierProfile = () => {
         </h1>
 
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="general">Informations</TabsTrigger>
             <TabsTrigger value="security">Sécurité</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-6 mt-6">
@@ -402,61 +392,6 @@ const SupplierProfile = () => {
                 {isOwnProfile && (
                   <Button type="button" className="bg-pharmacy-accent hover:bg-pharmacy-dark">
                     Changer le mot de passe
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="notifications" className="space-y-6 mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Paramètres de notification</CardTitle>
-                <CardDescription>Configurez comment vous souhaitez être notifié</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Notifications par email</p>
-                    <p className="text-sm text-gray-500">Recevoir des notifications par email</p>
-                  </div>
-                  <Switch
-                    checked={profileData.isEmailNotificationsEnabled}
-                    onCheckedChange={(checked) =>
-                      handleSwitchChange("isEmailNotificationsEnabled", checked)
-                    }
-                    disabled={!isOwnProfile}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Notifications par SMS</p>
-                    <p className="text-sm text-gray-500">Recevoir des notifications par SMS</p>
-                  </div>
-                  <Switch
-                    checked={profileData.isSmsNotificationsEnabled}
-                    onCheckedChange={(checked) =>
-                      handleSwitchChange("isSmsNotificationsEnabled", checked)
-                    }
-                    disabled={!isOwnProfile}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Notifications push</p>
-                    <p className="text-sm text-gray-500">Recevoir des notifications push</p>
-                  </div>
-                  <Switch
-                    checked={profileData.isPushNotificationsEnabled}
-                    onCheckedChange={(checked) =>
-                      handleSwitchChange("isPushNotificationsEnabled", checked)
-                    }
-                    disabled={!isOwnProfile}
-                  />
-                </div>
-                {isOwnProfile && (
-                  <Button type="button" className="bg-pharmacy-accent hover:bg-pharmacy-dark">
-                    Sauvegarder les préférences
                   </Button>
                 )}
               </CardContent>

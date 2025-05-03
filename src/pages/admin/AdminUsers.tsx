@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +21,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { 
@@ -40,7 +40,9 @@ import {
   Award, 
   Star, 
   Medal, 
-  Trophy 
+  Trophy,
+  Search,
+  Filter 
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -58,6 +60,7 @@ interface User {
   subExpiry: string;
   createdAt: string;
   registerNumber?: string;
+  transferReceiptUrl?: string;
 }
 
 const AdminUsers = () => {
@@ -67,6 +70,12 @@ const AdminUsers = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isImageOpen, setIsImageOpen] = useState(false);
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterWilaya, setFilterWilaya] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterSubscription, setFilterSubscription] = useState("all");
   const [editForm, setEditForm] = useState({
     businessName: "",
     isActive: false,
@@ -95,6 +104,7 @@ const AdminUsers = () => {
           email: "pharmacie.centrale@example.com",
           wilaya: "Alger",
           registerImageUrl: "/path/to/image.jpg",
+          transferReceiptUrl: "/path/to/receipt.pdf",
           isActive: true,
           subscription: "bronze",
           subExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -109,6 +119,7 @@ const AdminUsers = () => {
           email: "contact@medistock.com",
           wilaya: "Oran",
           registerImageUrl: "/path/to/image.jpg",
+          transferReceiptUrl: "/path/to/receipt.pdf",
           isActive: false,
           subscription: "or",
           subExpiry: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
@@ -137,6 +148,7 @@ const AdminUsers = () => {
           email: "contact@pharmaplus.com",
           wilaya: "Annaba",
           registerImageUrl: "/path/to/image.jpg",
+          transferReceiptUrl: "/path/to/receipt.pdf",
           isActive: true,
           subscription: "bronze",
           subExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -175,6 +187,15 @@ const AdminUsers = () => {
   const handleViewImage = (user: User) => {
     setSelectedUser(user);
     setIsImageOpen(true);
+  };
+
+  const handleViewReceipt = (user: User) => {
+    if (!user.transferReceiptUrl) {
+      toast.error("Aucun bon de virement disponible");
+      return;
+    }
+    setSelectedUser(user);
+    setIsReceiptOpen(true);
   };
 
   const handleEditUser = (user: User) => {
@@ -290,15 +311,99 @@ const AdminUsers = () => {
     }
   };
 
-  const renderUserTable = (role: string) => {
-    const filteredUsers = users.filter(user => user.role === role);
+  const getUniqueWilayas = () => {
+    const wilayas = users.map(user => user.wilaya);
+    return [...new Set(wilayas)];
+  };
+
+  const filteredUsers = users.filter(user => {
+    // Filter by tab (user role)
+    if (activeTab !== "all" && user.role !== activeTab) return false;
     
+    // Filter by search query
+    if (searchQuery && !user.businessName.toLowerCase().includes(searchQuery.toLowerCase()) && 
+        !user.email.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    
+    // Filter by wilaya
+    if (filterWilaya && user.wilaya !== filterWilaya) return false;
+    
+    // Filter by status
+    if (filterStatus === "active" && !user.isActive) return false;
+    if (filterStatus === "inactive" && user.isActive) return false;
+    
+    // Filter by subscription
+    if (filterSubscription !== "all" && user.subscription !== filterSubscription) return false;
+    
+    return true;
+  });
+
+  const renderUserTable = () => {
     return (
       <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>{role === "pharmacist" ? "Pharmaciens" : "Fournisseurs"}</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>
+            {activeTab === "all" ? "Tous les utilisateurs" : 
+             activeTab === "pharmacist" ? "Pharmaciens" : "Fournisseurs"}
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => {
+              setSearchQuery("");
+              setFilterWilaya("");
+              setFilterStatus("all");
+              setFilterSubscription("all");
+            }}>
+              Réinitialiser les filtres
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="flex items-center space-x-2">
+              <Search className="text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Rechercher par nom ou email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            <Select value={filterWilaya} onValueChange={setFilterWilaya}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrer par wilaya" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Toutes les wilayas</SelectItem>
+                {getUniqueWilayas().map(wilaya => (
+                  <SelectItem key={wilaya} value={wilaya}>{wilaya}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrer par statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="active">Actif</SelectItem>
+                <SelectItem value="inactive">Inactif</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterSubscription} onValueChange={setFilterSubscription}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrer par abonnement" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les abonnements</SelectItem>
+                <SelectItem value="bronze">Bronze</SelectItem>
+                <SelectItem value="argent">Argent</SelectItem>
+                <SelectItem value="or">Or</SelectItem>
+                <SelectItem value="gratuit">Gratuit</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -324,7 +429,7 @@ const AdminUsers = () => {
               ) : filteredUsers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={10} className="text-center py-4">
-                    Aucun {role === "pharmacist" ? "pharmacien" : "fournisseur"} trouvé
+                    Aucun utilisateur trouvé
                   </TableCell>
                 </TableRow>
               ) : (
@@ -380,6 +485,16 @@ const AdminUsers = () => {
                             <Edit className="mr-2 h-4 w-4" />
                             Modifier
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleViewImage(user)}>
+                            <ImageIcon className="mr-2 h-4 w-4" />
+                            Voir le registre
+                          </DropdownMenuItem>
+                          {user.transferReceiptUrl && (
+                            <DropdownMenuItem onClick={() => handleViewReceipt(user)}>
+                              <Upload className="mr-2 h-4 w-4" />
+                              Voir le bon de virement
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem 
                             onClick={() => handleToggleStatus(user.id, !user.isActive)}
                           >
@@ -413,18 +528,28 @@ const AdminUsers = () => {
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-6">Gestion des Utilisateurs</h1>
         
-        <Tabs defaultValue="pharmacists" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
-            <TabsTrigger value="pharmacists">Pharmaciens</TabsTrigger>
-            <TabsTrigger value="suppliers">Fournisseurs</TabsTrigger>
+        <Tabs 
+          defaultValue="all" 
+          value={activeTab}
+          onValueChange={setActiveTab} 
+          className="w-full"
+        >
+          <TabsList className="grid w-full max-w-md grid-cols-3 mb-6">
+            <TabsTrigger value="all">Tous</TabsTrigger>
+            <TabsTrigger value="pharmacist">Pharmaciens</TabsTrigger>
+            <TabsTrigger value="supplier">Fournisseurs</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="pharmacists">
-            {renderUserTable("pharmacist")}
+          <TabsContent value="all">
+            {renderUserTable()}
           </TabsContent>
           
-          <TabsContent value="suppliers">
-            {renderUserTable("supplier")}
+          <TabsContent value="pharmacist">
+            {renderUserTable()}
+          </TabsContent>
+          
+          <TabsContent value="supplier">
+            {renderUserTable()}
           </TabsContent>
         </Tabs>
       </div>
@@ -512,6 +637,27 @@ const AdminUsers = () => {
                   {format(new Date(selectedUser.createdAt), 'dd/MM/yyyy')}
                 </div>
               </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Paiement</Label>
+                <div className="col-span-3">
+                  {selectedUser.transferReceiptUrl ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        setIsDetailsOpen(false);
+                        setTimeout(() => handleViewReceipt(selectedUser), 100);
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      Voir le bon de virement
+                    </Button>
+                  ) : (
+                    <span className="text-yellow-600">Aucun bon de virement</span>
+                  )}
+                </div>
+              </div>
             </div>
           )}
           <DialogFooter>
@@ -550,6 +696,40 @@ const AdminUsers = () => {
           </div>
           <DialogFooter>
             <Button onClick={() => setIsImageOpen(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transfer Receipt Dialog */}
+      <Dialog open={isReceiptOpen} onOpenChange={setIsReceiptOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Bon de Virement</DialogTitle>
+            <DialogDescription>
+              {selectedUser?.businessName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            {selectedUser?.transferReceiptUrl ? (
+              <img 
+                src={selectedUser.transferReceiptUrl} 
+                alt="Bon de virement"
+                className="max-h-[400px] max-w-full object-contain border rounded-md"
+                onError={(e) => {
+                  // Fallback if the image doesn't load
+                  const target = e.target as HTMLImageElement;
+                  target.src = "https://placehold.co/400x300?text=Document+Indisponible";
+                }}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center bg-gray-100 w-full h-64 rounded-md">
+                <Upload className="h-16 w-16 text-gray-400" />
+                <p className="mt-2 text-gray-500">Document non disponible</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsReceiptOpen(false)}>Fermer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

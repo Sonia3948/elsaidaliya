@@ -1,6 +1,6 @@
 
 import { ReactNode, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu,
@@ -36,6 +36,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -44,6 +45,7 @@ type DashboardLayoutProps = {
 
 const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -103,6 +105,11 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
   };
 
   const navItems = getNavItems();
+  
+  // Function to check if a link is active
+  const isActiveLink = (href: string) => {
+    return location.pathname.startsWith(href);
+  };
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -125,8 +132,18 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
                   {navItems.map((item) => (
                     <SidebarMenuItem key={item.name}>
                       <SidebarMenuButton asChild tooltip={item.name}>
-                        <Link to={item.href}>
-                          <item.icon className="mr-2 h-5 w-5" />
+                        <Link 
+                          to={item.href}
+                          className={cn(
+                            isActiveLink(item.href) 
+                              ? "bg-pharmacy-light text-pharmacy-dark font-medium" 
+                              : "hover:bg-gray-100"
+                          )}
+                        >
+                          <item.icon className={cn(
+                            "mr-2 h-5 w-5",
+                            isActiveLink(item.href) ? "text-pharmacy-dark" : ""
+                          )} />
                           <span>{item.name}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -173,7 +190,10 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
                 <Link to="/" className="text-gray-500 hover:text-medical">
                   <Home size={20} />
                 </Link>
-                <Link to={`/${userRole}/profile`} className="text-gray-500 hover:text-medical">
+                <Link to={`/${userRole}/profile`} className={cn(
+                  "text-gray-500 hover:text-medical",
+                  isActiveLink(`/${userRole}/profile`) ? "text-pharmacy-dark" : ""
+                )}>
                   <Settings size={20} />
                 </Link>
                 <div className="border-l border-gray-200 h-6 mx-2"></div>

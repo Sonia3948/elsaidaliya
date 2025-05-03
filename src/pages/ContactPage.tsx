@@ -93,7 +93,7 @@ const ContactPage = () => {
                     <div className="ml-3">
                       <p className="text-sm font-medium text-gray-900">Email</p>
                       <p className="text-sm text-gray-600">contact@elsaidaliya.com</p>
-                      <p className="text-sm text-gray-600">finance@elsaidaliya.com</p>
+                      
                     </div>
                   </div>
                   
@@ -113,7 +113,7 @@ const ContactPage = () => {
                     </div>
                     <div className="ml-3">
                       <p className="text-sm font-medium text-gray-900">Adresse</p>
-                      <p className="text-sm text-gray-600">Alger, Algérie</p>
+                      <p className="text-sm text-gray-600">Constantine, Algérie</p>
                     </div>
                   </div>
                 </div>

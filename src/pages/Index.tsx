@@ -1,4 +1,3 @@
-
 import { ArrowRight } from "lucide-react";
 import { Trophy, Medal, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,30 +7,25 @@ import OffersSection from "@/components/offers/OffersSection";
 import UsersCarousel from "@/components/home/UsersCarousel";
 
 // Featured suppliers (gold subscription)
-const featuredSuppliers = [
-  {
-    id: 1,
-    name: "MediStock Algérie",
-    wilaya: "Alger",
-    description: "Distributeur leader de produits pharmaceutiques en Algérie",
-    imageUrl: "/placeholder.svg"
-  },
-  {
-    id: 2,
-    name: "PharmaSupply",
-    wilaya: "Oran",
-    description: "Plus de 2000 références de médicaments disponibles",
-    imageUrl: "/placeholder.svg"
-  },
-  {
-    id: 3,
-    name: "AlgéPharm",
-    wilaya: "Constantine",
-    description: "Spécialiste en produits dermatologiques et cosmétiques",
-    imageUrl: "/placeholder.svg"
-  },
-];
-
+const featuredSuppliers = [{
+  id: 1,
+  name: "MediStock Algérie",
+  wilaya: "Alger",
+  description: "Distributeur leader de produits pharmaceutiques en Algérie",
+  imageUrl: "/placeholder.svg"
+}, {
+  id: 2,
+  name: "PharmaSupply",
+  wilaya: "Oran",
+  description: "Plus de 2000 références de médicaments disponibles",
+  imageUrl: "/placeholder.svg"
+}, {
+  id: 3,
+  name: "AlgéPharm",
+  wilaya: "Constantine",
+  description: "Spécialiste en produits dermatologiques et cosmétiques",
+  imageUrl: "/placeholder.svg"
+}];
 const Index = () => {
   return <Layout>
       <section className="bg-gradient-to-b from-pharmacy-light to-white">
@@ -71,18 +65,11 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-            {featuredSuppliers.map((supplier) => (
-              <div key={supplier.id} className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100 transition-transform transform hover:scale-105">
+            {featuredSuppliers.map(supplier => <div key={supplier.id} className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100 transition-transform transform hover:scale-105">
                 <div className="h-48 bg-gray-100 relative">
-                  <img 
-                    src={supplier.imageUrl} 
-                    alt={supplier.name} 
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={supplier.imageUrl} alt={supplier.name} className="w-full h-full object-cover" />
                   <div className="absolute top-3 right-3">
-                    <div className="bg-yellow-500 text-white p-2 rounded-full shadow-md flex items-center">
-                      <Trophy size={20} className="fill-white" />
-                    </div>
+                    
                   </div>
                 </div>
                 <div className="p-5">
@@ -95,8 +82,7 @@ const Index = () => {
                     </Button>
                   </Link>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>

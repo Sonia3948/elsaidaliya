@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, CreditCard, Wallet, Upload } from "lucide-react";
@@ -11,9 +10,12 @@ import { Input } from "@/components/ui/input";
 import Layout from "@/components/layout/Layout";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-
 const PaymentPage = () => {
-  const { offerId } = useParams<{ offerId: string }>();
+  const {
+    offerId
+  } = useParams<{
+    offerId: string;
+  }>();
   const [paymentType, setPaymentType] = useState<"monthly" | "yearly">("monthly");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "bank">("card");
   const [transferReceipt, setTransferReceipt] = useState<File | null>(null);
@@ -21,9 +23,8 @@ const PaymentPage = () => {
     cardNumber: "",
     cardHolder: "",
     expiryDate: "",
-    cvv: "",
+    cvv: ""
   });
-
   const offerDetails = {
     bronze: {
       title: "Offre Bronze",
@@ -47,9 +48,7 @@ const PaymentPage = () => {
       features: ["Priorité maximale dans les résultats", "Mise à jour quotidienne des listings", "Notifications aux pharmaciens pour les nouveaux produits", "Annonces sur la page d'accueil", "Newsletter mensuelle aux pharmaciens"]
     }
   };
-
   const offer = offerId === 'gold' ? offerDetails.gold : offerId === 'silver' ? offerDetails.silver : offerDetails.bronze;
-
   const handlePayment = () => {
     if (paymentMethod === "bank" && !transferReceipt) {
       toast.error("Veuillez téléverser le bon de virement");
@@ -58,28 +57,25 @@ const PaymentPage = () => {
 
     // Handle the payment process
     console.log(`Traitement du paiement pour l'offre ${offerId} (${paymentType}) via ${paymentMethod}`);
-    
+
     // If there's a transfer receipt, we would upload it here in a real implementation
     if (transferReceipt) {
       console.log("Téléversement du bon de virement:", transferReceipt.name);
       // In a real app, we would upload the file to the backend here
     }
-
     toast.success("Votre demande d'abonnement a été enregistrée avec succès");
     toast.info("Veuillez patienter 24 à 48 heures pour l'activation de votre compte");
-    
+
     // Redirect to the success page after a short delay
     setTimeout(() => {
       window.location.href = "/payment-success";
     }, 2000);
   };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setTransferReceipt(e.target.files[0]);
     }
   };
-
   const ribDetails = {
     bank: "Banque Nationale d'Algérie (BNA)",
     accountName: "Elsaidaliya SARL",
@@ -87,9 +83,7 @@ const PaymentPage = () => {
     swift: "BNAADZALXXX",
     address: "123 Boulevard Mohammed V, Alger, Algérie"
   };
-
-  return (
-    <Layout>
+  return <Layout>
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="mb-8">
           <Link to="/" className="flex items-center text-pharmacy hover:underline">
@@ -139,14 +133,12 @@ const PaymentPage = () => {
                 <div className="mt-6">
                   <h3 className="font-semibold mb-2">Fonctionnalités incluses:</h3>
                   <ul className="space-y-2">
-                    {offer.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
+                    {offer.features.map((feature, index) => <li key={index} className="flex items-start">
                         <div className="flex-shrink-0 h-5 w-5 rounded-full bg-pharmacy-light flex items-center justify-center mt-0.5">
                           <span className="text-pharmacy-dark font-bold text-xs">✓</span>
                         </div>
                         <p className="ml-2 text-gray-700">{feature}</p>
-                      </li>
-                    ))}
+                      </li>)}
                   </ul>
                 </div>
               </CardContent>
@@ -173,8 +165,7 @@ const PaymentPage = () => {
                   </div>
                 </RadioGroup>
                 
-                {paymentMethod === "card" && (
-                  <div className="mt-6 space-y-4">
+                {paymentMethod === "card" && <div className="mt-6 space-y-4">
                     <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
                       <p className="text-sm text-yellow-800">
                         <span className="font-bold">Important:</span> Le paiement par carte bancaire n'est pas disponible pour le moment. Veuillez utiliser le virement bancaire.
@@ -184,52 +175,38 @@ const PaymentPage = () => {
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="cardNumber">Numéro de carte</Label>
-                        <Input 
-                          id="cardNumber" 
-                          placeholder="1234 5678 9012 3456" 
-                          value={cardDetails.cardNumber}
-                          onChange={(e) => setCardDetails({...cardDetails, cardNumber: e.target.value})}
-                          disabled
-                        />
+                        <Input id="cardNumber" placeholder="1234 5678 9012 3456" value={cardDetails.cardNumber} onChange={e => setCardDetails({
+                      ...cardDetails,
+                      cardNumber: e.target.value
+                    })} disabled />
                       </div>
                       <div>
                         <Label htmlFor="cardHolder">Titulaire de la carte</Label>
-                        <Input 
-                          id="cardHolder" 
-                          placeholder="Nom complet" 
-                          value={cardDetails.cardHolder}
-                          onChange={(e) => setCardDetails({...cardDetails, cardHolder: e.target.value})}
-                          disabled
-                        />
+                        <Input id="cardHolder" placeholder="Nom complet" value={cardDetails.cardHolder} onChange={e => setCardDetails({
+                      ...cardDetails,
+                      cardHolder: e.target.value
+                    })} disabled />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="expiryDate">Date d'expiration</Label>
-                          <Input 
-                            id="expiryDate" 
-                            placeholder="MM/AA" 
-                            value={cardDetails.expiryDate}
-                            onChange={(e) => setCardDetails({...cardDetails, expiryDate: e.target.value})}
-                            disabled
-                          />
+                          <Input id="expiryDate" placeholder="MM/AA" value={cardDetails.expiryDate} onChange={e => setCardDetails({
+                        ...cardDetails,
+                        expiryDate: e.target.value
+                      })} disabled />
                         </div>
                         <div>
                           <Label htmlFor="cvv">CVV</Label>
-                          <Input 
-                            id="cvv" 
-                            placeholder="123" 
-                            value={cardDetails.cvv}
-                            onChange={(e) => setCardDetails({...cardDetails, cvv: e.target.value})}
-                            disabled
-                          />
+                          <Input id="cvv" placeholder="123" value={cardDetails.cvv} onChange={e => setCardDetails({
+                        ...cardDetails,
+                        cvv: e.target.value
+                      })} disabled />
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  </div>}
                 
-                {paymentMethod === "bank" && (
-                  <div className="mt-6 p-4 bg-pharmacy-light bg-opacity-20 rounded-md">
+                {paymentMethod === "bank" && <div className="mt-6 p-4 bg-pharmacy-light bg-opacity-20 rounded-md">
                     <h3 className="font-semibold mb-2">Coordonnées bancaires:</h3>
                     <div className="space-y-2 text-sm">
                       <p><span className="font-semibold">Banque:</span> {ribDetails.bank}</p>
@@ -239,26 +216,15 @@ const PaymentPage = () => {
                       <p><span className="font-semibold">Adresse:</span> {ribDetails.address}</p>
                     </div>
                     
-                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                      <p className="text-sm text-yellow-800">
-                        <span className="font-bold">Important:</span> Après avoir effectué votre virement, veuillez téléverser le bon de virement ci-dessous et nous envoyer une confirmation par email à finance@elsaidaliya.dz avec votre numéro de référence.
-                      </p>
-                    </div>
+                    
                     
                     <div className="mt-4 space-y-3">
                       <Label htmlFor="transferReceipt">Bon de virement (obligatoire)</Label>
                       <div className="flex items-center gap-2">
-                        <Input 
-                          id="transferReceipt" 
-                          type="file" 
-                          onChange={handleFileChange}
-                          className="max-w-md"
-                        />
-                        {transferReceipt && (
-                          <span className="text-green-600 text-sm">
+                        <Input id="transferReceipt" type="file" onChange={handleFileChange} className="max-w-md" />
+                        {transferReceipt && <span className="text-green-600 text-sm">
                             Fichier sélectionné: {transferReceipt.name}
-                          </span>
-                        )}
+                          </span>}
                       </div>
                       <p className="text-xs text-gray-500">
                         Formats acceptés: PDF, JPG, PNG. Taille max: 5MB
@@ -267,9 +233,7 @@ const PaymentPage = () => {
                     
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button variant="outline" className="mt-4 bg-white">
-                          Afficher RIB complet
-                        </Button>
+                        
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-md">
                         <DialogHeader>
@@ -294,8 +258,7 @@ const PaymentPage = () => {
                         </div>
                       </DialogContent>
                     </Dialog>
-                  </div>
-                )}
+                  </div>}
                 
                 <div className="mt-8 space-y-4">
                   <h3 className="font-semibold">Délai d'activation</h3>
@@ -305,10 +268,7 @@ const PaymentPage = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button 
-                  onClick={handlePayment} 
-                  className="w-full bg-pharmacy-accent rounded-xl"
-                >
+                <Button onClick={handlePayment} className="w-full bg-pharmacy-accent rounded-xl">
                   {paymentMethod === "card" ? "Procéder au paiement" : "Confirmer la commande"}
                 </Button>
               </CardFooter>
@@ -316,8 +276,6 @@ const PaymentPage = () => {
           </div>
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default PaymentPage;

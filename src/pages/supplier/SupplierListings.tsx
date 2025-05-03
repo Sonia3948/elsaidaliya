@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -6,18 +5,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FilePlus, FileText, Trash2, FileUp, Download, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
 const SupplierListings = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Mock data for existing listings
-  const [listings, setListings] = useState([
-    { id: 1, name: "Listing_Janvier_2025.pdf", date: "2025-01-15", views: 45 },
-    { id: 2, name: "Listing_Février_2025.pdf", date: "2025-02-15", views: 32 },
-    { id: 3, name: "Listing_Mars_2025.pdf", date: "2025-03-15", views: 28 }
-  ]);
-
+  const [listings, setListings] = useState([{
+    id: 1,
+    name: "Listing_Janvier_2025.pdf",
+    date: "2025-01-15",
+    views: 45
+  }, {
+    id: 2,
+    name: "Listing_Février_2025.pdf",
+    date: "2025-02-15",
+    views: 32
+  }, {
+    id: 3,
+    name: "Listing_Mars_2025.pdf",
+    date: "2025-03-15",
+    views: 28
+  }]);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -25,14 +35,13 @@ const SupplierListings = () => {
         toast({
           title: "Format non supporté",
           description: "Veuillez télécharger un fichier PDF.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
       setSelectedFile(file);
     }
   };
-
   const handleUpload = () => {
     if (selectedFile) {
       // In a real app, this would upload the file to a server
@@ -42,33 +51,28 @@ const SupplierListings = () => {
         date: new Date().toISOString().split("T")[0],
         views: 0
       };
-      
       setListings([newListing, ...listings]);
       setSelectedFile(null);
-      
       toast({
         title: "Listing téléchargé avec succès",
-        description: "Votre nouveau listing est maintenant disponible pour les pharmaciens.",
+        description: "Votre nouveau listing est maintenant disponible pour les pharmaciens."
       });
     } else {
       toast({
         title: "Aucun fichier sélectionné",
         description: "Veuillez sélectionner un fichier PDF à télécharger.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleDelete = (id: number) => {
     setListings(listings.filter(listing => listing.id !== id));
     toast({
       title: "Listing supprimé",
-      description: "Le listing a été supprimé avec succès.",
+      description: "Le listing a été supprimé avec succès."
     });
   };
-
-  return (
-    <DashboardLayout userRole="supplier">
+  return <DashboardLayout userRole="supplier">
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-6">Gestion des Listings</h1>
         
@@ -86,23 +90,13 @@ const SupplierListings = () => {
                 <p className="text-sm text-gray-500 mb-4">
                   Déposez votre fichier ici ou cliquez pour parcourir
                 </p>
-                <Input 
-                  type="file" 
-                  accept=".pdf" 
-                  onChange={handleFileChange}
-                  className="max-w-xs"
-                />
-                {selectedFile && (
-                  <div className="mt-3 text-sm text-gray-600">
+                <Input type="file" accept=".pdf" onChange={handleFileChange} className="max-w-xs" />
+                {selectedFile && <div className="mt-3 text-sm text-gray-600">
                     Fichier sélectionné: {selectedFile.name}
-                  </div>
-                )}
+                  </div>}
               </div>
               <div className="flex justify-end">
-                <Button 
-                  onClick={handleUpload} 
-                  className="bg-medical hover:bg-medical-dark"
-                >
+                <Button onClick={handleUpload} className="bg-medical hover:bg-medical-dark text-pharmacy-DEFAULT bg-pharmacy-DEFAULT">
                   <FileUp className="mr-2 h-4 w-4" />
                   Télécharger le listing
                 </Button>
@@ -130,8 +124,7 @@ const SupplierListings = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {listings.map(listing => (
-                    <tr key={listing.id} className="border-b hover:bg-gray-50">
+                  {listings.map(listing => <tr key={listing.id} className="border-b hover:bg-gray-50">
                       <td className="px-6 py-4 font-medium">{listing.name}</td>
                       <td className="px-6 py-4">{listing.date}</td>
                       <td className="px-6 py-4">{listing.views}</td>
@@ -142,26 +135,17 @@ const SupplierListings = () => {
                         <Button variant="outline" size="icon" title="Télécharger">
                           <Download size={16} />
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          className="text-red-500 hover:text-red-700" 
-                          title="Supprimer"
-                          onClick={() => handleDelete(listing.id)}
-                        >
+                        <Button variant="outline" size="icon" className="text-red-500 hover:text-red-700" title="Supprimer" onClick={() => handleDelete(listing.id)}>
                           <Trash2 size={16} />
                         </Button>
                       </td>
-                    </tr>
-                  ))}
+                    </tr>)}
                 </tbody>
               </table>
             </div>
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default SupplierListings;

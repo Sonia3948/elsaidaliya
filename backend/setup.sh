@@ -12,6 +12,8 @@ go get -u github.com/gin-gonic/gin
 go get -u github.com/gin-contrib/cors
 go get -u go.mongodb.org/mongo-driver/mongo
 go get -u github.com/joho/godotenv
+go get -u github.com/google/uuid
+go get -u golang.org/x/crypto/bcrypt
 
 echo "Updating and tidying dependencies..."
 go mod tidy

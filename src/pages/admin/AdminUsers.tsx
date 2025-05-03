@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -375,7 +374,7 @@ const AdminUsers = () => {
                 <SelectValue placeholder="Filtrer par wilaya" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Toutes les wilayas</SelectItem>
+                <SelectItem value="all">Toutes les wilayas</SelectItem>
                 {getUniqueWilayas().map(wilaya => (
                   <SelectItem key={wilaya} value={wilaya}>{wilaya}</SelectItem>
                 ))}

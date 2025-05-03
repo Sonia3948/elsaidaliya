@@ -96,7 +96,7 @@ const SupplierListings = () => {
                   </div>}
               </div>
               <div className="flex justify-end">
-                <Button onClick={handleUpload} className="bg-medical hover:bg-medical-dark text-pharmacy-DEFAULT bg-pharmacy-DEFAULT">
+                <Button onClick={handleUpload} className="bg-medical hover:bg-medical-dark text-pharmacy-DEFAULT bg-pharmacy-DEFAULT text-center rounded-xl">
                   <FileUp className="mr-2 h-4 w-4" />
                   Télécharger le listing
                 </Button>

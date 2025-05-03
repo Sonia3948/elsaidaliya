@@ -1,363 +1,340 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { Search, FilePdf, FileText } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { FileText, Search, User, ExternalLink, Star, Building } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { algeriasWilayas } from "@/data/wilayas";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-// Mock data for suppliers and their listings
-const mockSuppliers = [
-  { 
-    id: 1, 
-    name: "MediStock", 
-    wilaya: "Alger", 
-    rating: 4.8,
-    listingUrl: "/sample.pdf",
-    subscription: "gold",
-    isFavorite: true,
-    medicines: ["Paracétamol", "Ibuprofène", "Amoxicilline", "Doliprane", "Aspirine", "Ventoline"]
+// Example medication data
+const medications = [
+  {
+    id: "1",
+    name: "Paracétamol",
+    dosage: "500mg",
+    form: "Comprimé",
+    manufacturer: "Pharma Algérie",
+    suppliers: [
+      { id: "1", name: "MediStock Algérie", stock: "En stock", price: "150 DA" },
+      { id: "2", name: "PharmaSupply", stock: "En stock", price: "160 DA" }
+    ],
+    category: "Analgésique",
+    details: "Traitement de la douleur et de la fièvre"
   },
-  { 
-    id: 2, 
-    name: "PharmaPro", 
-    wilaya: "Oran", 
-    rating: 4.5,
-    listingUrl: "/sample.pdf",
-    subscription: "silver",
-    isFavorite: false,
-    medicines: ["Paracétamol", "Ibuprofène", "Aspirine", "Augmentin", "Xanax", "Doliprane"]
+  {
+    id: "2",
+    name: "Amoxicilline",
+    dosage: "1g",
+    form: "Gélule",
+    manufacturer: "SAIDAL",
+    suppliers: [
+      { id: "3", name: "AlgéPharm", stock: "Stock limité", price: "320 DA" }
+    ],
+    category: "Antibiotique",
+    details: "Traitement des infections bactériennes"
   },
-  { 
-    id: 3, 
-    name: "MedPlus", 
-    wilaya: "Constantine", 
-    rating: 4.2,
-    listingUrl: "/sample.pdf",
-    subscription: "bronze",
-    isFavorite: true,
-    medicines: ["Paracétamol", "Augmentin", "Doliprane", "Ventoline", "Lexomil"]
-  },
-  { 
-    id: 4, 
-    name: "AlgeriaMed", 
-    wilaya: "Annaba", 
-    rating: 4.7,
-    listingUrl: "/sample.pdf",
-    subscription: "gold",
-    isFavorite: false,
-    medicines: ["Ibuprofène", "Amoxicilline", "Doliprane", "Ventoline", "Aspirine"]
-  },
-  { 
-    id: 5, 
-    name: "MedSupply", 
-    wilaya: "Sétif", 
-    rating: 4.4,
-    listingUrl: "/sample.pdf",
-    subscription: "silver",
-    isFavorite: true,
-    medicines: ["Paracétamol", "Ibuprofène", "Ventoline", "Lexomil", "Xanax"]
+  {
+    id: "3",
+    name: "Oméprazole",
+    dosage: "20mg",
+    form: "Comprimé",
+    manufacturer: "LPA Laboratoires",
+    suppliers: [
+      { id: "1", name: "MediStock Algérie", stock: "En stock", price: "280 DA" },
+      { id: "3", name: "AlgéPharm", stock: "Rupture de stock", price: "260 DA" }
+    ],
+    category: "Anti-ulcéreux",
+    details: "Inhibiteur de la pompe à protons"
   }
 ];
 
 const PharmacistMedicines = () => {
-  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [selectedWilaya, setSelectedWilaya] = useState<string>("all");
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  
-  useEffect(() => {
-    // Extract search query from URL if present
-    const params = new URLSearchParams(location.search);
-    const queryParam = params.get('query');
-    if (queryParam) {
-      setSearchQuery(queryParam);
-      handleSearch(queryParam);
-    }
-  }, [location]);
+  const [searchResults, setSearchResults] = useState<typeof medications>([]);
+  const [activeTab, setActiveTab] = useState("recherche");
+  const [selectedMedication, setSelectedMedication] = useState<any>(null);
+  const { toast } = useToast();
 
-  const handleSearch = (query: string = searchQuery) => {
-    if (!query?.trim()) return;
-    
-    // Filter suppliers that have the medicine in their list
-    let results = mockSuppliers.filter(supplier => 
-      supplier.medicines.some(medicine => 
-        medicine.toLowerCase().includes(query.toLowerCase())
-      )
+  const handleSearch = () => {
+    if (searchQuery.trim() === "") {
+      toast({
+        title: "Recherche vide",
+        description: "Veuillez saisir un terme de recherche",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Filter medications based on search query
+    const results = medications.filter(
+      (med) =>
+        med.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        med.manufacturer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        med.category.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
-    // Apply wilaya filter
-    if (selectedWilaya !== "all") {
-      results = results.filter(supplier => supplier.wilaya === selectedWilaya);
-    }
-    
-    // Apply favorites filter
-    if (showFavoritesOnly) {
-      results = results.filter(supplier => supplier.isFavorite);
-    }
 
-    // Sort by subscription level: gold > silver > bronze
-    results.sort((a, b) => {
-      const subscriptionOrder: Record<string, number> = {
-        gold: 3,
-        silver: 2,
-        bronze: 1
-      };
-      return subscriptionOrder[b.subscription] - subscriptionOrder[a.subscription];
-    });
-    
     setSearchResults(results);
-    setHasSearched(true);
-  };
-  
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
-  
-  const toggleFavorite = (supplierId: number) => {
-    // Update the mockSuppliers list
-    const updatedSuppliers = mockSuppliers.map(supplier => 
-      supplier.id === supplierId ? { ...supplier, isFavorite: !supplier.isFavorite } : supplier
-    );
-    
-    // Update search results if they exist
-    if (hasSearched) {
-      const updatedResults = searchResults.map(supplier => 
-        supplier.id === supplierId ? { ...supplier, isFavorite: !supplier.isFavorite } : supplier
-      );
-      setSearchResults(updatedResults);
+    setActiveTab("resultats");
+
+    if (results.length === 0) {
+      toast({
+        title: "Aucun résultat",
+        description: "Aucun médicament ne correspond à votre recherche",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Recherche complétée",
+        description: `${results.length} médicament(s) trouvé(s)`,
+      });
     }
   };
 
-  const getSubscriptionBadgeClass = (subscription: string) => {
-    switch (subscription) {
-      case "gold":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "silver":
-        return "bg-gray-100 text-gray-800 border-gray-300";
-      case "bronze":
-        return "bg-amber-100 text-amber-800 border-amber-300";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  const handleViewMedication = (medication: any) => {
+    setSelectedMedication(medication);
+    setActiveTab("details");
+  };
+
+  const downloadAsPdf = (medicationId: string) => {
+    // This would normally generate or fetch a PDF document
+    toast({
+      title: "Téléchargement PDF",
+      description: "Le document PDF est en cours de téléchargement",
+    });
+    console.log(`Downloading PDF for medication ID: ${medicationId}`);
+    // In a real app, this would trigger a PDF download
+  };
+
+  const viewPrescriptionDetails = (medicationId: string) => {
+    // This would normally show prescription details in a modal or navigate to details page
+    toast({
+      title: "Détails d'ordonnance",
+      description: "Affichage des détails d'ordonnance pour ce médicament",
+    });
+    console.log(`Viewing prescription details for medication ID: ${medicationId}`);
+    // In a real app, this would show more details
   };
 
   return (
     <DashboardLayout userRole="pharmacist">
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Recherche de Médicaments</h1>
-        
-        <Card className="mb-8">
+      <div className="container mx-auto p-4 space-y-6">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Search className="mr-2 h-5 w-5" />
-              Rechercher un médicament
-            </CardTitle>
+            <CardTitle>Recherche de Médicaments</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="medicineSearch" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nom du médicament
-                </label>
-                <div className="flex">
-                  <Input
-                    id="medicineSearch"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Ex: Paracétamol, Ibuprofène..."
-                    className="rounded-r-none"
-                    onKeyDown={handleKeyDown}
-                  />
-                  <Button 
-                    onClick={() => handleSearch()}
-                    className="rounded-l-none bg-medical hover:bg-medical-dark"
-                  >
-                    <Search className="h-4 w-4 mr-2" /> Rechercher
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="recherche">Recherche</TabsTrigger>
+                <TabsTrigger value="resultats">Résultats</TabsTrigger>
+                <TabsTrigger value="details">Détails</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="recherche" className="space-y-4 pt-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Nom du médicament, fabricant ou catégorie..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="mb-4"
+                    />
+                  </div>
+                  <Button onClick={handleSearch} className="bg-pharmacy-accent">
+                    <Search className="mr-2 h-4 w-4" />
+                    Rechercher
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Entrez le nom exact ou partiel du médicament que vous recherchez
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
-                <div>
-                  <label htmlFor="wilayaFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                    Filtrer par wilaya
-                  </label>
-                  <Select 
-                    value={selectedWilaya} 
-                    onValueChange={(value) => {
-                      setSelectedWilaya(value);
-                      if (hasSearched) handleSearch();
-                    }}
-                  >
-                    <SelectTrigger id="wilayaFilter" className="w-full">
-                      <SelectValue placeholder="Filtrer par wilaya" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Toutes les wilayas</SelectItem>
-                      {algeriasWilayas.map(wilaya => (
-                        <SelectItem key={wilaya.code} value={wilaya.name}>{wilaya.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="bg-gray-50 rounded-md p-4">
+                  <h3 className="font-medium mb-2">Recherches récentes</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge
+                      variant="outline"
+                      className="cursor-pointer"
+                      onClick={() => setSearchQuery("Paracétamol")}
+                    >
+                      Paracétamol
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className="cursor-pointer"
+                      onClick={() => setSearchQuery("Antibiotique")}
+                    >
+                      Antibiotique
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className="cursor-pointer"
+                      onClick={() => setSearchQuery("SAIDAL")}
+                    >
+                      SAIDAL
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex items-end">
-                  <Button 
-                    variant={showFavoritesOnly ? "default" : "outline"}
-                    onClick={() => {
-                      setShowFavoritesOnly(!showFavoritesOnly);
-                      if (hasSearched) handleSearch();
-                    }}
-                    className={showFavoritesOnly ? "bg-medical hover:bg-medical-dark" : ""}
-                  >
-                    <Star className={`mr-2 h-4 w-4 ${showFavoritesOnly ? "fill-white" : ""}`} />
-                    {showFavoritesOnly ? "Affichage des favoris" : "Afficher les favoris uniquement"}
-                  </Button>
-                </div>
-              </div>
-            </div>
+              </TabsContent>
+
+              <TabsContent value="resultats" className="pt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nom</TableHead>
+                      <TableHead>Dosage</TableHead>
+                      <TableHead>Forme</TableHead>
+                      <TableHead>Fabricant</TableHead>
+                      <TableHead>Catégorie</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {searchResults.map((medication) => (
+                      <TableRow key={medication.id}>
+                        <TableCell>{medication.name}</TableCell>
+                        <TableCell>{medication.dosage}</TableCell>
+                        <TableCell>{medication.form}</TableCell>
+                        <TableCell>{medication.manufacturer}</TableCell>
+                        <TableCell>{medication.category}</TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              onClick={() => handleViewMedication(medication)}
+                            >
+                              <Search className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              onClick={() => downloadAsPdf(medication.id)}
+                            >
+                              <FilePdf className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              onClick={() => viewPrescriptionDetails(medication.id)}
+                            >
+                              <FileText className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TabsContent>
+
+              <TabsContent value="details" className="pt-4">
+                {selectedMedication ? (
+                  <div className="space-y-6">
+                    <div>
+                      <h2 className="text-2xl font-bold flex items-center justify-between">
+                        {selectedMedication.name}
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => downloadAsPdf(selectedMedication.id)}
+                          >
+                            <FilePdf className="h-4 w-4 mr-2" />
+                            PDF
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => viewPrescriptionDetails(selectedMedication.id)}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Ordonnance
+                          </Button>
+                        </div>
+                      </h2>
+                      <div className="flex items-center mt-2">
+                        <Badge>{selectedMedication.category}</Badge>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="font-semibold text-lg mb-2">Informations</h3>
+                        <div className="bg-white p-4 rounded-md border">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-sm text-gray-500">Dosage</p>
+                              <p>{selectedMedication.dosage}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Forme</p>
+                              <p>{selectedMedication.form}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Fabricant</p>
+                              <p>{selectedMedication.manufacturer}</p>
+                            </div>
+                          </div>
+                          <Separator className="my-4" />
+                          <div>
+                            <p className="text-sm text-gray-500">Description</p>
+                            <p>{selectedMedication.details}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="font-semibold text-lg mb-2">Fournisseurs</h3>
+                        <div className="bg-white p-4 rounded-md border">
+                          {selectedMedication.suppliers.map((supplier: any) => (
+                            <div
+                              key={supplier.id}
+                              className="border-b last:border-0 py-2"
+                            >
+                              <p className="font-medium">{supplier.name}</p>
+                              <div className="flex justify-between text-sm">
+                                <span
+                                  className={`${
+                                    supplier.stock === "En stock"
+                                      ? "text-green-600"
+                                      : supplier.stock === "Stock limité"
+                                      ? "text-amber-600"
+                                      : "text-red-600"
+                                  }`}
+                                >
+                                  {supplier.stock}
+                                </span>
+                                <span className="font-medium">
+                                  {supplier.price}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p>Sélectionnez un médicament pour voir les détails</p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
-        
-        {hasSearched && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="mr-2 h-5 w-5" />
-                Résultats de recherche pour "{searchQuery}"
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {searchResults.length > 0 ? (
-                <div className="space-y-6">
-                  <p className="text-sm text-gray-600">
-                    {searchResults.length} fournisseur(s) trouvé(s) avec ce médicament.
-                  </p>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                      <thead className="text-xs text-gray-700 uppercase bg-gray-100">
-                        <tr>
-                          <th scope="col" className="px-6 py-3">Fournisseur</th>
-                          <th scope="col" className="px-6 py-3">Wilaya</th>
-                          <th scope="col" className="px-6 py-3">Évaluation</th>
-                          <th scope="col" className="px-6 py-3">Favoris</th>
-                          <th scope="col" className="px-6 py-3">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {searchResults.map(supplier => (
-                          <tr key={supplier.id} className="border-b hover:bg-gray-50">
-                            <td className="px-6 py-4 font-medium">
-                              <Link 
-                                to={`/pharmacist/suppliers/${supplier.id}`}
-                                className="text-medical hover:text-medical-dark flex items-center"
-                              >
-                                <User size={16} className="mr-2" /> 
-                                <span className="mr-2">{supplier.name}</span>
-                                <span className={`text-xs px-2 py-1 rounded-full border ${getSubscriptionBadgeClass(supplier.subscription)}`}>
-                                  {supplier.subscription === "gold" ? "🥇" : 
-                                   supplier.subscription === "silver" ? "🥈" : "🥉"}
-                                </span>
-                              </Link>
-                            </td>
-                            <td className="px-6 py-4">{supplier.wilaya}</td>
-                            <td className="px-6 py-4">
-                              <div className="flex items-center">
-                                <span className="font-medium">{supplier.rating}</span>
-                                <div className="ml-1 flex items-center">
-                                  {[...Array(5)].map((_, i) => (
-                                    <svg
-                                      key={i}
-                                      className={`w-3 h-3 ${
-                                        i < Math.floor(supplier.rating) 
-                                          ? "text-yellow-400" 
-                                          : "text-gray-300"
-                                      }`}
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      viewBox="0 0 20 20"
-                                      fill="currentColor"
-                                    >
-                                      <path
-                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                                      />
-                                    </svg>
-                                  ))}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <Button 
-                                onClick={() => toggleFavorite(supplier.id)}
-                                variant="ghost" 
-                                className="h-8 w-8 p-0"
-                              >
-                                <Star 
-                                  size={20} 
-                                  className={supplier.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-400"} 
-                                />
-                              </Button>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex space-x-2">
-                                <Button 
-                                  asChild
-                                  variant="default" 
-                                  size="sm" 
-                                  className="bg-medical hover:bg-medical-dark"
-                                >
-                                  <a href={supplier.listingUrl} target="_blank" rel="noopener noreferrer">
-                                    <FileText size={14} className="mr-1" /> PDF
-                                  </a>
-                                </Button>
-                                <Button 
-                                  asChild
-                                  variant="outline" 
-                                  size="sm"
-                                >
-                                  <Link to={`/pharmacist/suppliers/${supplier.id}`}>
-                                    <Building size={14} className="mr-1" /> Profil
-                                  </Link>
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                    <Search className="h-6 w-6 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-1">Aucun résultat trouvé</h3>
-                  <p className="text-gray-500">
-                    Aucun fournisseur ne semble proposer "{searchQuery}" dans son listing.<br />
-                    Essayez avec un autre nom ou vérifiez l'orthographe.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
       </div>
     </DashboardLayout>
   );

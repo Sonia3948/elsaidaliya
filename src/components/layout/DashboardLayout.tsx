@@ -3,10 +3,8 @@ import { ReactNode, useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  Menu,
-  X,
-  Home,
   LogOut,
+  Home,
   User,
   Settings,
   LayoutDashboard,
@@ -15,10 +13,7 @@ import {
   Search,
   Users,
   ShieldCheck,
-  Award,
-  Star,
-  Medal,
-  Trophy,
+  FilePdf
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
@@ -47,8 +42,6 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState("Utilisateur");
 
   useEffect(() => {
@@ -175,37 +168,35 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
                 <LogOut size={20} />
               </Button>
             </div>
+            <div className="px-4 py-2 flex justify-between">
+              <Link to="/" className="text-gray-500 hover:text-medical">
+                <Home size={20} />
+              </Link>
+              <Link to={`/${userRole}/profile`} className={cn(
+                "text-gray-500 hover:text-medical",
+                isActiveLink(`/${userRole}/profile`) ? "text-pharmacy-dark" : ""
+              )}>
+                <Settings size={20} />
+              </Link>
+            </div>
           </SidebarFooter>
         </Sidebar>
 
         {/* Main content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top navigation */}
-          <header className="bg-white shadow-sm z-10">
-            <div className="h-16 flex items-center justify-between px-4 md:px-6">
-              <div className="flex items-center md:hidden">
-                <SidebarTrigger />
-              </div>
-              <div className="flex items-center space-x-4 ml-auto">
-                <Link to="/" className="text-gray-500 hover:text-medical">
-                  <Home size={20} />
-                </Link>
-                <Link to={`/${userRole}/profile`} className={cn(
-                  "text-gray-500 hover:text-medical",
-                  isActiveLink(`/${userRole}/profile`) ? "text-pharmacy-dark" : ""
-                )}>
-                  <Settings size={20} />
-                </Link>
-                <div className="border-l border-gray-200 h-6 mx-2"></div>
-                <div className="flex items-center md:hidden">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="" alt={userName} />
-                    <AvatarFallback>{userName.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                </div>
+          {/* Mobile header with sidebar trigger */}
+          <div className="bg-white shadow-sm z-10 md:hidden">
+            <div className="h-16 flex items-center px-4">
+              <SidebarTrigger />
+              <div className="ml-4">
+                <img 
+                  src="/lovable-uploads/416db742-a6a0-481e-8bf5-91b997537eae.png" 
+                  alt="Elsaidaliya Logo" 
+                  className="h-8 w-auto" 
+                />
               </div>
             </div>
-          </header>
+          </div>
 
           {/* Main content */}
           <main className="flex-1 overflow-y-auto bg-gray-50">

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Search, FilePdf, FileText } from "lucide-react";
+import { Search, File, FileText } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -221,7 +221,7 @@ const PharmacistMedicines = () => {
                               className="h-8 w-8 p-0"
                               onClick={() => downloadAsPdf(medication.id)}
                             >
-                              <FilePdf className="h-4 w-4" />
+                              <File className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="outline"
@@ -251,7 +251,7 @@ const PharmacistMedicines = () => {
                             size="sm"
                             onClick={() => downloadAsPdf(selectedMedication.id)}
                           >
-                            <FilePdf className="h-4 w-4 mr-2" />
+                            <File className="h-4 w-4 mr-2" />
                             PDF
                           </Button>
                           <Button

@@ -46,8 +46,8 @@ const OfferCard: React.FC<OfferCardProps> = ({
           {features.map((feature, index) => <Feature key={index} text={feature} />)}
         </div>
       </CardContent>
-      <CardFooter>
-        <Link to={`/payment/${offerId}`} className="w-full">
+      <CardFooter className="py-0">
+        <Link to={`/payment/${offerId}`} className="w-full py-0">
           <Button className={`w-full ${highlighted ? "bg-pharmacy-dark hover:bg-pharmacy" : "bg-pharmacy hover:bg-pharmacy-dark"}`}>Choisir </Button>
         </Link>
       </CardFooter>

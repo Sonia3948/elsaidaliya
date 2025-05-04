@@ -15,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	
 	"elsaidaliya/handlers"
+	"elsaidaliya/middleware"
 )
 
 var client *mongo.Client
@@ -67,6 +68,11 @@ func main() {
 	// Initialize handlers with database connection
 	handlers.InitAuthHandlers(database)
 	handlers.InitUserHandlers(database)
+	handlers.InitListingHandlers(database)
+	handlers.InitOfferHandlers(database)
+	
+	// Initialize middleware
+	middleware.InitAuthMiddleware(database)
 	
 	// Configuration de Gin
 	r := gin.Default()
@@ -108,116 +114,42 @@ func main() {
 func setupUserRoutes(r *gin.Engine) {
 	users := r.Group("/api/users")
 	{
-		users.GET("/", handlers.GetAllUsers)
-		users.GET("/:id", handlers.GetUserByID)
-		users.POST("/", createUser)
-		users.PUT("/:id", handlers.UpdateUser)
-		users.PUT("/:id/status", handlers.UpdateUserStatus)
-		users.PUT("/:id/subscription", handlers.UpdateUserSubscription)
-		users.DELETE("/:id", deleteUser)
+		users.GET("/", middleware.RequireAuth, middleware.RequireRole("admin"), handlers.GetAllUsers)
+		users.GET("/:id", middleware.RequireAuth, handlers.GetUserByID)
+		users.PUT("/:id", middleware.RequireAuth, handlers.UpdateUser)
+		users.PUT("/:id/status", middleware.RequireAuth, middleware.RequireRole("admin"), handlers.UpdateUserStatus)
+		users.PUT("/:id/subscription", middleware.RequireAuth, middleware.RequireRole("admin"), handlers.UpdateUserSubscription)
 	}
 }
 
 func setupAuthRoutes(r *gin.Engine) {
 	auth := r.Group("/api/auth")
 	{
-		auth.POST("/register", registerUser)
+		auth.POST("/register", handlers.RegisterUser)
 		auth.POST("/login", handlers.LoginUser)
-		auth.POST("/forgot-password", forgotPassword)
+		auth.POST("/forgot-password", handlers.ForgotPassword)
 	}
 }
 
 func setupListingRoutes(r *gin.Engine) {
 	listings := r.Group("/api/listings")
 	{
-		listings.GET("/", getAllListings)
-		listings.GET("/:id", getListingById)
-		listings.POST("/", createListing)
-		listings.PUT("/:id", updateListing)
-		listings.DELETE("/:id", deleteListing)
-		listings.GET("/search", searchListings)
+		listings.GET("/", handlers.GetAllListings)
+		listings.GET("/:id", handlers.GetListingByID)
+		listings.POST("/", middleware.RequireAuth, middleware.RequireRole("fournisseur"), handlers.CreateListing)
+		listings.PUT("/:id", middleware.RequireAuth, middleware.RequireRole("fournisseur"), handlers.UpdateListing)
+		listings.DELETE("/:id", middleware.RequireAuth, handlers.DeleteListing)
+		listings.GET("/search", handlers.SearchListings)
 	}
 }
 
 func setupOfferRoutes(r *gin.Engine) {
 	offers := r.Group("/api/offers")
 	{
-		offers.GET("/", getAllOffers)
-		offers.GET("/:id", getOfferById)
-		offers.POST("/", createOffer)
-		offers.PUT("/:id", updateOffer)
-		offers.DELETE("/:id", deleteOffer)
+		offers.GET("/", handlers.GetAllOffers)
+		offers.GET("/:id", handlers.GetOfferByID)
+		offers.POST("/", middleware.RequireAuth, middleware.RequireRole("fournisseur"), handlers.CreateOffer)
+		offers.PUT("/:id", middleware.RequireAuth, middleware.RequireRole("fournisseur"), handlers.UpdateOffer)
+		offers.DELETE("/:id", middleware.RequireAuth, handlers.DeleteOffer)
 	}
-}
-
-// Définitions des handlers pour les utilisateurs
-func createUser(c *gin.Context) {
-	c.JSON(http.StatusCreated, gin.H{"message": "Utilisateur créé"})
-}
-
-func deleteUser(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Suppression de l'utilisateur " + id})
-}
-
-// Définitions des handlers pour l'authentification
-func registerUser(c *gin.Context) {
-	c.JSON(http.StatusCreated, gin.H{"message": "Utilisateur enregistré"})
-}
-
-func forgotPassword(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Email de réinitialisation envoyé"})
-}
-
-// Définitions des handlers pour les listings
-func getAllListings(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Récupération de tous les listings"})
-}
-
-func getListingById(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Récupération du listing " + id})
-}
-
-func createListing(c *gin.Context) {
-	c.JSON(http.StatusCreated, gin.H{"message": "Listing créé"})
-}
-
-func updateListing(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Mise à jour du listing " + id})
-}
-
-func deleteListing(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Suppression du listing " + id})
-}
-
-func searchListings(c *gin.Context) {
-	query := c.Query("q")
-	c.JSON(http.StatusOK, gin.H{"message": "Recherche de listings pour " + query})
-}
-
-// Définitions des handlers pour les offres
-func getAllOffers(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Récupération de toutes les offres"})
-}
-
-func getOfferById(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Récupération de l'offre " + id})
-}
-
-func createOffer(c *gin.Context) {
-	c.JSON(http.StatusCreated, gin.H{"message": "Offre créée"})
-}
-
-func updateOffer(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Mise à jour de l'offre " + id})
-}
-
-func deleteOffer(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Suppression de l'offre " + id})
 }

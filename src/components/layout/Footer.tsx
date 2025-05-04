@@ -1,9 +1,6 @@
-
 import { Link } from "react-router-dom";
-
 const Footer = () => {
-  return (
-    <footer className="bg-white px-4 py-8 border-t">
+  return <footer className="bg-white px-4 py-8 border-t">
       <div className="container mx-auto">
         <div className="md:flex md:justify-between mb-8">
           <div className="mb-6 md:mb-0">
@@ -17,16 +14,16 @@ const Footer = () => {
           
           <div className="grid grid-cols-2 gap-8 sm:gap-12 sm:grid-cols-3">
             <div>
-              <h2 className="mb-4 text-sm font-semibold uppercase">Ressources</h2>
+              
               <ul className="text-gray-600 space-y-2">
                 <li>
-                  <Link to="/about" className="hover:underline">À propos</Link>
+                  
                 </li>
                 <li>
-                  <Link to="/legal" className="hover:underline">Informations légales</Link>
+                  
                 </li>
                 <li>
-                  <Link to="/contact" className="hover:underline">Contact</Link>
+                  
                 </li>
               </ul>
             </div>
@@ -40,9 +37,7 @@ const Footer = () => {
                 <li>
                   <a href="https://www.instagram.com/" className="hover:underline" target="_blank" rel="noopener noreferrer">Instagram</a>
                 </li>
-                <li>
-                  <a href="https://www.linkedin.com/" className="hover:underline" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-                </li>
+                
               </ul>
             </div>
             
@@ -72,8 +67,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;

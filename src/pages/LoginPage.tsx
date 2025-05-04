@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import Layout from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/services/api";
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const {
@@ -49,10 +50,9 @@ const LoginPage = () => {
         return;
       }
 
-      // Call the API for real login
+      // Call the API for real login - Fixed: use identifier instead of email
       const response = await authService.login({
-        email: formData.identifier,
-        // The backend will check if this is email or phone
+        identifier: formData.identifier, // Using identifier property instead of email
         password: formData.password
       });
       if (response && !response.error) {

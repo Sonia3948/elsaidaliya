@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Layout from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
+import { authService } from "@/services";
 
 const AdminLoginPage = () => {
   const navigate = useNavigate();
@@ -44,7 +45,22 @@ const AdminLoginPage = () => {
         });
         navigate("/admin/dashboard");
       } else {
-        setError("Identifiants administrateur invalides");
+        // Try to login with real API
+        const response = await authService.login({
+          identifier: formData.identifier,
+          password: formData.password
+        });
+        
+        if (response && response.user && response.user.role === "admin") {
+          localStorage.setItem("user", JSON.stringify(response.user));
+          toast({
+            title: "Connexion réussie",
+            description: "Bienvenue sur le tableau de bord administrateur!"
+          });
+          navigate("/admin/dashboard");
+        } else {
+          setError("Identifiants administrateur invalides");
+        }
       }
     } catch (error) {
       setError("Erreur de connexion");

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Layout from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
-import { authService } from "@/services/api";
+import { authService } from "@/services";
 
 const LoginPage = () => {
   const navigate = useNavigate();

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Layout from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
+import { authService } from "@/services";
 
 const ForgotPasswordPage = () => {
   const { toast } = useToast();
@@ -12,20 +13,31 @@ const ForgotPasswordPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate API call with timeout
-    setTimeout(() => {
-      // In a real app, this would call an API to send a password reset email
-      setIsSubmitted(true);
+    try {
+      // Call the API to request password reset
+      const response = await authService.forgotPassword(email);
+      
+      if (response) {
+        setIsSubmitted(true);
+        toast({
+          title: "Email envoyé",
+          description: "Si un compte est associé à cet email, vous recevrez un lien de réinitialisation."
+        });
+      }
+    } catch (error) {
+      console.error("Password reset error:", error);
       toast({
-        title: "Email envoyé",
-        description: "Si un compte est associé à cet email, vous recevrez un lien de réinitialisation."
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'envoi de l'email de réinitialisation.",
+        variant: "destructive"
       });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (

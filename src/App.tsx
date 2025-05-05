@@ -23,6 +23,7 @@ import PharmacistMedicines from "./pages/pharmacist/PharmacistMedicines";
 import PharmacistOffers from "./pages/pharmacist/PharmacistOffers";
 import PharmacistSuppliers from "./pages/pharmacist/PharmacistSuppliers";
 import PharmacistProfile from "./pages/pharmacist/PharmacistProfile";
+import PharmacistListings from "./pages/pharmacist/PharmacistListings";
 import NotFound from "./pages/NotFound";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import LegalPage from "./pages/LegalPage";
@@ -62,12 +63,13 @@ const App = () => (
           
           {/* Pharmacist Routes */}
           <Route path="/pharmacist/dashboard" element={<PharmacistDashboard />} />
+          <Route path="/pharmacist/listings" element={<PharmacistListings />} />
           <Route path="/pharmacist/medicines" element={<PharmacistMedicines />} />
           <Route path="/pharmacist/offers" element={<PharmacistOffers />} />
           <Route path="/pharmacist/suppliers" element={<PharmacistSuppliers />} />
           <Route path="/pharmacist/profile" element={<PharmacistProfile />} />
-          <Route path="/pharmacist/offers/:id" element={<PharmacistDashboard />} />
-          <Route path="/pharmacist/suppliers/:id" element={<PharmacistDashboard />} />
+          <Route path="/pharmacist/offers/:id" element={<PharmacistOffers />} />
+          <Route path="/pharmacist/suppliers/:id" element={<PharmacistSuppliers />} />
           <Route path="/pharmacist/history" element={<PharmacistDashboard />} />
           
           {/* 404 Route */}

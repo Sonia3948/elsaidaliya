@@ -1,251 +1,122 @@
 
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Building, Image, Search, Calendar, Filter } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { offerService } from "@/services/offer";
 
-// Sample offer data structure
 interface Offer {
-  id: number;
+  id: string;
   title: string;
   description: string;
   imageUrl: string;
   supplier: {
-    id: number;
+    id: string;
     name: string;
-    wilaya: string;
   };
-  category: string;
   expiresAt: string;
-  published: string;
+  createdAt: string;
 }
 
 const PharmacistOffers = () => {
-  const [offers, setOffers] = useState<Offer[]>([]);
-  const [filteredOffers, setFilteredOffers] = useState<Offer[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate API call to fetch offers
-    setTimeout(() => {
-      const mockOffers = [
-        { 
-          id: 1, 
-          title: "Promotion sur les antibiotiques", 
-          description: "20% de réduction sur toute la gamme d'antibiotiques. Disponible pour les pharmacies avec un historique d'achat minimum de 100,000 DA.",
-          imageUrl: "/placeholder.svg", 
-          supplier: { 
-            id: 1, 
-            name: "MediStock Algérie",
-            wilaya: "Alger", 
-          },
-          category: "Promotions",
-          expiresAt: "2025-06-30",
-          published: "2025-05-01",
-        },
-        { 
-          id: 2, 
-          title: "Offre spéciale antihistaminiques", 
-          description: "Achetez 10 boîtes, obtenez-en 2 gratuites. Valable sur toute la gamme d'antihistaminiques de notre catalogue.",
-          imageUrl: "/placeholder.svg", 
-          supplier: { 
-            id: 2, 
-            name: "PharmaSupply",
-            wilaya: "Oran", 
-          },
-          category: "Promotions",
-          expiresAt: "2025-06-15",
-          published: "2025-05-02",
-        },
-        { 
-          id: 3, 
-          title: "Nouveaux produits dermatologiques", 
-          description: "Découvrez notre nouvelle gamme de produits dermatologiques importés d'Europe. Testés cliniquement et approuvés par les dermatologues.",
-          imageUrl: "/placeholder.svg", 
-          supplier: { 
-            id: 3, 
-            name: "MedProvision",
-            wilaya: "Constantine", 
-          },
-          category: "Nouveautés",
-          expiresAt: "2025-08-01",
-          published: "2025-05-03",
-        },
-        { 
-          id: 4, 
-          title: "Gamme complète de vitamines", 
-          description: "Notre nouvelle gamme de vitamines et compléments alimentaires est maintenant disponible avec des prix spéciaux pour les commandes en gros.",
-          imageUrl: "/placeholder.svg", 
-          supplier: { 
-            id: 4, 
-            name: "HealthDistributors",
-            wilaya: "Annaba", 
-          },
-          category: "Nouveautés",
-          expiresAt: "2025-07-20",
-          published: "2025-04-28",
-        },
-        { 
-          id: 5, 
-          title: "Matériel médical en promotion", 
-          description: "Réduction de 15% sur tout notre matériel médical. Stocks limités, commandez rapidement!",
-          imageUrl: "/placeholder.svg", 
-          supplier: { 
-            id: 5, 
-            name: "PharmaMed Algérie",
-            wilaya: "Sétif", 
-          },
-          category: "Matériel médical",
-          expiresAt: "2025-06-10",
-          published: "2025-05-05",
-        },
-      ];
-      
-      setOffers(mockOffers);
-      setFilteredOffers(mockOffers);
-      setLoading(false);
-    }, 1000);
-  }, []);
-
-  // Get unique categories from offers
-  const categories = [...new Set(offers.map(offer => offer.category))];
-
-  // Filter offers based on search and category
-  const handleSearch = () => {
-    let filtered = offers;
-    
-    if (searchQuery) {
-      filtered = filtered.filter(offer => 
-        offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        offer.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        offer.supplier.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    
-    if (categoryFilter) {
-      filtered = filtered.filter(offer => offer.category === categoryFilter);
-    }
-    
-    setFilteredOffers(filtered);
-  };
-
-  // Reset filters
-  const handleReset = () => {
-    setSearchQuery("");
-    setCategoryFilter("");
-    setFilteredOffers(offers);
-  };
+  const { data: offers, isLoading, isError } = useQuery({
+    queryKey: ["recentOffers"],
+    queryFn: async () => {
+      const response = await offerService.getAllOffers({ sort: "createdAt", limit: "20" });
+      return response.offers || [];
+    },
+  });
 
   // Format date for display
   const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('fr-FR', options);
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return "Aujourd'hui";
+    if (diffDays === 1) return "Hier";
+    if (diffDays < 7) return `Il y a ${diffDays} jours`;
+    
+    return new Intl.DateTimeFormat('fr-FR').format(date);
   };
 
   return (
     <DashboardLayout userRole="pharmacist">
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Offres Disponibles</h1>
-        
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Filtres de recherche</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div>
-                <label htmlFor="offerSearch" className="block text-sm font-medium mb-1">Rechercher des offres</label>
-                <Input
-                  id="offerSearch"
-                  placeholder="Titre, description, fournisseur..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="max-w-full"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="categorySelect" className="block text-sm font-medium mb-1">Catégorie</label>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger id="categorySelect" className="w-full">
-                    <SelectValue placeholder="Toutes les catégories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Toutes les catégories</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex items-end space-x-2">
-                <Button onClick={handleSearch} className="flex-1">
-                  <Search size={18} className="mr-2" /> Rechercher
-                </Button>
-                <Button variant="outline" onClick={handleReset}>
-                  Réinitialiser
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Chargement des offres...</p>
-          </div>
-        ) : filteredOffers.length > 0 ? (
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">Offres Disponibles</h1>
+          <p className="text-gray-600 mt-1">
+            Découvrez les dernières offres publiées par les fournisseurs
+          </p>
+        </div>
+
+        {isLoading ? (
+          <p className="text-center my-8">Chargement des offres...</p>
+        ) : isError ? (
+          <p className="text-center my-8 text-red-500">Erreur lors du chargement des offres</p>
+        ) : offers && offers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredOffers.map((offer) => (
+            {offers.map((offer: Offer) => (
               <Card key={offer.id} className="overflow-hidden flex flex-col">
                 <div className="h-48 bg-gray-100">
-                  <img src={offer.imageUrl} alt={offer.title} className="h-full w-full object-cover" />
+                  {offer.imageUrl ? (
+                    <img 
+                      src={offer.imageUrl} 
+                      alt={offer.title} 
+                      className="h-full w-full object-cover" 
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center bg-gray-200">
+                      <p className="text-gray-500">Pas d'image</p>
+                    </div>
+                  )}
                 </div>
                 <CardContent className="p-4 flex-grow">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-semibold text-lg">{offer.title}</h3>
-                    <Badge variant="outline">{offer.category}</Badge>
-                  </div>
+                  <h3 className="font-semibold text-lg">{offer.title}</h3>
                   <p className="text-sm text-gray-600 mt-2 line-clamp-3">{offer.description}</p>
                   
-                  <div className="mt-3 text-xs text-gray-500 flex items-center">
-                    <Calendar size={14} className="mr-1" />
-                    <span>Expire le {formatDate(offer.expiresAt)}</span>
+                  <div className="flex items-center justify-between mt-4 text-xs text-gray-500">
+                    <span>Par: {offer.supplier ? offer.supplier.name : "Fournisseur"}</span>
+                    <span>{formatDate(offer.createdAt)}</span>
                   </div>
                   
-                  <div className="mt-2 flex items-center">
-                    <Building size={14} className="mr-1 text-gray-500" />
-                    <Link to={`/pharmacist/suppliers/${offer.supplier.id}`} className="text-xs text-pharmacy-accent hover:underline">
-                      {offer.supplier.name} • {offer.supplier.wilaya}
-                    </Link>
-                  </div>
+                  {offer.expiresAt && (
+                    <div className="mt-2 text-xs text-red-500">
+                      Expire le: {new Intl.DateTimeFormat('fr-FR').format(new Date(offer.expiresAt))}
+                    </div>
+                  )}
                 </CardContent>
                 <div className="p-4 pt-0 border-t mt-auto">
-                  <Button className="w-full" asChild>
-                    <Link to={`/pharmacist/offers/${offer.id}`}>
-                      Voir les détails
-                    </Link>
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="default" 
+                      className="w-full" 
+                      asChild
+                    >
+                      <Link to={`/pharmacist/offers/${offer.id}`}>
+                        Voir les détails
+                      </Link>
+                    </Button>
+                    
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      asChild
+                    >
+                      <Link to={`/pharmacist/suppliers/${offer.supplier?.id}`}>
+                        Voir fournisseur
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Aucune offre trouvée correspondant à vos critères.</p>
-            <Button variant="outline" onClick={handleReset} className="mt-4">
-              Réinitialiser les filtres
-            </Button>
+          <div className="text-center my-8">
+            <p>Aucune offre disponible pour le moment.</p>
           </div>
         )}
       </div>

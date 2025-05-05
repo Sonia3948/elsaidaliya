@@ -1,86 +1,82 @@
 
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Search, FileText, Image, Users, Clock, ArrowRight, Star, Bell, FileCheck, Building, MapPin } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Search, 
+  FileText, 
+  Package, 
+  Gift, 
+  Users, 
+  Clock, 
+  ArrowRight, 
+  Bell, 
+  Building 
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import RegistrationNotice from "@/components/notifications/RegistrationNotice";
-
-// Types for our data
-interface Medicine {
-  id: number;
-  name: string;
-  supplier: {
-    id: number;
-    name: string;
-    pdfUrl: string;
-    productCount: number;
-  };
-}
-
-interface Supplier {
-  id: number;
-  name: string;
-  wilaya: string;
-  rating: number;
-  isFavorite: boolean;
-  productCount: number;
-}
-
-interface Offer {
-  id: number;
-  title: string;
-  description: string;
-  imageUrl: string;
-  supplier: {
-    id: number;
-    name: string;
-  };
-  date: string;
-}
-
-interface Notification {
-  id: number;
-  type: "offer" | "product";
-  supplierName: string;
-  title: string;
-  date: string;
-  read: boolean;
-}
-
-interface Listing {
-  id: number;
-  title: string;
-  supplierName: string;
-  supplierID: number;
-  medicationCount: number;
-}
+import { notificationService } from "@/services/notification";
+import { offerService } from "@/services/offer";
+import { listingService } from "@/services/listing";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const PharmacistDashboard = () => {
   // States
-  const [stats, setStats] = useState({
-    searchesThisMonth: 0,
-    suppliersViewed: 0,
-    offersViewed: 0,
-  });
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Medicine[]>([]);
-  const [listingResults, setListingResults] = useState<Listing[]>([]);
-  const [topSuppliers, setTopSuppliers] = useState<Supplier[]>([]);
-  const [recentOffers, setRecentOffers] = useState<Offer[]>([]);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [showMedicineResults, setShowMedicineResults] = useState(false);
   const [isUserActive, setIsUserActive] = useState(true);
-
-  // Mock data fetch on component mount
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [notifications, setNotifications] = useState<any[]>([]);
+  
+  // Get user stats
+  const { data: stats } = useQuery({
+    queryKey: ["pharmacistStats"],
+    queryFn: async () => {
+      // In a real application, fetch from backend
+      return {
+        searchesThisMonth: 28,
+        suppliersViewed: 15,
+        offersViewed: 22,
+      };
+    },
+  });
+  
+  // Get recent offers
+  const { data: recentOffers, isLoading: offersLoading } = useQuery({
+    queryKey: ["recentOffers"],
+    queryFn: async () => {
+      const response = await offerService.getAllOffers({ limit: "3", sort: "createdAt" });
+      return response.offers || [];
+    },
+  });
+  
+  // Get popular listings
+  const { data: popularListings, isLoading: listingsLoading } = useQuery({
+    queryKey: ["popularListings"],
+    queryFn: async () => {
+      const response = await listingService.getAllListings({ limit: "3", sort: "viewCount" });
+      return response.listings || [];
+    },
+  });
+  
+  // Get user notifications
+  const { data: userNotifications, refetch: refetchNotifications } = useQuery({
+    queryKey: ["userNotifications"],
+    queryFn: async () => {
+      const response = await notificationService.getUserNotifications();
+      return response.notifications || [];
+    },
+  });
+  
   useEffect(() => {
-    // Simuler la vérification du statut d'activation de l'utilisateur
+    if (userNotifications) {
+      setNotifications(userNotifications);
+    }
+  }, [userNotifications]);
+  
+  // Check user status
+  useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
@@ -90,122 +86,20 @@ const PharmacistDashboard = () => {
         console.error("Error parsing user data", error);
       }
     }
-
-    // Simulate fetching stats
-    const mockStats = {
-      searchesThisMonth: 28,
-      suppliersViewed: 15,
-      offersViewed: 22,
-    };
-    setStats(mockStats);
-
-    // Simulate fetching top suppliers
-    const mockTopSuppliers = [
-      { id: 1, name: "MediStock Algérie", wilaya: "Alger", rating: 4.8, isFavorite: true, productCount: 245 },
-      { id: 2, name: "PharmaSupply", wilaya: "Oran", rating: 4.6, isFavorite: false, productCount: 198 },
-      { id: 3, name: "MedProvision", wilaya: "Constantine", rating: 4.5, isFavorite: true, productCount: 176 },
-      { id: 4, name: "HealthDistributors", wilaya: "Annaba", rating: 4.3, isFavorite: false, productCount: 154 },
-    ];
-    setTopSuppliers(mockTopSuppliers);
-
-    // Simulate fetching recent offers
-    const mockRecentOffers = [
-      { 
-        id: 1, 
-        title: "Promotion sur les antibiotiques", 
-        description: "20% de réduction sur toute la gamme d'antibiotiques", 
-        imageUrl: "/placeholder.svg", 
-        supplier: { id: 1, name: "MediStock Algérie" },
-        date: "Il y a 2 jours"
-      },
-      { 
-        id: 2, 
-        title: "Offre spéciale antihistaminiques", 
-        description: "Achetez 10 boîtes, obtenez-en 2 gratuites", 
-        imageUrl: "/placeholder.svg", 
-        supplier: { id: 2, name: "PharmaSupply" },
-        date: "Il y a 3 jours"
-      },
-      { 
-        id: 3, 
-        title: "Nouveaux produits dermatologiques", 
-        description: "Découvrez notre nouvelle gamme de produits dermatologiques", 
-        imageUrl: "/placeholder.svg", 
-        supplier: { id: 3, name: "MedProvision" },
-        date: "Il y a 5 jours"
-      },
-    ];
-    setRecentOffers(mockRecentOffers);
-
-    // Simulate fetching notifications
-    const mockNotifications = [
-      { 
-        id: 1, 
-        type: "offer" as const, 
-        supplierName: "MediStock Algérie", 
-        title: "Nouvelle offre spéciale", 
-        date: "Aujourd'hui", 
-        read: false 
-      },
-      { 
-        id: 2, 
-        type: "product" as const, 
-        supplierName: "PharmaSupply", 
-        title: "Nouveaux produits disponibles", 
-        date: "Hier", 
-        read: true 
-      },
-      { 
-        id: 3, 
-        type: "offer" as const, 
-        supplierName: "MedProvision", 
-        title: "Promotion sur les antibiotiques", 
-        date: "Il y a 3 jours", 
-        read: true 
-      },
-    ];
-    setNotifications(mockNotifications);
   }, []);
-
-  // Handle medicine search
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      setShowMedicineResults(true);
-      
-      // Simulate API call to search for medicines
-      const mockResults = [
-        { id: 1, name: "Paracétamol 500mg", supplier: { id: 1, name: "MediStock Algérie", pdfUrl: "/sample.pdf", productCount: 245 } },
-        { id: 2, name: "Paracétamol 1g", supplier: { id: 2, name: "PharmaSupply", pdfUrl: "/sample.pdf", productCount: 198 } },
-        { id: 3, name: "Paracétamol sirop", supplier: { id: 3, name: "MedProvision", pdfUrl: "/sample.pdf", productCount: 176 } },
-        { id: 4, name: "Ibuprofène 400mg", supplier: { id: 1, name: "MediStock Algérie", pdfUrl: "/sample.pdf", productCount: 245 } },
-        { id: 5, name: "Aspirine 100mg", supplier: { id: 4, name: "HealthDistributors", pdfUrl: "/sample.pdf", productCount: 154 } },
-      ];
-      setSearchResults(mockResults);
-      
-      // Simuler les listings contenant ce médicament
-      const mockListings = [
-        { id: 1, title: "Catalogue Printemps 2023", supplierName: "MediStock Algérie", supplierID: 1, medicationCount: 120 },
-        { id: 2, title: "Produits Populaires", supplierName: "PharmaSupply", supplierID: 2, medicationCount: 85 },
-        { id: 3, title: "Médicaments Génériques", supplierName: "MedProvision", supplierID: 3, medicationCount: 150 }
-      ];
-      setListingResults(mockListings);
+  
+  // Mark notification as read
+  const markAsRead = async (id: string) => {
+    try {
+      await notificationService.markAsRead(id);
+      setNotifications(notifications.map(notif => 
+        notif.id === id ? { ...notif, read: true } : notif
+      ));
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
     }
   };
-
-  // Mark notification as read
-  const markAsRead = (id: number) => {
-    setNotifications(notifications.map(notif => 
-      notif.id === id ? { ...notif, read: true } : notif
-    ));
-  };
-
-  // Toggle favorite supplier
-  const toggleFavorite = (id: number) => {
-    setTopSuppliers(topSuppliers.map(supplier => 
-      supplier.id === id ? { ...supplier, isFavorite: !supplier.isFavorite } : supplier
-    ));
-  };
-
+  
   // Count unread notifications
   const unreadCount = notifications.filter(notif => !notif.read).length;
 
@@ -217,40 +111,47 @@ const PharmacistDashboard = () => {
             <RegistrationNotice role="pharmacist" />
           </div>
         )}
-      
+        
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Tableau de Bord Pharmacien</h1>
           <div className="relative">
-            <Button variant="outline" className="flex items-center gap-2" onClick={() => setActiveTab("notifications")}>
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2" 
+              onClick={() => setActiveTab("notifications")}
+            >
               <Bell size={18} />
               Notifications
               {unreadCount > 0 && (
-                <Badge variant="destructive" className="h-5 w-5 text-xs p-0 flex items-center justify-center rounded-full">
+                <Badge 
+                  variant="destructive" 
+                  className="h-5 w-5 text-xs p-0 flex items-center justify-center rounded-full"
+                >
                   {unreadCount}
                 </Badge>
               )}
             </Button>
           </div>
         </div>
-
+        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid grid-cols-4 w-full">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="listings">📦 Médicaments</TabsTrigger>
+            <TabsTrigger value="listings">📦 Listings</TabsTrigger>
             <TabsTrigger value="offers">🎁 Offres</TabsTrigger>
             <TabsTrigger value="suppliers">🏪 Fournisseurs</TabsTrigger>
           </TabsList>
           
           <TabsContent value="dashboard" className="space-y-6">
             {/* Dashboard Statistics Cards */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Recherches</CardTitle>
                   <Search className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.searchesThisMonth}</div>
+                  <div className="text-2xl font-bold">{stats?.searchesThisMonth || 0}</div>
                   <p className="text-xs text-muted-foreground mt-1">Ce mois-ci</p>
                 </CardContent>
               </Card>
@@ -261,7 +162,7 @@ const PharmacistDashboard = () => {
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.suppliersViewed}</div>
+                  <div className="text-2xl font-bold">{stats?.suppliersViewed || 0}</div>
                   <p className="text-xs text-muted-foreground mt-1">Ce mois-ci</p>
                 </CardContent>
               </Card>
@@ -269,15 +170,15 @@ const PharmacistDashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Offres consultées</CardTitle>
-                  <Image className="h-4 w-4 text-muted-foreground" />
+                  <Gift className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.offersViewed}</div>
+                  <div className="text-2xl font-bold">{stats?.offersViewed || 0}</div>
                   <p className="text-xs text-muted-foreground mt-1">Ce mois-ci</p>
                 </CardContent>
               </Card>
             </div>
-
+            
             {/* Recent Activity */}
             <Card>
               <CardHeader>
@@ -295,7 +196,7 @@ const PharmacistDashboard = () => {
                   <div className="flex items-center">
                     <Clock className="h-5 w-5 text-gray-400 mr-2" />
                     <div>
-                      <p className="text-sm">Vous avez consulté le profil de "MediStock"</p>
+                      <p className="text-sm">Vous avez consulté le profil d'un fournisseur</p>
                       <p className="text-xs text-gray-500">Il y a 1 jour</p>
                     </div>
                   </div>
@@ -309,310 +210,276 @@ const PharmacistDashboard = () => {
                 </div>
               </CardContent>
             </Card>
-
+            
+            {/* Quick Links */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-gradient-to-br from-green-50 to-blue-50">
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center text-center">
+                    <Package className="h-10 w-10 text-green-600 mb-3" />
+                    <h3 className="text-lg font-semibold mb-2">Rechercher des Médicaments</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Trouvez rapidement les médicaments dont vous avez besoin
+                    </p>
+                    <Button asChild>
+                      <Link to="/pharmacist/listings">Accéder</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-purple-50 to-pink-50">
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center text-center">
+                    <Gift className="h-10 w-10 text-purple-600 mb-3" />
+                    <h3 className="text-lg font-semibold mb-2">Voir les Offres</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Découvrez les dernières promotions et offres spéciales
+                    </p>
+                    <Button asChild>
+                      <Link to="/pharmacist/offers">Accéder</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-yellow-50 to-orange-50">
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center text-center">
+                    <Building className="h-10 w-10 text-amber-600 mb-3" />
+                    <h3 className="text-lg font-semibold mb-2">Trouver des Fournisseurs</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Recherchez des fournisseurs par nom ou wilaya
+                    </p>
+                    <Button asChild>
+                      <Link to="/pharmacist/suppliers">Accéder</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
             {/* Recent Offers Preview */}
             <div>
-              <h2 className="text-lg font-semibold mb-4">Dernières offres disponibles</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {recentOffers.slice(0, 3).map((offer) => (
-                  <Card key={offer.id} className="overflow-hidden">
-                    <div className="h-32 bg-gray-100 flex items-center justify-center">
-                      <img src={offer.imageUrl} alt={offer.title} className="h-full w-full object-cover" />
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-medium">{offer.title}</h3>
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">{offer.description}</p>
-                      <div className="flex justify-between items-center mt-3">
-                        <span className="text-xs text-gray-500">{offer.supplier.name}</span>
-                        <Link to={`/pharmacist/offers/${offer.id}`}>
-                          <Button variant="link" className="p-0 h-auto">
-                            Voir détails
-                          </Button>
-                        </Link>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              <div className="mt-4 text-center">
-                <Button variant="outline" onClick={() => setActiveTab("offers")}>
-                  Voir toutes les offres <ArrowRight size={16} className="ml-1" />
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Dernières offres disponibles</h2>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/pharmacist/offers" className="flex items-center">
+                    Voir toutes <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
                 </Button>
               </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="listings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recherche de Médicaments</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Rechercher un médicament..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="max-w-md"
-                  />
-                  <Button onClick={handleSearch}>Rechercher</Button>
-                </div>
-                
-                {showMedicineResults && (
-                  <>
-                    {searchResults.length > 0 && (
-                      <div className="mt-6">
-                        <h3 className="text-lg font-semibold mb-4">Médicaments trouvés</h3>
-                        <div className="space-y-4">
-                          {searchResults.slice(0, 5).map((medicine) => (
-                            <Card key={medicine.id} className="p-4">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h4 className="font-semibold">{medicine.name}</h4>
-                                  <p className="text-sm text-gray-600">
-                                    Fournisseur: {medicine.supplier.name}
-                                  </p>
-                                </div>
-                                <div className="space-x-2">
-                                  <Button variant="outline" size="sm" asChild>
-                                    <a href={medicine.supplier.pdfUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
-                                      <FileText size={16} className="mr-1" /> Catalogue
-                                    </a>
-                                  </Button>
-                                  <Button size="sm" asChild>
-                                    <Link to={`/pharmacist/suppliers/${medicine.supplier.id}`} className="flex items-center">
-                                      <Building size={16} className="mr-1" /> Profil
-                                    </Link>
-                                  </Button>
-                                </div>
-                              </div>
-                            </Card>
-                          ))}
-                        </div>
+              
+              {offersLoading ? (
+                <p className="text-center my-4">Chargement des offres...</p>
+              ) : recentOffers && recentOffers.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {recentOffers.map((offer: any) => (
+                    <Card key={offer.id} className="overflow-hidden">
+                      <div className="h-32 bg-gray-100 flex items-center justify-center">
+                        {offer.imageUrl ? (
+                          <img 
+                            src={offer.imageUrl} 
+                            alt={offer.title} 
+                            className="h-full w-full object-cover" 
+                          />
+                        ) : (
+                          <Gift className="h-12 w-12 text-gray-300" />
+                        )}
                       </div>
-                    )}
-                    
-                    {listingResults.length > 0 && (
-                      <div className="mt-8">
-                        <h3 className="text-lg font-semibold mb-4">Listings contenant ce médicament</h3>
-                        <div className="space-y-4">
-                          {listingResults.map((listing) => (
-                            <Card key={listing.id} className="p-4">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h4 className="font-semibold">{listing.title}</h4>
-                                  <p className="text-sm text-gray-600">
-                                    Fournisseur: {listing.supplierName}
-                                  </p>
-                                  <p className="text-sm text-gray-600">
-                                    {listing.medicationCount} médicaments dans ce catalogue
-                                  </p>
-                                </div>
-                                <div className="space-x-2">
-                                  <Button variant="outline" size="sm" asChild>
-                                    <Link to={`/pharmacist/listings/${listing.id}`} className="flex items-center">
-                                      <FileText size={16} className="mr-1" /> Voir le listing
-                                    </Link>
-                                  </Button>
-                                  <Button size="sm" asChild>
-                                    <Link to={`/pharmacist/suppliers/${listing.supplierID}`} className="flex items-center">
-                                      <Building size={16} className="mr-1" /> Voir fournisseur
-                                    </Link>
-                                  </Button>
-                                </div>
-                              </div>
-                            </Card>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </CardContent>
-            </Card>
-                      
-            <Card>
-              <CardHeader>
-                <CardTitle>Fournisseurs les plus populaires</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {topSuppliers.map((supplier) => (
-                    <Card key={supplier.id} className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-semibold">{supplier.name}</h4>
-                          <div className="flex items-center text-sm text-gray-600 mt-1">
-                            <p>{supplier.productCount} produits</p>
-                            <span className="mx-2">•</span>
-                            <p>Wilaya: {supplier.wilaya}</p>
-                          </div>
-                          <div className="flex items-center mt-2">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star
-                                key={i}
-                                size={16}
-                                className={i < Math.floor(supplier.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
-                              />
-                            ))}
-                            <span className="ml-1 text-sm text-gray-600">{supplier.rating}</span>
-                          </div>
-                        </div>
-                        <div className="space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => toggleFavorite(supplier.id)}
-                            className={supplier.isFavorite ? "bg-pharmacy-light text-pharmacy-dark" : ""}
-                          >
-                            <Star
-                              size={16}
-                              className={`mr-1 ${supplier.isFavorite ? "fill-pharmacy-dark" : ""}`}
-                            />
-                            {supplier.isFavorite ? "Favori" : "Ajouter aux favoris"}
-                          </Button>
-                          <Button size="sm" asChild>
-                            <Link to={`/pharmacist/suppliers/${supplier.id}`} className="flex items-center">
-                              <Building size={16} className="mr-1" /> Voir profil
+                      <CardContent className="p-4">
+                        <h3 className="font-medium">{offer.title}</h3>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{offer.description}</p>
+                        <div className="flex justify-between items-center mt-3">
+                          <span className="text-xs text-gray-500">
+                            {offer.supplier?.name || "Fournisseur"}
+                          </span>
+                          <Button variant="link" size="sm" className="p-0 h-auto" asChild>
+                            <Link to={`/pharmacist/offers/${offer.id}`}>
+                              Voir détails
                             </Link>
                           </Button>
                         </div>
-                      </div>
+                      </CardContent>
                     </Card>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="offers" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {recentOffers.map((offer) => (
-                <Card key={offer.id} className="overflow-hidden flex flex-col">
-                  <div className="h-48 bg-gray-100">
-                    <img src={offer.imageUrl} alt={offer.title} className="h-full w-full object-cover" />
-                  </div>
-                  <CardContent className="p-4 flex-grow">
-                    <h3 className="font-semibold text-lg">{offer.title}</h3>
-                    <p className="text-sm text-gray-600 mt-2">{offer.description}</p>
-                    <div className="flex items-center mt-4 text-xs text-gray-500">
-                      <span>{offer.date}</span>
-                      <span className="mx-1">•</span>
-                      <span>{offer.supplier.name}</span>
-                    </div>
-                  </CardContent>
-                  <div className="p-4 pt-0 border-t mt-auto">
-                    <Button className="w-full" asChild>
-                      <Link to={`/pharmacist/offers/${offer.id}`}>
-                        Voir les détails
-                      </Link>
-                    </Button>
-                  </div>
-                </Card>
-              ))}
+              ) : (
+                <p className="text-center my-4">Aucune offre disponible</p>
+              )}
+            </div>
+            
+            {/* Popular Listings */}
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Listings populaires</h2>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/pharmacist/listings" className="flex items-center">
+                    Voir tous <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+              
+              {listingsLoading ? (
+                <p className="text-center my-4">Chargement des listings...</p>
+              ) : popularListings && popularListings.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {popularListings.map((listing: any) => (
+                    <Card key={listing.id} className="overflow-hidden">
+                      <CardContent className="p-4">
+                        <h3 className="font-medium">{listing.title}</h3>
+                        <div className="text-sm text-gray-600 mt-2">
+                          <p>
+                            {listing.medications?.length || 0} médicaments disponibles
+                          </p>
+                          <p className="mt-1">
+                            Fournisseur: {listing.supplierName || "Non spécifié"}
+                          </p>
+                        </div>
+                        <div className="flex justify-between items-center mt-3">
+                          <Button variant="outline" size="sm" asChild>
+                            <a 
+                              href={listing.pdfUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="flex items-center"
+                            >
+                              <FileText className="mr-1 h-4 w-4" /> Voir PDF
+                            </a>
+                          </Button>
+                          <Button variant="link" size="sm" className="p-0 h-auto" asChild>
+                            <Link to={`/pharmacist/suppliers/${listing.supplierID}`}>
+                              Profil fournisseur
+                            </Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center my-4">Aucun listing disponible</p>
+              )}
             </div>
           </TabsContent>
           
-          <TabsContent value="suppliers" className="space-y-6">
+          <TabsContent value="listings">
             <Card>
               <CardHeader>
-                <CardTitle>Recherche de Fournisseurs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Input placeholder="Nom du fournisseur..." className="max-w-md" />
-                  <div className="flex items-center gap-2">
-                    <MapPin size={20} className="text-gray-400" />
-                    <Link to="/pharmacist/wilaya-search" className="text-pharmacy-accent hover:underline">
-                      Rechercher par wilaya
+                <CardTitle className="flex justify-between items-center">
+                  <span>Recherche de Médicaments</span>
+                  <Button asChild>
+                    <Link to="/pharmacist/listings">
+                      Accéder à la page de recherche
                     </Link>
-                  </div>
-                </div>
-                <Button className="mt-4">Rechercher</Button>
-                
-                <div className="mt-8">
-                  <h3 className="text-lg font-semibold mb-4">Résultats</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {topSuppliers.map((supplier) => (
-                      <Card key={supplier.id} className="p-4">
-                        <div className="flex items-start space-x-4">
-                          <Avatar className="h-12 w-12">
-                            <AvatarFallback>{supplier.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="flex justify-between">
-                              <h4 className="font-semibold">{supplier.name}</h4>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => toggleFavorite(supplier.id)}
-                                className={supplier.isFavorite ? "text-yellow-500" : "text-gray-400"}
-                              >
-                                <Star
-                                  size={16}
-                                  className={supplier.isFavorite ? "fill-yellow-500" : ""}
-                                />
-                              </Button>
-                            </div>
-                            <p className="text-sm text-gray-600">Wilaya: {supplier.wilaya}</p>
-                            <div className="flex items-center mt-2">
-                              {Array.from({ length: 5 }).map((_, i) => (
-                                <Star
-                                  key={i}
-                                  size={14}
-                                  className={i < Math.floor(supplier.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
-                                />
-                              ))}
-                              <span className="ml-1 text-sm">{supplier.rating}</span>
-                            </div>
-                            <div className="mt-3">
-                              <Button size="sm" asChild>
-                                <Link to={`/pharmacist/suppliers/${supplier.id}`}>
-                                  Voir profil
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center p-8">
+                <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-medium mb-2">
+                  Accédez à notre base de données complète
+                </h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  Recherchez des médicaments par nom et consultez les PDF des listings pour trouver les produits dont vous avez besoin.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
           
-          <TabsContent value="notifications" className="space-y-4">
+          <TabsContent value="offers">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  <span>Offres Disponibles</span>
+                  <Button asChild>
+                    <Link to="/pharmacist/offers">
+                      Voir toutes les offres
+                    </Link>
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center p-8">
+                <Gift className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-medium mb-2">
+                  Découvrez les meilleures offres du moment
+                </h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  Des offres spéciales, des promotions et des nouveaux produits sont régulièrement publiés par nos fournisseurs partenaires.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="suppliers">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  <span>Fournisseurs</span>
+                  <Button asChild>
+                    <Link to="/pharmacist/suppliers">
+                      Rechercher des fournisseurs
+                    </Link>
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center p-8">
+                <Users className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-medium mb-2">
+                  Trouvez les meilleurs fournisseurs
+                </h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  Recherchez des fournisseurs par nom ou wilaya, ajoutez-les à vos favoris et notez leur service pour aider la communauté.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="notifications">
             <Card>
               <CardHeader>
                 <CardTitle>Notifications</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {notifications.length > 0 ? (
-                    notifications.map((notification) => (
+                {notifications.length > 0 ? (
+                  <div className="space-y-4">
+                    {notifications.map((notification) => (
                       <div 
                         key={notification.id}
-                        className={`p-4 border rounded-lg ${notification.read ? "bg-white" : "bg-pharmacy-light/10"}`}
+                        className={`p-4 border rounded-lg ${notification.read ? "bg-white" : "bg-green-50"}`}
                         onClick={() => markAsRead(notification.id)}
                       >
                         <div className="flex items-start">
                           {notification.type === "offer" ? (
-                            <div className="h-10 w-10 rounded-full bg-pharmacy-light flex items-center justify-center text-pharmacy-dark flex-shrink-0">
-                              <Image size={20} />
+                            <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0">
+                              <Gift size={20} />
+                            </div>
+                          ) : notification.type === "listing" ? (
+                            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                              <Package size={20} />
                             </div>
                           ) : (
                             <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
-                              <FileCheck size={20} />
+                              <Bell size={20} />
                             </div>
                           )}
                           
                           <div className="ml-3 flex-grow">
                             <div className="flex justify-between items-start">
                               <h4 className="font-medium">{notification.title}</h4>
-                              <span className="text-xs text-gray-500">{notification.date}</span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(notification.createdAt).toLocaleDateString()}
+                              </span>
                             </div>
-                            <p className="text-sm text-gray-600">De {notification.supplierName}</p>
+                            <p className="text-sm text-gray-600">
+                              {notification.description}
+                            </p>
+                            
+                            {notification.fromName && (
+                              <p className="text-sm text-gray-500 mt-1">
+                                De: {notification.fromName}
+                              </p>
+                            )}
                             
                             <div className="mt-2">
                               <Button size="sm" variant="link" className="p-0 h-auto">
@@ -626,11 +493,29 @@ const PharmacistDashboard = () => {
                           )}
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-gray-500 py-8">Aucune notification</p>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Bell className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p>Vous n'avez aucune notification pour le moment.</p>
+                  </div>
+                )}
+                
+                {notifications.length > 0 && (
+                  <div className="mt-4 text-center">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        // Mark all as read
+                        notifications.forEach(n => !n.read && markAsRead(n.id));
+                        refetchNotifications();
+                      }}
+                    >
+                      Marquer toutes comme lues
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -12,6 +12,7 @@ import (
 func SetupNotificationRoutes(r *gin.Engine) {
 	notificationGroup := r.Group("/api/notifications")
 	notificationGroup.POST("/payment", notification.CreatePaymentNotificationFunc)
+	notificationGroup.POST("/create", middleware.AuthMiddleware(), notification.CreateNotificationFunc)
 	
 	// Protected routes requiring authentication
 	notificationGroup.Use(middleware.AuthMiddleware())

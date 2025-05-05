@@ -1,136 +1,207 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, Star, Building, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Building, Search, MapPin } from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { algeriasWilayas } from "@/data/wilayas";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SupplierRating from "@/components/pharmacist/SupplierRating";
+import { userService } from "@/services/user";
 
-// Sample supplier data structure
 interface Supplier {
-  id: number;
+  id: string;
   name: string;
   wilaya: string;
   rating: number;
-  productCount: number;
-  specialties: string[];
   isFavorite: boolean;
 }
 
 const PharmacistSuppliers = () => {
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [filteredSuppliers, setFilteredSuppliers] = useState<Supplier[]>([]);
   const [nameQuery, setNameQuery] = useState("");
   const [selectedWilaya, setSelectedWilaya] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("name");
+  const [searchResults, setSearchResults] = useState<Supplier[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
-  useEffect(() => {
-    // Simulate API call to fetch suppliers
-    setTimeout(() => {
-      const mockSuppliers = [
-        { id: 1, name: "MediStock Algérie", wilaya: "Alger", rating: 4.8, productCount: 245, specialties: ["Génériques", "Antibiotiques"], isFavorite: true },
-        { id: 2, name: "PharmaSupply", wilaya: "Oran", rating: 4.6, productCount: 198, specialties: ["Médicaments importés", "Matériel médical"], isFavorite: false },
-        { id: 3, name: "MedProvision", wilaya: "Constantine", rating: 4.5, productCount: 176, specialties: ["Cardiologie", "Diabète"], isFavorite: true },
-        { id: 4, name: "HealthDistributors", wilaya: "Annaba", rating: 4.3, productCount: 154, specialties: ["Génériques", "Dermatologie"], isFavorite: false },
-        { id: 5, name: "PharmaMed Algérie", wilaya: "Sétif", rating: 4.7, productCount: 210, specialties: ["Respiratoire", "Antibiotiques"], isFavorite: false },
-        { id: 6, name: "AlgéMed Distribution", wilaya: "Batna", rating: 4.2, productCount: 122, specialties: ["Pédiatrie", "Vitamines"], isFavorite: false },
-        { id: 7, name: "TéleMed Pharma", wilaya: "Tlemcen", rating: 4.4, productCount: 167, specialties: ["Orthopédie", "Génériques"], isFavorite: false },
-      ];
+  // Get top suppliers
+  const { data: topSuppliers, isLoading } = useQuery({
+    queryKey: ["topSuppliers"],
+    queryFn: async () => {
+      const response = await userService.getAllUsers({ 
+        role: "fournisseur", 
+        sort: "rating", 
+        limit: "10" 
+      });
       
-      setSuppliers(mockSuppliers);
-      setFilteredSuppliers(mockSuppliers);
-      setLoading(false);
-    }, 1000);
-  }, []);
+      // Get favorites from local storage
+      const storedFavorites = localStorage.getItem("favoriteSuppliers");
+      const favoriteIds = storedFavorites ? JSON.parse(storedFavorites) : [];
+      setFavorites(favoriteIds);
+      
+      // Mark favorites
+      const suppliers = response.users || [];
+      return suppliers.map((supplier: any) => ({
+        ...supplier,
+        isFavorite: favoriteIds.includes(supplier.id)
+      }));
+    },
+  });
 
-  // Handle supplier rating change
-  const handleRatingChange = (supplierId: number, newRating: number) => {
-    setSuppliers(suppliers.map(supplier => 
-      supplier.id === supplierId ? { ...supplier, rating: newRating } : supplier
-    ));
+  // Handle search by name
+  const handleNameSearch = async () => {
+    if (!nameQuery.trim()) return;
     
-    setFilteredSuppliers(filteredSuppliers.map(supplier => 
-      supplier.id === supplierId ? { ...supplier, rating: newRating } : supplier
-    ));
+    setIsSearching(true);
+    try {
+      const response = await userService.getAllUsers({ 
+        role: "fournisseur", 
+        name: nameQuery 
+      });
+      
+      if (response && response.users) {
+        // Mark favorites
+        const results = response.users.map((supplier: any) => ({
+          ...supplier,
+          isFavorite: favorites.includes(supplier.id)
+        }));
+        
+        setSearchResults(results);
+      }
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
-  // Filter suppliers based on search criteria
-  const handleSearch = () => {
-    let filtered = suppliers;
+  // Handle search by wilaya
+  const handleWilayaSearch = async () => {
+    if (!selectedWilaya) return;
     
-    // Filter by name if search query is provided
-    if (nameQuery) {
-      filtered = filtered.filter(supplier => 
-        supplier.name.toLowerCase().includes(nameQuery.toLowerCase())
-      );
+    setIsSearching(true);
+    try {
+      const response = await userService.getAllUsers({ 
+        role: "fournisseur", 
+        wilaya: selectedWilaya 
+      });
+      
+      if (response && response.users) {
+        // Mark favorites
+        const results = response.users.map((supplier: any) => ({
+          ...supplier,
+          isFavorite: favorites.includes(supplier.id)
+        }));
+        
+        setSearchResults(results);
+      }
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsSearching(false);
     }
-    
-    // Filter by selected wilaya if any
-    if (selectedWilaya) {
-      filtered = filtered.filter(supplier => supplier.wilaya === selectedWilaya);
-    }
-    
-    setFilteredSuppliers(filtered);
-  };
-
-  // Reset filters
-  const handleReset = () => {
-    setNameQuery("");
-    setSelectedWilaya("");
-    setFilteredSuppliers(suppliers);
   };
 
   // Toggle favorite status
-  const toggleFavorite = (id: number) => {
-    const updatedSuppliers = suppliers.map(supplier =>
-      supplier.id === id ? { ...supplier, isFavorite: !supplier.isFavorite } : supplier
-    );
+  const toggleFavorite = (supplierId: string) => {
+    let newFavorites = [...favorites];
     
-    setSuppliers(updatedSuppliers);
+    if (newFavorites.includes(supplierId)) {
+      newFavorites = newFavorites.filter(id => id !== supplierId);
+    } else {
+      newFavorites.push(supplierId);
+    }
     
-    // Also update filtered list
-    setFilteredSuppliers(filteredSuppliers.map(supplier =>
-      supplier.id === id ? { ...supplier, isFavorite: !supplier.isFavorite } : supplier
+    setFavorites(newFavorites);
+    localStorage.setItem("favoriteSuppliers", JSON.stringify(newFavorites));
+    
+    // Update search results
+    setSearchResults(searchResults.map(supplier => 
+      supplier.id === supplierId 
+        ? { ...supplier, isFavorite: !supplier.isFavorite } 
+        : supplier
     ));
   };
 
   return (
     <DashboardLayout userRole="pharmacist">
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Recherche de Fournisseurs</h1>
-        
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Filtres de recherche</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div>
-                <label htmlFor="nameSearch" className="block text-sm font-medium mb-1">Nom du fournisseur</label>
-                <div className="flex items-center">
-                  <Input
-                    id="nameSearch"
-                    placeholder="Rechercher par nom..."
-                    value={nameQuery}
-                    onChange={(e) => setNameQuery(e.target.value)}
-                    className="max-w-full"
-                  />
-                </div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">Rechercher Fournisseurs</h1>
+          <p className="text-gray-600 mt-1">
+            Trouvez des fournisseurs par nom ou wilaya
+          </p>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="name">Par Nom</TabsTrigger>
+            <TabsTrigger value="wilaya">Par Wilaya</TabsTrigger>
+            <TabsTrigger value="popular">Populaires</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="name" className="space-y-6">
+            <Card className="p-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                <Input
+                  placeholder="Nom du fournisseur..."
+                  value={nameQuery}
+                  onChange={(e) => setNameQuery(e.target.value)}
+                  className="flex-1"
+                />
+                <Button 
+                  onClick={handleNameSearch} 
+                  disabled={isSearching || !nameQuery.trim()}
+                  className="md:w-auto w-full"
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  Rechercher
+                </Button>
               </div>
               
-              <div>
-                <label htmlFor="wilayaSelect" className="block text-sm font-medium mb-1">Wilaya</label>
+              {isSearching && <p className="text-center my-4">Recherche en cours...</p>}
+              
+              {searchResults.length > 0 && activeTab === "name" && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-4">Résultats de recherche</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {searchResults.map((supplier) => (
+                      <SupplierCard 
+                        key={supplier.id} 
+                        supplier={supplier} 
+                        toggleFavorite={toggleFavorite}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {nameQuery && !isSearching && searchResults.length === 0 && activeTab === "name" && (
+                <p className="text-center my-4">Aucun résultat trouvé pour "{nameQuery}"</p>
+              )}
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="wilaya" className="space-y-6">
+            <Card className="p-6">
+              <div className="flex flex-col md:flex-row gap-4">
                 <Select value={selectedWilaya} onValueChange={setSelectedWilaya}>
-                  <SelectTrigger id="wilayaSelect" className="w-full">
+                  <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Sélectionner une wilaya" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Toutes les wilayas</SelectItem>
                     {algeriasWilayas.map((wilaya) => (
                       <SelectItem key={wilaya.code} value={wilaya.name}>
                         {wilaya.name}
@@ -138,81 +209,115 @@ const PharmacistSuppliers = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                <Button 
+                  onClick={handleWilayaSearch} 
+                  disabled={isSearching || !selectedWilaya}
+                  className="md:w-auto w-full"
+                >
+                  <MapPin className="mr-2 h-4 w-4" />
+                  Filtrer
+                </Button>
               </div>
               
-              <div className="flex items-end space-x-2">
-                <Button onClick={handleSearch} className="flex-1">
-                  <Search size={18} className="mr-2" /> Rechercher
-                </Button>
-                <Button variant="outline" onClick={handleReset}>
-                  Réinitialiser
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Chargement des fournisseurs...</p>
-          </div>
-        ) : filteredSuppliers.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredSuppliers.map((supplier) => (
-              <Card key={supplier.id} className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex items-start space-x-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarFallback>{supplier.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex justify-between">
-                        <h3 className="font-semibold text-lg">{supplier.name}</h3>
-                      </div>
-                      <div className="flex items-center text-sm text-gray-600 mt-1">
-                        <MapPin size={14} className="mr-1" />
-                        <span>{supplier.wilaya}</span>
-                      </div>
-                      <div className="mt-1">
-                        <p className="text-sm text-gray-600">{supplier.productCount} produits</p>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {supplier.specialties.map((specialty, i) => (
-                            <span key={i} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
-                              {specialty}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="mt-3">
-                        <SupplierRating 
-                          supplierId={supplier.id} 
-                          initialRating={supplier.rating}
-                          onRatingChange={(rating) => handleRatingChange(supplier.id, rating)}
-                        />
-                      </div>
-                      <div className="mt-3 flex justify-between items-center">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/pharmacist/suppliers/${supplier.id}`} className="flex items-center">
-                            <Building size={16} className="mr-1" /> Voir profil
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
+              {isSearching && <p className="text-center my-4">Recherche en cours...</p>}
+              
+              {searchResults.length > 0 && activeTab === "wilaya" && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-4">
+                    Fournisseurs dans {selectedWilaya}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {searchResults.map((supplier) => (
+                      <SupplierCard 
+                        key={supplier.id} 
+                        supplier={supplier} 
+                        toggleFavorite={toggleFavorite}
+                      />
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Aucun fournisseur trouvé correspondant à vos critères.</p>
-            <Button variant="outline" onClick={handleReset} className="mt-4">
-              Réinitialiser les filtres
-            </Button>
-          </div>
-        )}
+                </div>
+              )}
+              
+              {selectedWilaya && !isSearching && searchResults.length === 0 && activeTab === "wilaya" && (
+                <p className="text-center my-4">Aucun fournisseur trouvé dans {selectedWilaya}</p>
+              )}
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="popular" className="space-y-4">
+            {isLoading ? (
+              <p className="text-center my-4">Chargement des fournisseurs populaires...</p>
+            ) : topSuppliers && topSuppliers.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {topSuppliers.map((supplier: any) => (
+                  <SupplierCard 
+                    key={supplier.id} 
+                    supplier={supplier} 
+                    toggleFavorite={() => toggleFavorite(supplier.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center my-4">Aucun fournisseur disponible</p>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
+  );
+};
+
+interface SupplierCardProps {
+  supplier: Supplier;
+  toggleFavorite: (id: string) => void;
+}
+
+const SupplierCard = ({ supplier, toggleFavorite }: SupplierCardProps) => {
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="p-4">
+        <div className="flex items-start space-x-4">
+          <Avatar className="h-12 w-12">
+            <AvatarFallback>{supplier.name?.charAt(0) || 'F'}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <div className="flex justify-between">
+              <h4 className="font-semibold">{supplier.name}</h4>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleFavorite(supplier.id)}
+                className={supplier.isFavorite ? "text-yellow-500" : "text-gray-400"}
+              >
+                <Star
+                  size={16}
+                  className={supplier.isFavorite ? "fill-yellow-500" : ""}
+                />
+              </Button>
+            </div>
+            {supplier.wilaya && (
+              <p className="text-sm text-gray-600">
+                <MapPin className="inline h-4 w-4 mr-1" />
+                {supplier.wilaya}
+              </p>
+            )}
+            <div className="my-2">
+              <SupplierRating 
+                supplierId={parseInt(supplier.id)} 
+                initialRating={supplier.rating} 
+              />
+            </div>
+            <div className="mt-3">
+              <Button size="sm" asChild>
+                <Link to={`/pharmacist/suppliers/${supplier.id}`}>
+                  <Building className="mr-1 h-4 w-4" /> Voir profil
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

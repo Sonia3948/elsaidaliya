@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
@@ -36,9 +35,7 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/register">
-                <Button size="lg" className="rounded-xl bg-pharmacy-accent hover:bg-pharmacy-dark">
-                  Créer un compte
-                </Button>
+                
               </Link>
               <Link to="/about">
                 <Button size="lg" variant="outline" className="rounded-xl bg-pharmacy-accent my-0">

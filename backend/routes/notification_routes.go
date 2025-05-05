@@ -2,19 +2,22 @@
 package routes
 
 import (
-	"elsaidaliya/handlers"
+	"elsaidaliya/handlers/notification"
 	"elsaidaliya/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
-// SetupNotificationRoutes configures routes for notification management
+// SetupNotificationRoutes initializes routes for notification management
 func SetupNotificationRoutes(r *gin.Engine) {
-	notifications := r.Group("/api/notifications")
+	notificationGroup := r.Group("/api/notifications")
+	notificationGroup.POST("/payment", notification.CreatePaymentNotificationFunc)
+	
+	// Protected routes requiring authentication
+	notificationGroup.Use(middleware.AuthMiddleware())
 	{
-		notifications.POST("/payment", middleware.RequireAuth, handlers.CreatePaymentNotification)
-		notifications.GET("/admin", middleware.RequireAuth, middleware.RequireRole("admin"), handlers.GetAdminNotifications)
-		notifications.PUT("/:id/read", middleware.RequireAuth, handlers.MarkNotificationAsRead)
-		notifications.PUT("/:id/status", middleware.RequireAuth, middleware.RequireRole("admin"), handlers.UpdateNotificationStatus)
+		notificationGroup.GET("/admin", notification.GetAdminNotificationsFunc)
+		notificationGroup.PUT("/:id/read", notification.MarkNotificationAsReadFunc)
+		notificationGroup.PUT("/:id/status", notification.UpdateNotificationStatusFunc)
 	}
 }

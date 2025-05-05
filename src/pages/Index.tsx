@@ -29,8 +29,8 @@ const Index = () => {
       <section className="bg-gradient-to-b from-pharmacy-light to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="text-center">
-            <h1 className="text-4xl text-gray-900 mb-6 font-bold md:text-5xl py-0 mx-0 my-0 px-0">Approvisionnement Pharmaceutique en un Clic!</h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">Le trait d’union entre pharmacien et fournisseur. </p>
+            <h1 className="text-gray-900 mb-6 font-bold md:text-5xl py-0 mx-0 my-0 px-0 text-4xl">Approvisionnement Pharmaceutique en un Clic!</h1>
+            <p className="md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto font-medium text-lg">Le trait d’union entre pharmacien et fournisseur. </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/register">
                 

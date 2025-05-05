@@ -13,9 +13,9 @@ import {
   Search,
   Users,
   ShieldCheck,
-  File,
   Bell,
-  MapPin
+  MapPin,
+  FileCheck
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
@@ -90,7 +90,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           { name: "Utilisateurs", href: "/admin/users", icon: Users },
           { name: "Fournisseurs", href: "/admin/suppliers", icon: ShieldCheck },
           { name: "Pharmaciens", href: "/admin/pharmacists", icon: User },
-          { name: "Paiements", href: "/admin/payments", icon: FileText, badge: unreadNotifications > 0 ? unreadNotifications : undefined },
+          { name: "Paiements", href: "/admin/payments", icon: FileCheck, badge: unreadNotifications > 0 ? unreadNotifications : undefined },
         ];
       case "supplier":
         return [
@@ -104,7 +104,6 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           { name: "Tableau de bord", href: "/pharmacist/dashboard", icon: LayoutDashboard },
           { name: "Rechercher Médicament", href: "/pharmacist/medicines", icon: Search },
           { name: "Rechercher Fournisseur", href: "/pharmacist/suppliers", icon: Users },
-          { name: "Rechercher par Wilaya", href: "/pharmacist/wilaya-search", icon: MapPin },
           { name: "Offres Disponibles", href: "/pharmacist/offers", icon: Image },
           { name: "Profil", href: "/pharmacist/profile", icon: User },
         ];

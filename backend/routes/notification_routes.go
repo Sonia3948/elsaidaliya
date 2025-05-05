@@ -17,6 +17,7 @@ func SetupNotificationRoutes(r *gin.Engine) {
 	notificationGroup.Use(middleware.AuthMiddleware())
 	{
 		notificationGroup.GET("/admin", notification.GetAdminNotificationsFunc)
+		notificationGroup.GET("/user", notification.GetUserNotificationsFunc)
 		notificationGroup.PUT("/:id/read", notification.MarkNotificationAsReadFunc)
 		notificationGroup.PUT("/:id/status", notification.UpdateNotificationStatusFunc)
 	}

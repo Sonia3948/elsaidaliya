@@ -13,12 +13,15 @@ import PaymentPage from "./pages/PaymentPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminProfile from "./pages/admin/AdminProfile";
+import AdminPayments from "./pages/admin/AdminPayments";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import SupplierListings from "./pages/supplier/SupplierListings";
 import SupplierOffers from "./pages/supplier/SupplierOffers";
 import SupplierProfile from "./pages/supplier/SupplierProfile";
 import PharmacistDashboard from "./pages/pharmacist/PharmacistDashboard";
 import PharmacistMedicines from "./pages/pharmacist/PharmacistMedicines";
+import PharmacistOffers from "./pages/pharmacist/PharmacistOffers";
+import PharmacistSuppliers from "./pages/pharmacist/PharmacistSuppliers";
 import PharmacistProfile from "./pages/pharmacist/PharmacistProfile";
 import NotFound from "./pages/NotFound";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
@@ -48,6 +51,7 @@ const App = () => (
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
+          <Route path="/admin/payments" element={<AdminPayments />} />
           
           {/* Supplier Routes */}
           <Route path="/supplier/dashboard" element={<SupplierDashboard />} />
@@ -59,10 +63,10 @@ const App = () => (
           {/* Pharmacist Routes */}
           <Route path="/pharmacist/dashboard" element={<PharmacistDashboard />} />
           <Route path="/pharmacist/medicines" element={<PharmacistMedicines />} />
+          <Route path="/pharmacist/offers" element={<PharmacistOffers />} />
+          <Route path="/pharmacist/suppliers" element={<PharmacistSuppliers />} />
           <Route path="/pharmacist/profile" element={<PharmacistProfile />} />
-          <Route path="/pharmacist/offers" element={<PharmacistDashboard />} />
           <Route path="/pharmacist/offers/:id" element={<PharmacistDashboard />} />
-          <Route path="/pharmacist/suppliers" element={<PharmacistDashboard />} />
           <Route path="/pharmacist/suppliers/:id" element={<PharmacistDashboard />} />
           <Route path="/pharmacist/history" element={<PharmacistDashboard />} />
           

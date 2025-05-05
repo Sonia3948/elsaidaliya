@@ -4,14 +4,30 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { FileUp, FilePlus, ImagePlus, BarChart2, Clock } from "lucide-react";
+import { FileUp, FilePlus, ImagePlus, BarChart2, Clock, Eye, Users, FileText } from "lucide-react";
 
 const SupplierDashboard = () => {
   const [stats, setStats] = useState({
     totalListings: 0,
     totalOffers: 0,
-    viewsToday: 0,
-    profileViews: 0,
+    profileViews: {
+      total: 0,
+      today: 0,
+      week: 0,
+      month: 0
+    },
+    listingViews: {
+      total: 0,
+      today: 0,
+      week: 0,
+      month: 0
+    },
+    offerViews: {
+      total: 0,
+      today: 0,
+      week: 0,
+      month: 0
+    }
   });
 
   useEffect(() => {
@@ -19,8 +35,24 @@ const SupplierDashboard = () => {
     const mockStats = {
       totalListings: 12,
       totalOffers: 8,
-      viewsToday: 45,
-      profileViews: 124,
+      profileViews: {
+        total: 124,
+        today: 8,
+        week: 42,
+        month: 124
+      },
+      listingViews: {
+        total: 356,
+        today: 15,
+        week: 85,
+        month: 356
+      },
+      offerViews: {
+        total: 219,
+        today: 12,
+        week: 68,
+        month: 219
+      }
     };
     setStats(mockStats);
   }, []);
@@ -30,7 +62,96 @@ const SupplierDashboard = () => {
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-6">Tableau de Bord Fournisseur</h1>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 mb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Statistiques des vues</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center">
+                      <Users className="mr-2 h-4 w-4 text-pharmacy-accent" />
+                      Vues de votre profil
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.profileViews.total}</div>
+                    <div className="grid grid-cols-3 gap-2 mt-2 text-xs">
+                      <div>
+                        <p className="text-gray-500">Aujourd'hui</p>
+                        <p className="font-semibold">{stats.profileViews.today}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Cette semaine</p>
+                        <p className="font-semibold">{stats.profileViews.week}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Ce mois</p>
+                        <p className="font-semibold">{stats.profileViews.month}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center">
+                      <FileText className="mr-2 h-4 w-4 text-pharmacy-accent" />
+                      Vues de vos listings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.listingViews.total}</div>
+                    <div className="grid grid-cols-3 gap-2 mt-2 text-xs">
+                      <div>
+                        <p className="text-gray-500">Aujourd'hui</p>
+                        <p className="font-semibold">{stats.listingViews.today}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Cette semaine</p>
+                        <p className="font-semibold">{stats.listingViews.week}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Ce mois</p>
+                        <p className="font-semibold">{stats.listingViews.month}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center">
+                      <ImagePlus className="mr-2 h-4 w-4 text-pharmacy-accent" />
+                      Vues de vos offres
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.offerViews.total}</div>
+                    <div className="grid grid-cols-3 gap-2 mt-2 text-xs">
+                      <div>
+                        <p className="text-gray-500">Aujourd'hui</p>
+                        <p className="font-semibold">{stats.offerViews.today}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Cette semaine</p>
+                        <p className="font-semibold">{stats.offerViews.week}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Ce mois</p>
+                        <p className="font-semibold">{stats.offerViews.month}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Listings Totaux</CardTitle>
@@ -56,22 +177,22 @@ const SupplierDashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Vues Aujourd'hui</CardTitle>
-              <BarChart2 className="h-4 w-4 text-muted-foreground" />
+              <Eye className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.viewsToday}</div>
+              <div className="text-2xl font-bold">{stats.profileViews.today + stats.listingViews.today + stats.offerViews.today}</div>
               <p className="text-xs text-muted-foreground mt-1">+15% par rapport à hier</p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Vues du Profil</CardTitle>
+              <CardTitle className="text-sm font-medium">Vues ce Mois</CardTitle>
               <BarChart2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.profileViews}</div>
-              <p className="text-xs text-muted-foreground mt-1">Ce mois-ci</p>
+              <div className="text-2xl font-bold">{stats.profileViews.month + stats.listingViews.month + stats.offerViews.month}</div>
+              <p className="text-xs text-muted-foreground mt-1">+23% par rapport au mois dernier</p>
             </CardContent>
           </Card>
         </div>

@@ -45,7 +45,7 @@ const PaymentForm = ({ amount, userRole, onSuccess }: PaymentFormProps) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -59,17 +59,44 @@ const PaymentForm = ({ amount, userRole, onSuccess }: PaymentFormProps) => {
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
+    // Simuler un appel API pour soumettre le paiement et notifier l'administrateur
+    try {
+      // Dans un cas réel, nous enverrions le fichier à l'API
+      // const formData = new FormData();
+      // formData.append('receipt', selectedReceipt);
+      
+      // Envoyer une notification à l'administrateur (API simulée)
+      // await fetch('/api/admin/notifications', {
+      //   method: 'POST',
+      //   body: JSON.stringify({
+      //     type: 'payment_receipt',
+      //     userRole: userRole,
+      //     paymentType: paymentType,
+      //   }),
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   }
+      // });
+      
+      // Simuler un délai
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       setLoading(false);
       toast({
         title: "Paiement traité avec succès",
         description: userRole === "supplier" 
           ? "Veuillez patienter de 24h à 48h pour l'activation de votre compte. Vous pourrez profiter de votre semaine gratuite dès l'activation."
-          : "Votre paiement a été traité avec succès.",
+          : "Votre paiement a été traité avec succès. Veuillez patienter pendant que l'administrateur valide votre inscription.",
       });
       onSuccess();
-    }, 1500);
+    } catch (error) {
+      setLoading(false);
+      toast({
+        title: "Erreur lors du traitement",
+        description: "Une erreur s'est produite lors du traitement de votre paiement. Veuillez réessayer.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -134,16 +161,15 @@ const PaymentForm = ({ amount, userRole, onSuccess }: PaymentFormProps) => {
                 </div>
               )}
               
-              {userRole === "supplier" && (
-                <Alert className="bg-amber-50 border-amber-200 text-amber-800">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>Information importante</AlertTitle>
-                  <AlertDescription>
-                    Après soumission de votre paiement, veuillez patienter de 24h à 48h pour l'activation de votre compte. 
-                    Vous pourrez profiter de votre semaine gratuite dès l'activation par un administrateur.
-                  </AlertDescription>
-                </Alert>
-              )}
+              <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Information importante</AlertTitle>
+                <AlertDescription>
+                  {userRole === "supplier" 
+                    ? "Après soumission de votre paiement, veuillez patienter de 24h à 48h pour l'activation de votre compte. Vous pourrez profiter de votre semaine gratuite dès l'activation par un administrateur."
+                    : "Après soumission de votre paiement, veuillez patienter pendant que l'administrateur vérifie et active votre compte."}
+                </AlertDescription>
+              </Alert>
             </CardContent>
             <CardFooter>
               <Button type="submit" className="w-full" disabled={loading}>

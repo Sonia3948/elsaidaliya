@@ -5,10 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetupAllRoutes configures all application routes
-func SetupAllRoutes(r *gin.Engine) {
-	SetupUserRoutes(r)
+// Setup initializes all routes
+func Setup(r *gin.Engine) {
 	SetupAuthRoutes(r)
+	SetupUserRoutes(r)
 	SetupListingRoutes(r)
 	SetupOfferRoutes(r)
+	SetupNotificationRoutes(r)
 }

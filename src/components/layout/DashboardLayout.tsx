@@ -1,3 +1,4 @@
+
 import { ReactNode, useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,9 @@ import {
   Search,
   Users,
   ShieldCheck,
-  File
+  File,
+  Bell,
+  MapPin
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +34,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import RegistrationNotice from "../notifications/RegistrationNotice";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -42,6 +47,8 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
   const location = useLocation();
   const { toast } = useToast();
   const [userName, setUserName] = useState("Utilisateur");
+  const [isActive, setIsActive] = useState(true); // État d'activation du compte
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -51,11 +58,19 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
       try {
         const user = JSON.parse(storedUser);
         setUserName(user.name || "Utilisateur");
+        
+        // Vérifier si le compte est actif (simulé)
+        setIsActive(user.isActive !== undefined ? user.isActive : true);
+        
+        // Simuler des notifications non lues
+        if (userRole === "admin") {
+          setUnreadNotifications(3); // Notifications de bons de versement en attente
+        }
       } catch (error) {
         console.error("Error parsing user data", error);
       }
     }
-  }, [navigate]);
+  }, [navigate, userRole]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -75,6 +90,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           { name: "Utilisateurs", href: "/admin/users", icon: Users },
           { name: "Fournisseurs", href: "/admin/suppliers", icon: ShieldCheck },
           { name: "Pharmaciens", href: "/admin/pharmacists", icon: User },
+          { name: "Paiements", href: "/admin/payments", icon: FileText, badge: unreadNotifications > 0 ? unreadNotifications : undefined },
         ];
       case "supplier":
         return [
@@ -86,9 +102,10 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
       case "pharmacist":
         return [
           { name: "Tableau de bord", href: "/pharmacist/dashboard", icon: LayoutDashboard },
-          { name: "Recherche Médicaments", href: "/pharmacist/medicines", icon: Search },
+          { name: "Rechercher Médicament", href: "/pharmacist/medicines", icon: Search },
+          { name: "Rechercher Fournisseur", href: "/pharmacist/suppliers", icon: Users },
+          { name: "Rechercher par Wilaya", href: "/pharmacist/wilaya-search", icon: MapPin },
           { name: "Offres Disponibles", href: "/pharmacist/offers", icon: Image },
-          { name: "Recherche Fournisseurs", href: "/pharmacist/suppliers", icon: Users },
           { name: "Profil", href: "/pharmacist/profile", icon: User },
         ];
       default:
@@ -117,6 +134,12 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
             </Link>
           </SidebarHeader>
           <SidebarContent>
+            {!isActive && (userRole === "pharmacist" || userRole === "supplier") && (
+              <div className="px-4 py-2">
+                <RegistrationNotice role={userRole as "pharmacist" | "supplier"} />
+              </div>
+            )}
+            
             <SidebarGroup>
               <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
               <SidebarGroupContent>
@@ -137,6 +160,11 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
                             isActiveLink(item.href) ? "text-pharmacy-dark" : ""
                           )} />
                           <span>{item.name}</span>
+                          {item.badge && (
+                            <Badge variant="destructive" className="ml-auto">
+                              {item.badge}
+                            </Badge>
+                          )}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

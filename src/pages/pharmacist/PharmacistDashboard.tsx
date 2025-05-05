@@ -1,80 +1,84 @@
-
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { 
-  Search, 
-  FileText, 
-  Package, 
-  Gift, 
-  Users, 
-  Clock, 
-  ArrowRight, 
-  Bell, 
-  Building 
-} from "lucide-react";
+import { Search, FileText, Package, Gift, Users, Clock, ArrowRight, Bell, Building } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import RegistrationNotice from "@/components/notifications/RegistrationNotice";
 import { notificationService } from "@/services/notification";
 import { offerService } from "@/services/offer";
 import { listingService } from "@/services/listing";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 const PharmacistDashboard = () => {
   // States
   const [isUserActive, setIsUserActive] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [notifications, setNotifications] = useState<any[]>([]);
-  
+
   // Get user stats
-  const { data: stats } = useQuery({
+  const {
+    data: stats
+  } = useQuery({
     queryKey: ["pharmacistStats"],
     queryFn: async () => {
       // In a real application, fetch from backend
       return {
         searchesThisMonth: 28,
         suppliersViewed: 15,
-        offersViewed: 22,
+        offersViewed: 22
       };
-    },
+    }
   });
-  
+
   // Get recent offers
-  const { data: recentOffers, isLoading: offersLoading } = useQuery({
+  const {
+    data: recentOffers,
+    isLoading: offersLoading
+  } = useQuery({
     queryKey: ["recentOffers"],
     queryFn: async () => {
-      const response = await offerService.getAllOffers({ limit: "3", sort: "createdAt" });
+      const response = await offerService.getAllOffers({
+        limit: "3",
+        sort: "createdAt"
+      });
       return response.offers || [];
-    },
+    }
   });
-  
+
   // Get popular listings
-  const { data: popularListings, isLoading: listingsLoading } = useQuery({
+  const {
+    data: popularListings,
+    isLoading: listingsLoading
+  } = useQuery({
     queryKey: ["popularListings"],
     queryFn: async () => {
-      const response = await listingService.getAllListings({ limit: "3", sort: "viewCount" });
+      const response = await listingService.getAllListings({
+        limit: "3",
+        sort: "viewCount"
+      });
       return response.listings || [];
-    },
+    }
   });
-  
+
   // Get user notifications
-  const { data: userNotifications, refetch: refetchNotifications } = useQuery({
+  const {
+    data: userNotifications,
+    refetch: refetchNotifications
+  } = useQuery({
     queryKey: ["userNotifications"],
     queryFn: async () => {
       const response = await notificationService.getUserNotifications();
       return response.notifications || [];
-    },
+    }
   });
-  
   useEffect(() => {
     if (userNotifications) {
       setNotifications(userNotifications);
     }
   }, [userNotifications]);
-  
+
   // Check user status
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -87,60 +91,43 @@ const PharmacistDashboard = () => {
       }
     }
   }, []);
-  
+
   // Mark notification as read
   const markAsRead = async (id: string) => {
     try {
       await notificationService.markAsRead(id);
-      setNotifications(notifications.map(notif => 
-        notif.id === id ? { ...notif, read: true } : notif
-      ));
+      setNotifications(notifications.map(notif => notif.id === id ? {
+        ...notif,
+        read: true
+      } : notif));
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
     }
   };
-  
+
   // Count unread notifications
   const unreadCount = notifications.filter(notif => !notif.read).length;
-
-  return (
-    <DashboardLayout userRole="pharmacist">
+  return <DashboardLayout userRole="pharmacist">
       <div className="p-6">
-        {!isUserActive && (
-          <div className="mb-6">
+        {!isUserActive && <div className="mb-6">
             <RegistrationNotice role="pharmacist" />
-          </div>
-        )}
+          </div>}
         
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Tableau de Bord Pharmacien</h1>
           <div className="relative">
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2" 
-              onClick={() => setActiveTab("notifications")}
-            >
+            <Button variant="outline" className="flex items-center gap-2" onClick={() => setActiveTab("notifications")}>
               <Bell size={18} />
               Notifications
-              {unreadCount > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="h-5 w-5 text-xs p-0 flex items-center justify-center rounded-full"
-                >
+              {unreadCount > 0 && <Badge variant="destructive" className="h-5 w-5 text-xs p-0 flex items-center justify-center rounded-full">
                   {unreadCount}
-                </Badge>
-              )}
+                </Badge>}
             </Button>
           </div>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-4 w-full">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="listings">📦 Listings</TabsTrigger>
-            <TabsTrigger value="offers">🎁 Offres</TabsTrigger>
-            <TabsTrigger value="suppliers">🏪 Fournisseurs</TabsTrigger>
-          </TabsList>
+          
           
           <TabsContent value="dashboard" className="space-y-6">
             {/* Dashboard Statistics Cards */}
@@ -270,22 +257,10 @@ const PharmacistDashboard = () => {
                 </Button>
               </div>
               
-              {offersLoading ? (
-                <p className="text-center my-4">Chargement des offres...</p>
-              ) : recentOffers && recentOffers.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {recentOffers.map((offer: any) => (
-                    <Card key={offer.id} className="overflow-hidden">
+              {offersLoading ? <p className="text-center my-4">Chargement des offres...</p> : recentOffers && recentOffers.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {recentOffers.map((offer: any) => <Card key={offer.id} className="overflow-hidden">
                       <div className="h-32 bg-gray-100 flex items-center justify-center">
-                        {offer.imageUrl ? (
-                          <img 
-                            src={offer.imageUrl} 
-                            alt={offer.title} 
-                            className="h-full w-full object-cover" 
-                          />
-                        ) : (
-                          <Gift className="h-12 w-12 text-gray-300" />
-                        )}
+                        {offer.imageUrl ? <img src={offer.imageUrl} alt={offer.title} className="h-full w-full object-cover" /> : <Gift className="h-12 w-12 text-gray-300" />}
                       </div>
                       <CardContent className="p-4">
                         <h3 className="font-medium">{offer.title}</h3>
@@ -301,12 +276,8 @@ const PharmacistDashboard = () => {
                           </Button>
                         </div>
                       </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center my-4">Aucune offre disponible</p>
-              )}
+                    </Card>)}
+                </div> : <p className="text-center my-4">Aucune offre disponible</p>}
             </div>
             
             {/* Popular Listings */}
@@ -320,12 +291,8 @@ const PharmacistDashboard = () => {
                 </Button>
               </div>
               
-              {listingsLoading ? (
-                <p className="text-center my-4">Chargement des listings...</p>
-              ) : popularListings && popularListings.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {popularListings.map((listing: any) => (
-                    <Card key={listing.id} className="overflow-hidden">
+              {listingsLoading ? <p className="text-center my-4">Chargement des listings...</p> : popularListings && popularListings.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {popularListings.map((listing: any) => <Card key={listing.id} className="overflow-hidden">
                       <CardContent className="p-4">
                         <h3 className="font-medium">{listing.title}</h3>
                         <div className="text-sm text-gray-600 mt-2">
@@ -338,12 +305,7 @@ const PharmacistDashboard = () => {
                         </div>
                         <div className="flex justify-between items-center mt-3">
                           <Button variant="outline" size="sm" asChild>
-                            <a 
-                              href={listing.pdfUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="flex items-center"
-                            >
+                            <a href={listing.pdfUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
                               <FileText className="mr-1 h-4 w-4" /> Voir PDF
                             </a>
                           </Button>
@@ -354,12 +316,8 @@ const PharmacistDashboard = () => {
                           </Button>
                         </div>
                       </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center my-4">Aucun listing disponible</p>
-              )}
+                    </Card>)}
+                </div> : <p className="text-center my-4">Aucun listing disponible</p>}
             </div>
           </TabsContent>
           
@@ -441,28 +399,16 @@ const PharmacistDashboard = () => {
                 <CardTitle>Notifications</CardTitle>
               </CardHeader>
               <CardContent>
-                {notifications.length > 0 ? (
-                  <div className="space-y-4">
-                    {notifications.map((notification) => (
-                      <div 
-                        key={notification.id}
-                        className={`p-4 border rounded-lg ${notification.read ? "bg-white" : "bg-green-50"}`}
-                        onClick={() => markAsRead(notification.id)}
-                      >
+                {notifications.length > 0 ? <div className="space-y-4">
+                    {notifications.map(notification => <div key={notification.id} className={`p-4 border rounded-lg ${notification.read ? "bg-white" : "bg-green-50"}`} onClick={() => markAsRead(notification.id)}>
                         <div className="flex items-start">
-                          {notification.type === "offer" ? (
-                            <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0">
+                          {notification.type === "offer" ? <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0">
                               <Gift size={20} />
-                            </div>
-                          ) : notification.type === "listing" ? (
-                            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                            </div> : notification.type === "listing" ? <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
                               <Package size={20} />
-                            </div>
-                          ) : (
-                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
+                            </div> : <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
                               <Bell size={20} />
-                            </div>
-                          )}
+                            </div>}
                           
                           <div className="ml-3 flex-grow">
                             <div className="flex justify-between items-start">
@@ -475,11 +421,9 @@ const PharmacistDashboard = () => {
                               {notification.description}
                             </p>
                             
-                            {notification.fromName && (
-                              <p className="text-sm text-gray-500 mt-1">
+                            {notification.fromName && <p className="text-sm text-gray-500 mt-1">
                                 De: {notification.fromName}
-                              </p>
-                            )}
+                              </p>}
                             
                             <div className="mt-2">
                               <Button size="sm" variant="link" className="p-0 h-auto">
@@ -488,41 +432,28 @@ const PharmacistDashboard = () => {
                             </div>
                           </div>
                           
-                          {!notification.read && (
-                            <Badge variant="destructive" className="ml-2 h-2 w-2 rounded-full p-0" />
-                          )}
+                          {!notification.read && <Badge variant="destructive" className="ml-2 h-2 w-2 rounded-full p-0" />}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
+                      </div>)}
+                  </div> : <div className="text-center py-8">
                     <Bell className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                     <p>Vous n'avez aucune notification pour le moment.</p>
-                  </div>
-                )}
+                  </div>}
                 
-                {notifications.length > 0 && (
-                  <div className="mt-4 text-center">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        // Mark all as read
-                        notifications.forEach(n => !n.read && markAsRead(n.id));
-                        refetchNotifications();
-                      }}
-                    >
+                {notifications.length > 0 && <div className="mt-4 text-center">
+                    <Button variant="outline" onClick={() => {
+                  // Mark all as read
+                  notifications.forEach(n => !n.read && markAsRead(n.id));
+                  refetchNotifications();
+                }}>
                       Marquer toutes comme lues
                     </Button>
-                  </div>
-                )}
+                  </div>}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default PharmacistDashboard;

@@ -62,9 +62,12 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
         // Vérifier si le compte est actif (simulé)
         setIsActive(user.isActive !== undefined ? user.isActive : true);
         
-        // Simuler des notifications non lues
+        // Simuler des notifications non lues - only for admin and suppliers
         if (userRole === "admin") {
           setUnreadNotifications(3); // Notifications de bons de versement en attente
+        } else if (userRole === "supplier") {
+          // Suppliers might have payment notifications
+          setUnreadNotifications(1);
         }
       } catch (error) {
         console.error("Error parsing user data", error);
@@ -98,6 +101,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           { name: "Listings", href: "/supplier/listings", icon: FileText },
           { name: "Offres", href: "/supplier/offers", icon: Image },
           { name: "Profil", href: "/supplier/profile", icon: User },
+          { name: "Abonnement", href: "/supplier/subscription", icon: FileCheck },
         ];
       case "pharmacist":
         return [
@@ -133,9 +137,9 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
             </Link>
           </SidebarHeader>
           <SidebarContent>
-            {!isActive && (userRole === "pharmacist" || userRole === "supplier") && (
+            {!isActive && (userRole === "supplier") && (
               <div className="px-4 py-2">
-                <RegistrationNotice role={userRole as "pharmacist" | "supplier"} />
+                <RegistrationNotice role="supplier" />
               </div>
             )}
             

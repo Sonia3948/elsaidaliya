@@ -3,6 +3,7 @@ import { Trophy, Medal, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const subscriptionPlans = [
   {
@@ -54,6 +55,46 @@ const subscriptionPlans = [
 ];
 
 const SubscriptionPlans = () => {
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check user role from local storage
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setUserRole(user.role);
+      } catch (error) {
+        console.error("Error parsing user data", error);
+      }
+    }
+  }, []);
+
+  // If user is a pharmacist, don't show subscription plans
+  if (userRole === "pharmacist") {
+    return (
+      <div className="py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+              Bienvenue sur Elsaidaliya
+            </h2>
+            <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
+              En tant que pharmacien, votre inscription est gratuite ! Aucun abonnement n'est nécessaire.
+            </p>
+            <div className="mt-8">
+              <Button asChild size="lg">
+                <Link to="/pharmacist/dashboard">
+                  Accéder à votre tableau de bord
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,7 +103,7 @@ const SubscriptionPlans = () => {
             Choisissez votre plan d'abonnement
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
-            Solutions adaptées pour tous les professionnels de la santé
+            Solutions adaptées pour les fournisseurs de produits pharmaceutiques
           </p>
         </div>
 

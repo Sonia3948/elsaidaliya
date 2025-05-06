@@ -7,14 +7,57 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface DocumentsViewerProps {
-  userId: number;
+  userId?: number;
   commerceRegisterUrl?: string;
   bankReceiptUrl?: string;
-  userName: string;
+  userName?: string;
+  isOpen?: boolean;
+  onClose?: () => void;
+  documentUrl?: string;
+  title?: string;
+  info?: string;
 }
 
-const DocumentsViewer = ({ userId, commerceRegisterUrl, bankReceiptUrl, userName }: DocumentsViewerProps) => {
+const DocumentsViewer = ({ 
+  userId, 
+  commerceRegisterUrl, 
+  bankReceiptUrl, 
+  userName = "", 
+  isOpen,
+  onClose,
+  documentUrl,
+  title,
+  info
+}: DocumentsViewerProps) => {
   const [activeTab, setActiveTab] = useState("register");
+  
+  // If used as a modal and isOpen is false, don't render
+  if (isOpen === false) return null;
+  
+  // Determine if we're viewing a single document or using tabs
+  const isSingleDocument = documentUrl !== undefined;
+  
+  if (isSingleDocument && isOpen) {
+    return (
+      <Dialog open={isOpen} onOpenChange={() => onClose && onClose()}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            <p className="text-sm text-gray-500 mb-4">{info}</p>
+            <div className="border rounded-md overflow-hidden">
+              <img 
+                src={documentUrl} 
+                alt={title} 
+                className="w-full object-contain" 
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
   
   return (
     <Card className="w-full">

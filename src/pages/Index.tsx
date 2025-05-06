@@ -1,10 +1,9 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
 import UsersCarousel from "@/components/home/UsersCarousel";
 import OffersSection from "@/components/offers/OffersSection";
-import { Pill, Medicine, Store } from "lucide-react";
+import { Pill, Package, Store } from "lucide-react";
 
 // Featured suppliers (gold subscription)
 const featuredSuppliers = [{

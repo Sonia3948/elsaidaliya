@@ -4,16 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileCheck, ExternalLink, Eye } from "lucide-react";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface PaymentReceiptNotificationProps {
-  id: string;
-  userName: string;
-  userRole: "pharmacist" | "supplier";
-  dateSubmitted: string;
-  receiptUrl: string;
-  onView: (id: string) => void;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
+  id?: string;
+  userName?: string;
+  userRole?: "pharmacist" | "supplier";
+  dateSubmitted?: string;
+  receiptUrl?: string;
+  onView?: (id: string) => void;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
+  
+  // New props
+  isOpen?: boolean;
+  onClose?: () => void;
+  supplier?: any;
 }
 
 const PaymentReceiptNotification = ({ 
@@ -24,22 +30,67 @@ const PaymentReceiptNotification = ({
   receiptUrl, 
   onView, 
   onApprove, 
-  onReject 
+  onReject,
+  isOpen,
+  onClose,
+  supplier
 }: PaymentReceiptNotificationProps) => {
   const [loading, setLoading] = useState(false);
 
-  const handleApprove = async () => {
-    setLoading(true);
-    await onApprove(id);
-    setLoading(false);
-  };
+  // If using as a dialog and supplier is provided
+  if (isOpen && supplier) {
+    return (
+      <Dialog open={isOpen} onOpenChange={() => onClose && onClose()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Bon de versement - {supplier.businessName}</DialogTitle>
+          </DialogHeader>
+          
+          <div className="mt-4">
+            <div className="border rounded-md overflow-hidden mb-4">
+              <img 
+                src="/placeholder.svg" 
+                alt="Bon de versement" 
+                className="w-full object-contain h-[200px]"
+              />
+            </div>
+            
+            <div className="space-y-2 mb-4">
+              <p className="text-sm"><span className="font-medium">Fournisseur:</span> {supplier.businessName}</p>
+              <p className="text-sm"><span className="font-medium">Date:</span> {new Date().toLocaleDateString("fr-FR")}</p>
+              <p className="text-sm"><span className="font-medium">Abonnement:</span> {supplier.subscription || "Non spécifié"}</p>
+            </div>
+            
+            <div className="flex justify-between gap-4 mt-6">
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  setLoading(true);
+                  if (onReject) onReject(supplier.id);
+                }} 
+                disabled={loading}
+              >
+                Rejeter
+              </Button>
+              <Button 
+                variant="default" 
+                className="bg-pharmacy-accent hover:bg-pharmacy-dark" 
+                onClick={() => {
+                  setLoading(true);
+                  if (onApprove) onApprove(supplier.id);
+                }}
+                disabled={loading}
+              >
+                {loading ? "Traitement..." : "Approuver"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
-  const handleReject = async () => {
-    setLoading(true);
-    await onReject(id);
-    setLoading(false);
-  };
-
+  // Original card implementation for dashboard display
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -64,7 +115,7 @@ const PaymentReceiptNotification = ({
           <span className="font-medium">Type:</span> {userRole === "supplier" ? "Fournisseur" : "Pharmacien"}
         </p>
         
-        <Button variant="outline" size="sm" className="w-full" onClick={() => onView(id)}>
+        <Button variant="outline" size="sm" className="w-full" onClick={() => id && onView && onView(id)}>
           <Eye className="mr-1 h-4 w-4" /> Voir le reçu
         </Button>
       </CardContent>
@@ -72,7 +123,7 @@ const PaymentReceiptNotification = ({
         <Button 
           variant="destructive" 
           size="sm" 
-          onClick={handleReject} 
+          onClick={() => id && onReject && onReject(id)} 
           disabled={loading}
         >
           Rejeter
@@ -81,7 +132,7 @@ const PaymentReceiptNotification = ({
           variant="default" 
           className="bg-pharmacy-accent hover:bg-pharmacy-dark" 
           size="sm" 
-          onClick={handleApprove}
+          onClick={() => id && onApprove && onApprove(id)}
           disabled={loading}
         >
           {loading ? "Traitement..." : "Approuver"}

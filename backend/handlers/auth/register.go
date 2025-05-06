@@ -83,14 +83,18 @@ func RegisterUser(c *gin.Context) {
 		UpdatedAt:   time.Now(),
 	}
 
-	// In a real production environment, you would save this notification to the database
-	// and retrieve the admin ID from somewhere
+	// Save notification to database
+	_, err = notificationCollection.InsertOne(ctx, adminNotification)
+	if err != nil {
+		// Log error but don't fail the registration
+		c.Logger().Error("Error creating admin notification:", err)
+	}
 
 	// Don't return the password
 	newUser.Password = ""
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "Utilisateur enregistré avec succès. Votre compte est en attente d'activation.",
+		"message": "Utilisateur enregistré avec succès. Votre compte est en attente d'activation par un administrateur.",
 		"user": newUser,
 	})
 }

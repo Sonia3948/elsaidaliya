@@ -1,4 +1,3 @@
-
 package handlers
 
 import (
@@ -68,15 +67,19 @@ func GetFeaturedSuppliers(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Define options to exclude password field
+	// Define options to exclude sensitive fields
 	findOptions := options.Find()
-	findOptions.SetProjection(bson.M{"password": 0})
+	findOptions.SetProjection(bson.M{
+		"password": 0,
+		"subscription": 0,  // Hide subscription info
+		"subExpiry": 0,     // Hide subscription expiry
+	})
 
 	// Filter for active suppliers with gold subscription
 	filter := bson.M{
 		"role":         "fournisseur",
 		"isActive":     true,
-		"subscription": "or",
+		"subscription": "or",  // Only fetch gold subscription suppliers
 	}
 
 	cursor, err := userCollection.Find(ctx, filter, findOptions)

@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
@@ -5,26 +6,6 @@ import UsersCarousel from "@/components/home/UsersCarousel";
 import OffersSection from "@/components/offers/OffersSection";
 import { Pill, Package, Store } from "lucide-react";
 
-// Featured suppliers (gold subscription)
-const featuredSuppliers = [{
-  id: 1,
-  name: "MediStock Algérie",
-  wilaya: "Alger",
-  description: "Distributeur leader de produits pharmaceutiques en Algérie",
-  imageUrl: "/placeholder.svg"
-}, {
-  id: 2,
-  name: "PharmaSupply",
-  wilaya: "Oran",
-  description: "Plus de 2000 références de médicaments disponibles",
-  imageUrl: "/placeholder.svg"
-}, {
-  id: 3,
-  name: "AlgéPharm",
-  wilaya: "Constantine",
-  description: "Spécialiste en produits dermatologiques et cosmétiques",
-  imageUrl: "/placeholder.svg"
-}];
 const Index = () => {
   return <Layout>
       <section className="bg-gradient-to-b from-pharmacy-light to-white">
@@ -50,9 +31,6 @@ const Index = () => {
 
       {/* Users Carousel - replacing "Comment ça fonctionne" section */}
       <UsersCarousel />
-
-      {/* Featured Suppliers Section (replacing "Nos Utilisateurs") */}
-      
 
       {/* Updated OffersSection will be rendered here */}
       <OffersSection />
@@ -149,4 +127,5 @@ const Index = () => {
       </section>
     </Layout>;
 };
+
 export default Index;

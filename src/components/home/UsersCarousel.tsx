@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { User, Store, MapPin, Award } from "lucide-react";
+import { Store, MapPin } from "lucide-react";
+
 type FeaturedSupplier = {
   id: string;
   name: string;
@@ -43,12 +44,12 @@ const dummyFeaturedSuppliers = [{
   wilaya: "Tlemcen",
   description: "Expert en compléments alimentaires et vitamines"
 }];
+
 const UsersCarousel = () => {
   const [featuredSuppliers, setFeaturedSuppliers] = useState<FeaturedSupplier[]>(dummyFeaturedSuppliers);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex(prevIndex => (prevIndex + 1) % featuredSuppliers.length);
@@ -58,15 +59,14 @@ const UsersCarousel = () => {
 
   // This would normally fetch from a backend API
   useEffect(() => {
-    // In a real app, we'd fetch featured suppliers with gold subscription from the backend
-    // For now, we'll use our dummy data
+    // In a real app, we'd fetch featured suppliers from the backend
     const fetchFeaturedSuppliers = async () => {
       try {
         // Simulating API call
         // In a real implementation, we would call:
-        // const response = await fetch('http://localhost:8080/api/users?subscription=or');
+        // const response = await fetch('http://localhost:8080/api/users/featured');
         // const data = await response.json();
-        // setFeaturedSuppliers(data.users);
+        // setFeaturedSuppliers(data.suppliers);
 
         setFeaturedSuppliers(dummyFeaturedSuppliers);
       } catch (error) {
@@ -80,6 +80,7 @@ const UsersCarousel = () => {
     };
     fetchFeaturedSuppliers();
   }, [toast]);
+
   const visibleSuppliers = () => {
     const result = [];
     for (let i = 0; i < 3; i++) {
@@ -95,7 +96,7 @@ const UsersCarousel = () => {
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold mb-4 text-pharmacy-dark">Nos Fournisseurs Vedettes</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Découvrez nos fournisseurs premium avec abonnement Or qui proposent une large gamme de produits pharmaceutiques.
+            Découvrez nos fournisseurs premium qui proposent une large gamme de produits pharmaceutiques.
           </p>
         </div>
         
@@ -110,7 +111,6 @@ const UsersCarousel = () => {
                     </div>
                     <div className="ml-3">
                       <h3 className="font-semibold text-lg text-gray-900">{supplier.name}</h3>
-                      
                     </div>
                   </div>
                 </div>
@@ -131,4 +131,5 @@ const UsersCarousel = () => {
       </div>
     </section>;
 };
+
 export default UsersCarousel;

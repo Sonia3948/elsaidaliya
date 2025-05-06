@@ -12,9 +12,7 @@ const RegistrationNotice = ({ role }: RegistrationNoticeProps) => {
       <AlertCircle className="h-5 w-5 text-amber-600" />
       <AlertTitle className="text-amber-800 font-medium">Votre compte est en attente de validation</AlertTitle>
       <AlertDescription className="text-amber-700">
-        {role === "pharmacien" 
-          ? "Veuillez patienter pendant que l'administrateur vérifie votre inscription. Vous recevrez une notification dès que votre compte sera activé."
-          : "Après validation de votre paiement, veuillez patienter 24h à 48h pour l'activation de votre compte par un administrateur. Vous recevrez une notification dès que votre compte sera activé."}
+        Veuillez patienter pendant que l'administrateur vérifie votre inscription. Vous recevrez une notification dès que votre compte sera activé.
       </AlertDescription>
     </Alert>
   );

@@ -156,9 +156,7 @@ const RegisterPage = () => {
       // In a real app, this would call an API to register the user
       toast({
         title: "Inscription réussie",
-        description: `Votre compte a été créé. ${formData.role === "pharmacien" ? 
-          "Veuillez patienter pendant la vérification de votre compte par un administrateur." : 
-          "Veuillez effectuer le paiement de votre abonnement pour compléter votre inscription."}`
+        description: "Votre compte a été créé. Veuillez patienter pendant la vérification de votre compte par un administrateur."
       });
       
       // Store information about the registration in localStorage for later use
@@ -358,11 +356,7 @@ const RegisterPage = () => {
               
               <div className="bg-pharmacy-light p-4 rounded-md text-sm text-pharmacy-dark mb-4">
                 <p className="font-medium mb-2">Information importante:</p>
-                {formData.role === "pharmacien" ? (
-                  <p>Après inscription, votre compte sera examiné par un administrateur avant d'être activé. Vous recevrez une notification dès que votre compte sera validé.</p>
-                ) : (
-                  <p>Après inscription, vous devrez sélectionner un abonnement et effectuer un paiement pour activer votre compte. Un administrateur validera votre compte sous 24h à 48h après réception du paiement.</p>
-                )}
+                <p>Après inscription, votre compte sera examiné par un administrateur avant d'être activé. Vous recevrez une notification dès que votre compte sera validé.</p>
               </div>
               
               <Button type="submit" disabled={isLoading} className="w-full bg-pharmacy-dark hover:bg-pharmacy text-white font-normal rounded-xl">
@@ -374,4 +368,5 @@ const RegisterPage = () => {
       </div>
     </Layout>;
 };
+
 export default RegisterPage;

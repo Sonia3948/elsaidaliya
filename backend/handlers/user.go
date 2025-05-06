@@ -98,6 +98,34 @@ func GetFeaturedSuppliers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"suppliers": suppliers})
 }
 
+// GetPendingUsers fetches users pending approval
+func GetPendingUsers(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Find users where isActive is false (pending approval)
+	filter := bson.M{"isActive": false}
+	
+	// Define options to exclude password field
+	findOptions := options.Find()
+	findOptions.SetProjection(bson.M{"password": 0})
+	
+	cursor, err := userCollection.Find(ctx, filter, findOptions)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération des utilisateurs en attente"})
+		return
+	}
+	defer cursor.Close(ctx)
+
+	var pendingUsers []models.User
+	if err = cursor.All(ctx, &pendingUsers); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors du traitement des utilisateurs en attente"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"users": pendingUsers})
+}
+
 // GetUserByID fetches a single user by ID
 func GetUserByID(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

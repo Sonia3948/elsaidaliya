@@ -18,6 +18,16 @@ export const userService = {
     }
   },
   
+  // Récupérer les utilisateurs en attente d'approbation
+  getPendingUsers: async () => {
+    try {
+      const response = await fetchWithAuth(`${API_URL}/users/pending`);
+      return await handleResponse(response);
+    } catch (error) {
+      return handleFetchError(error);
+    }
+  },
+  
   // Récupérer un utilisateur par ID
   getUserById: async (id: string) => {
     try {

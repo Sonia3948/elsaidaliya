@@ -2,15 +2,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Users, 
   ShoppingBag, 
   Activity, 
   AlertCircle, 
-  CheckCircle, 
-  XCircle,
   UserCheck, 
   TrendingUp,
   Calendar 
@@ -34,6 +32,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import PendingApprovalsList from "@/components/admin/PendingApprovalsList";
+import { userService } from "@/services/user";
+import { toast } from "sonner";
 
 // Sample data for charts
 const userGrowthData = [
@@ -64,12 +65,6 @@ const recentActivities = [
   { id: 4, type: "subscription", user: "AlgéMed", time: "Il y a 1 jour", subscription: "argent", status: "pending" },
 ];
 
-const pendingApprovals = [
-  { id: 1, name: "Pharmacie du Sud", type: "pharmacist", date: "2025-05-01" },
-  { id: 2, name: "AlgéMed", type: "supplier", date: "2025-05-01" },
-  { id: 3, name: "Pharma Express", type: "pharmacist", date: "2025-04-30" },
-];
-
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -86,24 +81,58 @@ const AdminDashboard = () => {
   });
 
   const [timeframe, setTimeframe] = useState("year");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching data
-    const mockStats = {
-      totalUsers: 152,
-      totalPharmacists: 98,
-      totalSuppliers: 54,
-      activeUsers: 140,
-      pendingUsers: 12,
-      newRegistrations: 12,
-      totalSubscriptions: {
-        bronze: 65,
-        argent: 25,
-        or: 10
-      }
-    };
-    setStats(mockStats);
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch all users
+      const allUsersResponse = await userService.getAllUsers();
+      const allUsers = allUsersResponse.users || [];
+      
+      // Fetch pending users
+      const pendingUsersResponse = await userService.getPendingUsers();
+      const pendingUsers = pendingUsersResponse.users || [];
+      
+      // Calculate stats
+      const totalUsers = allUsers.length;
+      const totalPharmacists = allUsers.filter(user => user.role === "pharmacien").length;
+      const totalSuppliers = allUsers.filter(user => user.role === "fournisseur").length;
+      const activeUsers = allUsers.filter(user => user.isActive).length;
+      
+      // Count subscriptions
+      const bronze = allUsers.filter(user => user.subscription === "bronze").length;
+      const argent = allUsers.filter(user => user.subscription === "argent").length;
+      const or = allUsers.filter(user => user.subscription === "or").length;
+      
+      // Get new registrations (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const newRegistrations = allUsers.filter(
+        user => new Date(user.createdAt) > thirtyDaysAgo
+      ).length;
+      
+      setStats({
+        totalUsers,
+        totalPharmacists,
+        totalSuppliers,
+        activeUsers,
+        pendingUsers: pendingUsers.length,
+        newRegistrations,
+        totalSubscriptions: { bronze, argent, or }
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      toast.error("Erreur lors de la récupération des statistiques");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <DashboardLayout userRole="admin">
@@ -142,7 +171,7 @@ const AdminDashboard = () => {
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalPharmacists}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {Math.round((stats.totalPharmacists / stats.totalUsers) * 100)}% des utilisateurs
+                {stats.totalUsers > 0 ? Math.round((stats.totalPharmacists / stats.totalUsers) * 100) : 0}% des utilisateurs
               </p>
             </CardContent>
           </Card>
@@ -155,7 +184,7 @@ const AdminDashboard = () => {
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalSuppliers}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {Math.round((stats.totalSuppliers / stats.totalUsers) * 100)}% des utilisateurs
+                {stats.totalUsers > 0 ? Math.round((stats.totalSuppliers / stats.totalUsers) * 100) : 0}% des utilisateurs
               </p>
             </CardContent>
           </Card>
@@ -267,49 +296,9 @@ const AdminDashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Approbations en Attente</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {pendingApprovals.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-4">
-                    Aucune approbation en attente
-                  </p>
-                ) : (
-                  pendingApprovals.map((approval) => (
-                    <div key={approval.id} className="flex items-center justify-between border-b pb-2">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
-                          {approval.type === 'pharmacist' ? 'P' : 'F'}
-                        </div>
-                        <div>
-                          <p className="font-medium">{approval.name}</p>
-                          <p className="text-sm text-gray-500">
-                            {approval.type === 'pharmacist' ? 'Pharmacien' : 'Fournisseur'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                        </Button>
-                        <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                          <XCircle className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full" asChild>
-                <Link to="/admin/users">Voir tous</Link>
-              </Button>
-            </CardFooter>
-          </Card>
+          <div className="md:col-span-1">
+            <PendingApprovalsList />
+          </div>
 
           <Card>
             <CardHeader>
@@ -345,11 +334,6 @@ const AdminDashboard = () => {
                 ))}
               </div>
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full" asChild>
-                <Link to="/admin/activity">Voir toutes les activités</Link>
-              </Button>
-            </CardFooter>
           </Card>
         </div>
       </div>

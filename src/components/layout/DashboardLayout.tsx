@@ -1,4 +1,3 @@
-
 import { ReactNode, useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -130,16 +129,17 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           <SidebarHeader>
             <Link to="/" className="flex items-center pl-2">
               <img 
-                src="/lovable-uploads/416db742-a6a0-481e-8bf5-91b997537eae.png" 
+                src="/lovable-uploads/55d7e20f-5825-427e-b3c2-7d1ad83d0df5.png" 
                 alt="Elsaidaliya Logo" 
                 className="h-8 w-auto" 
               />
+              <span className="ml-2 text-lg font-bold text-pharmacy-dark">Elsaidaliya</span>
             </Link>
           </SidebarHeader>
           <SidebarContent>
-            {!isActive && (userRole === "supplier") && (
+            {!isActive && (
               <div className="px-4 py-2">
-                <RegistrationNotice role="supplier" />
+                <RegistrationNotice role={userRole === "pharmacist" ? "pharmacien" : "fournisseur"} />
               </div>
             )}
             
@@ -199,15 +199,23 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
               </Button>
             </div>
             <div className="px-4 py-2 flex justify-between">
-              <Link to="/" className="text-gray-500 hover:text-medical">
+              <Link to="/" className="text-gray-500 hover:text-pharmacy-dark">
                 <Home size={20} />
               </Link>
               <Link to={`/${userRole}/profile`} className={cn(
-                "text-gray-500 hover:text-medical",
+                "text-gray-500 hover:text-pharmacy-dark",
                 isActiveLink(`/${userRole}/profile`) ? "text-pharmacy-dark" : ""
               )}>
                 <Settings size={20} />
               </Link>
+              {unreadNotifications > 0 && (
+                <Link to={`/${userRole}/notifications`} className="text-gray-500 hover:text-pharmacy-dark relative">
+                  <Bell size={20} />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {unreadNotifications}
+                  </span>
+                </Link>
+              )}
             </div>
           </SidebarFooter>
         </Sidebar>
@@ -218,12 +226,13 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           <div className="bg-white shadow-sm z-10 md:hidden">
             <div className="h-16 flex items-center px-4">
               <SidebarTrigger />
-              <div className="ml-4">
+              <div className="ml-4 flex items-center">
                 <img 
-                  src="/lovable-uploads/416db742-a6a0-481e-8bf5-91b997537eae.png" 
+                  src="/lovable-uploads/55d7e20f-5825-427e-b3c2-7d1ad83d0df5.png" 
                   alt="Elsaidaliya Logo" 
                   className="h-8 w-auto" 
                 />
+                <span className="ml-2 text-lg font-bold text-pharmacy-dark">Elsaidaliya</span>
               </div>
             </div>
           </div>

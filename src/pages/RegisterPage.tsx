@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -157,8 +156,18 @@ const RegisterPage = () => {
       // In a real app, this would call an API to register the user
       toast({
         title: "Inscription réussie",
-        description: "Votre compte a été créé. Vous pouvez maintenant vous connecter."
+        description: `Votre compte a été créé. ${formData.role === "pharmacien" ? 
+          "Veuillez patienter pendant la vérification de votre compte par un administrateur." : 
+          "Veuillez effectuer le paiement de votre abonnement pour compléter votre inscription."}`
       });
+      
+      // Store information about the registration in localStorage for later use
+      localStorage.setItem("pendingRegistration", JSON.stringify({
+        role: formData.role,
+        email: formData.email,
+        timestamp: new Date().toISOString()
+      }));
+      
       navigate("/login");
       setIsLoading(false);
     }, 1500);
@@ -173,7 +182,7 @@ const RegisterPage = () => {
             </h2>
             <p className="mt-2 text-gray-600">
               Déjà inscrit ?{" "}
-              <Link to="/login" className="text-medical hover:text-medical-dark font-medium">
+              <Link to="/login" className="text-pharmacy-dark hover:text-pharmacy font-medium">
                 Connectez-vous
               </Link>
             </p>
@@ -332,22 +341,31 @@ const RegisterPage = () => {
                   checked={formData.acceptTerms}
                   onChange={handleChange}
                   required 
-                  className={`h-4 w-4 text-medical focus:ring-medical-dark border-gray-300 rounded ${errors.acceptTerms ? 'border-red-500' : ''}`} 
+                  className={`h-4 w-4 text-pharmacy-dark focus:ring-pharmacy-dark border-gray-300 rounded ${errors.acceptTerms ? 'border-red-500' : ''}`} 
                 />
                 <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-900">
                   J'accepte les{" "}
-                  <Link to="/terms" className="text-medical hover:text-medical-dark">
+                  <Link to="/terms" className="text-pharmacy-dark hover:text-pharmacy">
                     conditions d'utilisation
                   </Link>{" "}
                   et la{" "}
-                  <Link to="/privacy-policy" className="text-medical hover:text-medical-dark">
+                  <Link to="/privacy-policy" className="text-pharmacy-dark hover:text-pharmacy">
                     politique de confidentialité
                   </Link>
                 </label>
               </div>
               {errors.acceptTerms && <p className="text-sm text-red-500">{errors.acceptTerms}</p>}
               
-              <Button type="submit" disabled={isLoading} className="w-full bg-medical hover:bg-medical-dark text-white font-normal bg-pharmacy-accent rounded-xl">
+              <div className="bg-pharmacy-light p-4 rounded-md text-sm text-pharmacy-dark mb-4">
+                <p className="font-medium mb-2">Information importante:</p>
+                {formData.role === "pharmacien" ? (
+                  <p>Après inscription, votre compte sera examiné par un administrateur avant d'être activé. Vous recevrez une notification dès que votre compte sera validé.</p>
+                ) : (
+                  <p>Après inscription, vous devrez sélectionner un abonnement et effectuer un paiement pour activer votre compte. Un administrateur validera votre compte sous 24h à 48h après réception du paiement.</p>
+                )}
+              </div>
+              
+              <Button type="submit" disabled={isLoading} className="w-full bg-pharmacy-dark hover:bg-pharmacy text-white font-normal rounded-xl">
                 {isLoading ? "Inscription en cours..." : "S'inscrire"}
               </Button>
             </form>

@@ -68,6 +68,24 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
+	// Create notification for admin about new user registration
+	adminNotification := models.Notification{
+		ID:          primitive.NewObjectID(),
+		UserID:      primitive.ObjectID{}, // Will be set to admin ID in production
+		FromID:      newUser.ID,
+		FromName:    newUser.BusinessName,
+		Type:        "user_registration",
+		Title:       "Nouvelle inscription",
+		Description: "Un nouveau " + newUser.Role + " s'est inscrit et attend validation",
+		Read:        false,
+		Status:      "pending",
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	// In a real production environment, you would save this notification to the database
+	// and retrieve the admin ID from somewhere
+
 	// Don't return the password
 	newUser.Password = ""
 

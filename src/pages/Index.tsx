@@ -1,8 +1,10 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
 import UsersCarousel from "@/components/home/UsersCarousel";
 import OffersSection from "@/components/offers/OffersSection";
+import { Pill, Medicine, Store } from "lucide-react";
 
 // Featured suppliers (gold subscription)
 const featuredSuppliers = [{
@@ -24,19 +26,23 @@ const featuredSuppliers = [{
   description: "Spécialiste en produits dermatologiques et cosmétiques",
   imageUrl: "/placeholder.svg"
 }];
+
 const Index = () => {
-  return <Layout>
+  return (
+    <Layout>
       <section className="bg-gradient-to-b from-pharmacy-light to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="text-center">
             <h1 className="text-gray-900 mb-6 font-bold md:text-5xl py-0 mx-0 my-0 px-0 text-4xl">Approvisionnement Pharmaceutique en un Clic!</h1>
-            <p className="md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto font-medium text-lg">Le trait d’union entre pharmacien et fournisseur. </p>
+            <p className="md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto font-medium text-lg">Le trait d'union entre pharmacien et fournisseur. </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/register">
-                
+                <Button size="lg" className="rounded-xl bg-pharmacy-dark hover:bg-pharmacy text-white font-medium">
+                  S'inscrire maintenant
+                </Button>
               </Link>
               <Link to="/about">
-                <Button size="lg" variant="outline" className="rounded-xl bg-pharmacy-accent my-0">
+                <Button size="lg" variant="outline" className="rounded-xl bg-pharmacy-accent text-white hover:bg-pharmacy my-0">
                   En savoir plus
                 </Button>
               </Link>
@@ -59,11 +65,14 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-            {featuredSuppliers.map(supplier => <div key={supplier.id} className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100 transition-transform transform hover:scale-105">
+            {featuredSuppliers.map(supplier => (
+              <div key={supplier.id} className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100 transition-transform transform hover:scale-105">
                 <div className="h-48 bg-gray-100 relative">
                   <img src={supplier.imageUrl} alt={supplier.name} className="w-full h-full object-cover" />
                   <div className="absolute top-3 right-3">
-                    
+                    <span className="bg-pharmacy-accent text-white py-1 px-3 rounded-full text-xs font-medium">
+                      Abonnement Or
+                    </span>
                   </div>
                 </div>
                 <div className="p-5">
@@ -76,7 +85,8 @@ const Index = () => {
                     </Button>
                   </Link>
                 </div>
-              </div>)}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -95,7 +105,12 @@ const Index = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <h3 className="text-xl font-semibold mb-4 text-pharmacy-dark">Pour les pharmaciens</h3>
+              <div className="flex items-center mb-4">
+                <div className="bg-pharmacy-light rounded-full p-2 mr-4">
+                  <Pill size={24} className="text-pharmacy-dark" />
+                </div>
+                <h3 className="text-xl font-semibold text-pharmacy-dark">Pour les pharmaciens</h3>
+              </div>
               <ul className="space-y-3">
                 <li className="flex items-start">
                   <div className="flex-shrink-0 h-5 w-5 rounded-full bg-pharmacy-light flex items-center justify-center mt-1">
@@ -118,7 +133,12 @@ const Index = () => {
               </ul>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <h3 className="text-xl font-semibold mb-4 text-pharmacy-dark">Pour les fournisseurs</h3>
+              <div className="flex items-center mb-4">
+                <div className="bg-pharmacy-light rounded-full p-2 mr-4">
+                  <Store size={24} className="text-pharmacy-dark" />
+                </div>
+                <h3 className="text-xl font-semibold text-pharmacy-dark">Pour les fournisseurs</h3>
+              </div>
               <ul className="space-y-3">
                 <li className="flex items-start">
                   <div className="flex-shrink-0 h-5 w-5 rounded-full bg-pharmacy-light flex items-center justify-center mt-1">
@@ -144,7 +164,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="py-12 text-white md:py-[25px] bg-pharmacy-accent">
+      <section className="py-12 text-white md:py-20 bg-pharmacy-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-6">Prêt à rejoindre Elsaidaliya ?</h2>
           <p className="text-lg mb-8 max-w-2xl mx-auto">
@@ -164,6 +184,8 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </Layout>;
+    </Layout>
+  );
 };
+
 export default Index;

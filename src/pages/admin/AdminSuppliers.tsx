@@ -1,875 +1,419 @@
 
-import { useState, useEffect } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { 
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { 
-  Eye, 
-  MoreHorizontal, 
-  UserCheck, 
-  UserX, 
-  Edit, 
-  Image as ImageIcon,
-  Search,
-  FileText,
-  Award, 
-  Star, 
-  Medal, 
-  Trophy,
-  Upload,
-} from "lucide-react";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { algeriasWilayas } from "@/data/wilayas";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Store, Eye, CheckCircle, XCircle, MoreHorizontal } from "lucide-react";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import DocumentsViewer from "@/components/admin/DocumentsViewer";
+import PaymentReceiptNotification from "@/components/admin/PaymentReceiptNotification";
 
-interface Supplier {
-  id: string;
-  businessName: string;
-  phone: string;
-  email: string;
-  wilaya: string;
-  registerImageUrl: string;
-  isActive: boolean;
-  subscription: string;
-  subExpiry: string;
-  createdAt: string;
-  registerNumber?: string;
-  transferReceiptUrl?: string;
-}
-
-const AdminSuppliers = () => {
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isImageOpen, setIsImageOpen] = useState(false);
-  const [isDocumentsOpen, setIsDocumentsOpen] = useState(false);
-  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterWilaya, setFilterWilaya] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterSubscription, setFilterSubscription] = useState("all");
-  const [editForm, setEditForm] = useState({
-    businessName: "",
+// Mock data - in a real app this would come from an API
+const mockSuppliers = [
+  {
+    id: "1",
+    businessName: "MediStock Algérie",
+    phone: "0555789012",
+    email: "contact@medistock.dz",
+    wilaya: "16 - Alger",
+    registerNumber: "123456789",
+    isActive: true,
+    registerImageUrl: "/placeholder.svg",
+    subscription: "gold",
+    subExpiry: "2024-05-15T00:00:00Z",
+    createdAt: "2023-04-10T10:30:00Z",
+    hasPendingPayment: false,
+  },
+  {
+    id: "2",
+    businessName: "PharmaSupply",
+    phone: "0666234567",
+    email: "info@pharmasupply.dz",
+    wilaya: "31 - Oran",
+    registerNumber: "987654321",
     isActive: false,
+    registerImageUrl: "/placeholder.svg",
+    subscription: "silver",
+    subExpiry: "2023-12-31T00:00:00Z",
+    createdAt: "2023-04-15T14:20:00Z",
+    hasPendingPayment: true,
+  },
+  {
+    id: "3",
+    businessName: "AlgéPharm",
+    phone: "0777345678",
+    email: "contact@algepharm.dz",
+    wilaya: "25 - Constantine",
+    registerNumber: "567890123",
+    isActive: true,
+    registerImageUrl: "/placeholder.svg",
+    subscription: "bronze",
+    subExpiry: "2024-02-28T00:00:00Z",
+    createdAt: "2023-04-12T09:45:00Z",
+    hasPendingPayment: false,
+  },
+  {
+    id: "4",
+    businessName: "MedImport SARL",
+    phone: "0555456789",
+    email: "service@medimport.dz",
+    wilaya: "09 - Blida",
+    registerNumber: "345678901",
+    isActive: false,
+    registerImageUrl: "/placeholder.svg",
     subscription: "",
     subExpiry: "",
-    phone: "",
-    email: "",
-    wilaya: "",
-    registerNumber: "",
-  });
+    createdAt: "2023-04-20T11:15:00Z",
+    hasPendingPayment: true,
+  },
+];
 
-  useEffect(() => {
-    fetchSuppliers();
-  }, []);
+const subscriptionBadges = {
+  gold: { label: "Or", className: "bg-amber-100 text-amber-800 border-amber-200" },
+  silver: { label: "Argent", className: "bg-slate-100 text-slate-800 border-slate-200" },
+  bronze: { label: "Bronze", className: "bg-orange-100 text-orange-800 border-orange-200" },
+  "": { label: "Aucun", className: "bg-gray-100 text-gray-800 border-gray-200" },
+};
 
-  const fetchSuppliers = async () => {
-    setLoading(true);
-    try {
-      // In a real implementation, this would fetch from backend
-      const mockSuppliers = [
-        {
-          id: "1",
-          businessName: "MediStock",
-          phone: "0555789012",
-          email: "contact@medistock.com",
-          wilaya: "Oran",
-          registerImageUrl: "/path/to/image.jpg",
-          transferReceiptUrl: "/path/to/receipt.pdf",
-          isActive: false,
-          subscription: "or",
-          subExpiry: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-          createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-          registerNumber: "RC-1234567890",
-        },
-        {
-          id: "2",
-          businessName: "AlgMed Distribution",
-          phone: "0555222333",
-          email: "contact@algmed.com",
-          wilaya: "Alger",
-          registerImageUrl: "/path/to/image.jpg",
-          isActive: true,
-          subscription: "argent",
-          subExpiry: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
-          createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          registerNumber: "RC-9988776655",
-        },
-        {
-          id: "3",
-          businessName: "PharmaSupply",
-          phone: "0555444555",
-          email: "info@pharmasupply.com",
-          wilaya: "Constantine",
-          registerImageUrl: "/path/to/image.jpg",
-          transferReceiptUrl: "/path/to/receipt.pdf",
-          isActive: true,
-          subscription: "bronze",
-          subExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          registerNumber: "RC-5566778899",
-        },
-      ];
-      setSuppliers(mockSuppliers);
-    } catch (error) {
-      console.error("Error fetching suppliers:", error);
-      toast.error("Erreur lors de la récupération des fournisseurs");
-    } finally {
-      setLoading(false);
-    }
-  };
+const AdminSuppliers = () => {
+  const { toast } = useToast();
+  const [suppliers, setSuppliers] = useState(mockSuppliers);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleViewDetails = (supplier: Supplier) => {
-    setSelectedSupplier(supplier);
-    setIsDetailsOpen(true);
-  };
-
-  const handleViewDocuments = (supplier: Supplier) => {
-    setSelectedSupplier(supplier);
-    setIsDocumentsOpen(true);
-  };
-
-  const handleViewImage = (supplier: Supplier) => {
-    setSelectedSupplier(supplier);
-    setIsImageOpen(true);
-  };
-
-  const handleViewReceipt = (supplier: Supplier) => {
-    if (!supplier.transferReceiptUrl) {
-      toast.error("Aucun bon de virement disponible");
-      return;
-    }
-    setSelectedSupplier(supplier);
-    setIsReceiptOpen(true);
-  };
-
-  const handleEditSupplier = (supplier: Supplier) => {
-    setSelectedSupplier(supplier);
-    setEditForm({
-      businessName: supplier.businessName,
-      isActive: supplier.isActive,
-      subscription: supplier.subscription,
-      subExpiry: new Date(supplier.subExpiry).toISOString().split('T')[0],
-      phone: supplier.phone,
-      email: supplier.email,
-      wilaya: supplier.wilaya,
-      registerNumber: supplier.registerNumber || "",
-    });
-    setIsEditOpen(true);
-  };
-
-  const handleToggleStatus = async (supplierId: string, newStatus: boolean) => {
-    try {
-      // In a real app, this would make an API call
-      // await userService.updateUserStatus(supplierId, newStatus);
-      
-      // Update the local state
-      setSuppliers(suppliers.map(supplier => 
-        supplier.id === supplierId ? {...supplier, isActive: newStatus} : supplier
-      ));
-      
-      toast.success(newStatus 
-        ? "Compte fournisseur activé avec succès" 
-        : "Compte fournisseur désactivé avec succès"
-      );
-    } catch (error) {
-      console.error("Error updating supplier status:", error);
-      toast.error("Erreur lors de la mise à jour du statut du fournisseur");
-    }
-  };
-
-  const handleUpdateSupplier = async () => {
-    if (!selectedSupplier) return;
-    
-    try {
-      // In a real app, this would make an API call
-      // await userService.updateUser(selectedSupplier.id, editForm);
-      
-      // Update the local state
-      setSuppliers(suppliers.map(supplier => 
-        supplier.id === selectedSupplier.id 
-          ? {
-              ...supplier, 
-              businessName: editForm.businessName,
-              isActive: editForm.isActive,
-              subscription: editForm.subscription,
-              subExpiry: new Date(editForm.subExpiry).toISOString(),
-              phone: editForm.phone,
-              email: editForm.email,
-              wilaya: editForm.wilaya,
-              registerNumber: editForm.registerNumber,
-            } 
+  // In a real app, this would be an API call
+  const toggleSupplierStatus = (id: string, newStatus: boolean) => {
+    setSuppliers((prev) =>
+      prev.map((supplier) =>
+        supplier.id === id
+          ? { ...supplier, isActive: newStatus }
           : supplier
-      ));
-      
-      setIsEditOpen(false);
-      toast.success("Informations fournisseur mises à jour avec succès");
-    } catch (error) {
-      console.error("Error updating supplier:", error);
-      toast.error("Erreur lors de la mise à jour du fournisseur");
-    }
+      )
+    );
+    
+    toast({
+      title: `Statut du fournisseur modifié`,
+      description: `Le fournisseur a été ${newStatus ? 'activé' : 'désactivé'}.`,
+    });
   };
 
-  const getSubscriptionIcon = (subscription: string) => {
-    switch (subscription.toLowerCase()) {
-      case 'or':
-        return <Trophy className="h-5 w-5 text-yellow-500" />;
-      case 'argent':
-        return <Medal className="h-5 w-5 text-gray-400" />;
-      case 'bronze':
-        return <Award className="h-5 w-5 text-amber-700" />;
-      default:
-        return <Star className="h-5 w-5 text-blue-400" />;
-    }
+  const handleViewDocument = (document: string, supplier: any) => {
+    setSelectedDocument(document);
+    setSelectedSupplier(supplier);
+    setIsViewerOpen(true);
   };
 
-  const getSubscriptionBadge = (subscription: string) => {
-    switch (subscription.toLowerCase()) {
-      case 'or':
-        return (
-          <Badge className="bg-yellow-500 flex items-center gap-1">
-            <Trophy className="h-3 w-3" />
-            Or
-          </Badge>
-        );
-      case 'argent':
-        return (
-          <Badge className="bg-gray-400 flex items-center gap-1">
-            <Medal className="h-3 w-3" />
-            Argent
-          </Badge>
-        );
-      case 'bronze':
-        return (
-          <Badge className="bg-amber-700 flex items-center gap-1">
-            <Award className="h-3 w-3" />
-            Bronze
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="outline" className="flex items-center gap-1">
-            <Star className="h-3 w-3" />
-            Gratuit
-          </Badge>
-        );
-    }
+  const handleViewPayment = (supplier: any) => {
+    setSelectedSupplier(supplier);
+    setIsPaymentDialogOpen(true);
   };
 
-  const filteredSuppliers = suppliers.filter(supplier => {
-    // Filter by search query
-    if (searchQuery && !supplier.businessName.toLowerCase().includes(searchQuery.toLowerCase()) && 
-        !supplier.email.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
+  const handleStatusChange = (id: string, isActive: boolean) => {
+    setSelectedSupplier(suppliers.find(s => s.id === id));
+    setIsDialogOpen(true);
+  };
+
+  const confirmStatusChange = () => {
+    if (selectedSupplier) {
+      toggleSupplierStatus(selectedSupplier.id, !selectedSupplier.isActive);
     }
+    setIsDialogOpen(false);
+  };
+
+  const updateSubscription = (id: string, newSubscription: string) => {
+    setSuppliers((prev) =>
+      prev.map((supplier) =>
+        supplier.id === id
+          ? { 
+              ...supplier, 
+              subscription: newSubscription,
+              subExpiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+            }
+          : supplier
+      )
+    );
     
-    // Filter by wilaya
-    if (filterWilaya && supplier.wilaya !== filterWilaya) return false;
-    
-    // Filter by status
-    if (filterStatus === "active" && !supplier.isActive) return false;
-    if (filterStatus === "inactive" && supplier.isActive) return false;
-    
-    // Filter by subscription
-    if (filterSubscription !== "all" && supplier.subscription !== filterSubscription) return false;
-    
-    return true;
-  });
+    toast({
+      title: `Abonnement mis à jour`,
+      description: `L'abonnement a été mis à jour vers ${
+        newSubscription ? subscriptionBadges[newSubscription as keyof typeof subscriptionBadges].label : "Aucun"
+      }.`,
+    });
+  };
+
+  const filteredSuppliers = suppliers.filter(
+    (supplier) =>
+      supplier.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      supplier.wilaya.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      supplier.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (supplier.subscription && subscriptionBadges[supplier.subscription as keyof typeof subscriptionBadges].label.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   return (
     <DashboardLayout userRole="admin">
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Gestion des Fournisseurs</h1>
-        
-        <Card className="mb-6">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Fournisseurs</CardTitle>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => {
-                setSearchQuery("");
-                setFilterWilaya("");
-                setFilterStatus("all");
-                setFilterSubscription("all");
-              }}>
-                Réinitialiser les filtres
-              </Button>
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Fournisseurs</h1>
+            <p className="text-gray-500">Gérer les comptes et abonnements des fournisseurs</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
+              <Store className="h-5 w-5 text-pharmacy-dark" />
+              <span className="text-lg font-medium text-pharmacy-dark">
+                {suppliers.length} Fournisseurs
+              </span>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="flex items-center space-x-2">
-                <Search className="text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher par nom ou email..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1"
-                />
-              </div>
-              <Select value={filterWilaya} onValueChange={setFilterWilaya}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filtrer par wilaya" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Toutes les wilayas</SelectItem>
-                  {algeriasWilayas.map(wilaya => (
-                    <SelectItem key={wilaya.code} value={wilaya.name}>{wilaya.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filtrer par statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les statuts</SelectItem>
-                  <SelectItem value="active">Actif</SelectItem>
-                  <SelectItem value="inactive">Inactif</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={filterSubscription} onValueChange={setFilterSubscription}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filtrer par abonnement" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les abonnements</SelectItem>
-                  <SelectItem value="bronze">Bronze</SelectItem>
-                  <SelectItem value="argent">Argent</SelectItem>
-                  <SelectItem value="or">Or</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200">
+              {suppliers.filter(s => s.hasPendingPayment).length} en attente de validation
+            </Badge>
+          </div>
+        </div>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Raison Sociale</TableHead>
-                  <TableHead>Registre de Commerce</TableHead>
-                  <TableHead>Téléphone</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Wilaya</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Abonnement</TableHead>
-                  <TableHead>Expiration</TableHead>
-                  <TableHead>Inscription</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={10} className="text-center py-4">
-                      Chargement...
-                    </TableCell>
-                  </TableRow>
-                ) : filteredSuppliers.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={10} className="text-center py-4">
-                      Aucun fournisseur trouvé
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredSuppliers.map((supplier) => (
-                    <TableRow key={supplier.id}>
-                      <TableCell>{supplier.businessName}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{supplier.registerNumber || "N/A"}</span>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-7 w-7"
-                            onClick={() => handleViewDocuments(supplier)}
-                          >
-                            <FileText className="h-4 w-4 text-blue-500" />
+        <div className="mb-6">
+          <Input
+            placeholder="Rechercher par nom, wilaya, email ou abonnement..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-sm"
+          />
+        </div>
+
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <Table>
+            <TableCaption>Liste des fournisseurs enregistrés sur la plateforme.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nom</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Wilaya</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Abonnement</TableHead>
+                <TableHead>Documents</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredSuppliers.map((supplier) => (
+                <TableRow key={supplier.id}>
+                  <TableCell className="font-medium">{supplier.businessName}</TableCell>
+                  <TableCell>
+                    <div>{supplier.phone}</div>
+                    <div className="text-sm text-gray-500">{supplier.email}</div>
+                  </TableCell>
+                  <TableCell>{supplier.wilaya}</TableCell>
+                  <TableCell>
+                    {supplier.isActive ? (
+                      <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+                        Actif
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100">
+                        En attente
+                      </Badge>
+                    )}
+                    {supplier.hasPendingPayment && (
+                      <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200">
+                        Paiement à vérifier
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {supplier.subscription ? (
+                      <div>
+                        <Badge 
+                          variant="outline" 
+                          className={subscriptionBadges[supplier.subscription as keyof typeof subscriptionBadges].className}
+                        >
+                          {subscriptionBadges[supplier.subscription as keyof typeof subscriptionBadges].label}
+                        </Badge>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Expire le {new Date(supplier.subExpiry).toLocaleDateString("fr-FR")}
+                        </div>
+                      </div>
+                    ) : (
+                      <Badge variant="outline" className="bg-gray-100 text-gray-800">
+                        Aucun
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewDocument(supplier.registerImageUrl, supplier)}
+                        className="flex items-center text-gray-600 hover:text-pharmacy-dark"
+                      >
+                        <Eye size={16} className="mr-1" />
+                        Registre
+                      </Button>
+                      {supplier.hasPendingPayment && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewPayment(supplier)}
+                          className="flex items-center bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                        >
+                          <Eye size={16} className="mr-1" />
+                          Paiement
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      {supplier.isActive ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleStatusChange(supplier.id, false)}
+                          className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                        >
+                          <XCircle size={16} className="mr-1" />
+                          Désactiver
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleStatusChange(supplier.id, true)}
+                          className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                        >
+                          <CheckCircle size={16} className="mr-1" />
+                          Activer
+                        </Button>
+                      )}
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal size={16} />
                           </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>{supplier.phone}</TableCell>
-                      <TableCell className="max-w-[150px] truncate" title={supplier.email}>{supplier.email}</TableCell>
-                      <TableCell>{supplier.wilaya}</TableCell>
-                      <TableCell>
-                        <Switch 
-                          checked={supplier.isActive}
-                          onCheckedChange={(checked) => handleToggleStatus(supplier.id, checked)}
-                          className="data-[state=checked]:bg-green-500"
-                        />
-                      </TableCell>
-                      <TableCell className="flex items-center gap-2">
-                        {getSubscriptionIcon(supplier.subscription)}
-                        {getSubscriptionBadge(supplier.subscription)}
-                      </TableCell>
-                      <TableCell>
-                        {format(new Date(supplier.subExpiry), 'dd/MM/yyyy')}
-                      </TableCell>
-                      <TableCell>
-                        {format(new Date(supplier.createdAt), 'dd/MM/yyyy')}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewDetails(supplier)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Voir détails
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditSupplier(supplier)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Modifier
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleViewDocuments(supplier)}>
-                              <FileText className="mr-2 h-4 w-4" />
-                              Voir les documents
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleToggleStatus(supplier.id, !supplier.isActive)}
-                            >
-                              {supplier.isActive ? (
-                                <>
-                                  <UserX className="mr-2 h-4 w-4" />
-                                  Désactiver
-                                </>
-                              ) : (
-                                <>
-                                  <UserCheck className="mr-2 h-4 w-4" />
-                                  Activer
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => updateSubscription(supplier.id, "gold")}>
+                            Définir abonnement Or
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateSubscription(supplier.id, "silver")}>
+                            Définir abonnement Argent
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateSubscription(supplier.id, "bronze")}>
+                            Définir abonnement Bronze
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateSubscription(supplier.id, "")}>
+                            Retirer l'abonnement
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {isViewerOpen && selectedSupplier && (
+          <DocumentsViewer
+            isOpen={isViewerOpen}
+            onClose={() => setIsViewerOpen(false)}
+            documentUrl={selectedDocument}
+            title={`Registre de commerce - ${selectedSupplier.businessName}`}
+            info={`Numéro: ${selectedSupplier.registerNumber}`}
+          />
+        )}
+
+        {isPaymentDialogOpen && selectedSupplier && (
+          <PaymentReceiptNotification
+            isOpen={isPaymentDialogOpen}
+            onClose={() => setIsPaymentDialogOpen(false)}
+            supplier={selectedSupplier}
+            onApprove={() => {
+              setSuppliers((prev) =>
+                prev.map((s) =>
+                  s.id === selectedSupplier.id
+                    ? { ...s, hasPendingPayment: false }
+                    : s
+                )
+              );
+              setIsPaymentDialogOpen(false);
+              toast({
+                title: "Paiement validé",
+                description: "Le paiement a été validé avec succès.",
+              });
+            }}
+            onReject={() => {
+              setSuppliers((prev) =>
+                prev.map((s) =>
+                  s.id === selectedSupplier.id
+                    ? { ...s, hasPendingPayment: false }
+                    : s
+                )
+              );
+              setIsPaymentDialogOpen(false);
+              toast({
+                title: "Paiement rejeté",
+                description: "Le bon de versement a été rejeté.",
+                variant: "destructive",
+              });
+            }}
+          />
+        )}
+
+        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {selectedSupplier?.isActive
+                  ? "Désactiver ce fournisseur ?"
+                  : "Activer ce fournisseur ?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {selectedSupplier?.isActive
+                  ? "Le fournisseur ne pourra plus se connecter ou utiliser la plateforme tant que son compte sera désactivé."
+                  : "Le fournisseur pourra désormais se connecter et utiliser tous les services de la plateforme."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmStatusChange}>
+                Confirmer
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-
-      {/* Supplier Details Dialog */}
-      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Détails du fournisseur</DialogTitle>
-            <DialogDescription>
-              Informations complètes sur ce fournisseur.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedSupplier && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Raison Sociale</Label>
-                <div className="col-span-3">{selectedSupplier.businessName}</div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Registre de Commerce</Label>
-                <div className="col-span-3 flex items-center gap-2">
-                  {selectedSupplier.registerNumber || "Non fourni"}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-7 w-7"
-                    onClick={() => {
-                      setIsDetailsOpen(false);
-                      setTimeout(() => handleViewImage(selectedSupplier), 100);
-                    }}
-                  >
-                    <ImageIcon className="h-4 w-4 text-blue-500" />
-                  </Button>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Email</Label>
-                <div className="col-span-3">{selectedSupplier.email}</div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Téléphone</Label>
-                <div className="col-span-3">{selectedSupplier.phone}</div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Wilaya</Label>
-                <div className="col-span-3">{selectedSupplier.wilaya}</div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Statut</Label>
-                <div className="col-span-3">
-                  {selectedSupplier.isActive ? (
-                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-                      Actif
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
-                      Inactif
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Abonnement</Label>
-                <div className="col-span-3 flex items-center gap-2">
-                  {getSubscriptionIcon(selectedSupplier.subscription)}
-                  {getSubscriptionBadge(selectedSupplier.subscription)}
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Expiration</Label>
-                <div className="col-span-3">
-                  {format(new Date(selectedSupplier.subExpiry), 'dd/MM/yyyy')}
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Inscrit le</Label>
-                <div className="col-span-3">
-                  {format(new Date(selectedSupplier.createdAt), 'dd/MM/yyyy')}
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Paiement</Label>
-                <div className="col-span-3">
-                  {selectedSupplier.transferReceiptUrl ? (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => {
-                        setIsDetailsOpen(false);
-                        setTimeout(() => handleViewReceipt(selectedSupplier), 100);
-                      }}
-                      className="flex items-center gap-2"
-                    >
-                      <Upload className="h-4 w-4" />
-                      Voir le bon de virement
-                    </Button>
-                  ) : (
-                    <span className="text-yellow-600">Aucun bon de virement</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button onClick={() => setIsDetailsOpen(false)}>Fermer</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Documents Dialog */}
-      <Dialog open={isDocumentsOpen} onOpenChange={setIsDocumentsOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Documents</DialogTitle>
-            <DialogDescription>
-              {selectedSupplier?.businessName} - Documents officiels
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-            {/* Registre de Commerce */}
-            <div className="border rounded-md p-4">
-              <h3 className="font-medium mb-2 flex items-center">
-                <ImageIcon className="mr-2 h-4 w-4" /> Registre de Commerce
-              </h3>
-              <p className="text-sm text-gray-500 mb-2">{selectedSupplier?.registerNumber || "Non fourni"}</p>
-              <div className="h-60 flex justify-center items-center bg-gray-50 border rounded-md overflow-hidden">
-                {selectedSupplier?.registerImageUrl ? (
-                  <img 
-                    src={selectedSupplier.registerImageUrl} 
-                    alt="Registre de commerce"
-                    className="max-h-full max-w-full object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "https://placehold.co/400x300?text=Image+Indisponible";
-                    }}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center w-full h-full">
-                    <ImageIcon className="h-12 w-12 text-gray-400" />
-                    <p className="mt-2 text-gray-500">Image non disponible</p>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Bon de Virement */}
-            <div className="border rounded-md p-4">
-              <h3 className="font-medium mb-2 flex items-center">
-                <Upload className="mr-2 h-4 w-4" /> Bon de Virement
-              </h3>
-              <p className="text-sm text-gray-500 mb-2">
-                {selectedSupplier?.transferReceiptUrl ? "Document fourni" : "Non fourni"}
-              </p>
-              <div className="h-60 flex justify-center items-center bg-gray-50 border rounded-md overflow-hidden">
-                {selectedSupplier?.transferReceiptUrl ? (
-                  <img 
-                    src={selectedSupplier.transferReceiptUrl} 
-                    alt="Bon de virement"
-                    className="max-h-full max-w-full object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "https://placehold.co/400x300?text=Document+Indisponible";
-                    }}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center w-full h-full">
-                    <Upload className="h-12 w-12 text-gray-400" />
-                    <p className="mt-2 text-gray-500">Document non disponible</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setIsDocumentsOpen(false)}>Fermer</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Registration Image Dialog */}
-      <Dialog open={isImageOpen} onOpenChange={setIsImageOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Registre de Commerce</DialogTitle>
-            <DialogDescription>
-              {selectedSupplier?.businessName} - {selectedSupplier?.registerNumber || "Non fourni"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center py-4">
-            {selectedSupplier?.registerImageUrl ? (
-              <img 
-                src={selectedSupplier.registerImageUrl} 
-                alt="Registre de commerce"
-                className="max-h-[400px] max-w-full object-contain border rounded-md"
-                onError={(e) => {
-                  // Fallback if the image doesn't load
-                  const target = e.target as HTMLImageElement;
-                  target.src = "https://placehold.co/400x300?text=Image+Indisponible";
-                }}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center bg-gray-100 w-full h-64 rounded-md">
-                <ImageIcon className="h-16 w-16 text-gray-400" />
-                <p className="mt-2 text-gray-500">Image non disponible</p>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setIsImageOpen(false)}>Fermer</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Transfer Receipt Dialog */}
-      <Dialog open={isReceiptOpen} onOpenChange={setIsReceiptOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Bon de Virement</DialogTitle>
-            <DialogDescription>
-              {selectedSupplier?.businessName}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center py-4">
-            {selectedSupplier?.transferReceiptUrl ? (
-              <img 
-                src={selectedSupplier.transferReceiptUrl} 
-                alt="Bon de virement"
-                className="max-h-[400px] max-w-full object-contain border rounded-md"
-                onError={(e) => {
-                  // Fallback if the image doesn't load
-                  const target = e.target as HTMLImageElement;
-                  target.src = "https://placehold.co/400x300?text=Document+Indisponible";
-                }}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center bg-gray-100 w-full h-64 rounded-md">
-                <Upload className="h-16 w-16 text-gray-400" />
-                <p className="mt-2 text-gray-500">Document non disponible</p>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setIsReceiptOpen(false)}>Fermer</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Supplier Dialog */}
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Modifier le fournisseur</DialogTitle>
-            <DialogDescription>
-              Mettre à jour les informations du fournisseur.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedSupplier && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="businessName" className="text-right">Raison Sociale</Label>
-                <Input 
-                  id="businessName" 
-                  className="col-span-3"
-                  value={editForm.businessName}
-                  onChange={(e) => setEditForm({...editForm, businessName: e.target.value})}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="registerNumber" className="text-right">Registre de Commerce</Label>
-                <Input 
-                  id="registerNumber" 
-                  className="col-span-3"
-                  value={editForm.registerNumber}
-                  onChange={(e) => setEditForm({...editForm, registerNumber: e.target.value})}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="phone" className="text-right">Téléphone</Label>
-                <Input 
-                  id="phone" 
-                  className="col-span-3"
-                  value={editForm.phone}
-                  onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">Email</Label>
-                <Input 
-                  id="email" 
-                  className="col-span-3"
-                  value={editForm.email}
-                  onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="wilaya" className="text-right">Wilaya</Label>
-                <Select 
-                  value={editForm.wilaya} 
-                  onValueChange={(value) => setEditForm({...editForm, wilaya: value})}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Sélectionner une wilaya" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {algeriasWilayas.map(wilaya => (
-                      <SelectItem key={wilaya.code} value={wilaya.name}>{wilaya.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Statut</Label>
-                <div className="flex items-center gap-2 col-span-3">
-                  <Switch 
-                    id="isActive" 
-                    checked={editForm.isActive}
-                    onCheckedChange={(checked) => setEditForm({...editForm, isActive: checked})} 
-                    className="data-[state=checked]:bg-green-500"
-                  />
-                  <Label htmlFor="isActive">
-                    {editForm.isActive ? "Actif" : "Inactif"}
-                  </Label>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="subscription" className="text-right">Abonnement</Label>
-                <div className="col-span-3">
-                  <Select 
-                    value={editForm.subscription}
-                    onValueChange={(value) => setEditForm({...editForm, subscription: value})}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner un abonnement">
-                        <div className="flex items-center gap-2">
-                          {editForm.subscription && getSubscriptionIcon(editForm.subscription)}
-                          {editForm.subscription ? (
-                            editForm.subscription.charAt(0).toUpperCase() + editForm.subscription.slice(1)
-                          ) : 'Sélectionner'}
-                        </div>
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bronze" className="flex items-center gap-2">
-                        <div className="flex items-center gap-2">
-                          <Award className="h-4 w-4 text-amber-700" />
-                          <span>Bronze</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="argent" className="flex items-center gap-2">
-                        <div className="flex items-center gap-2">
-                          <Medal className="h-4 w-4 text-gray-400" />
-                          <span>Argent</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="or" className="flex items-center gap-2">
-                        <div className="flex items-center gap-2">
-                          <Trophy className="h-4 w-4 text-yellow-500" />
-                          <span>Or</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="subExpiry" className="text-right">Expiration</Label>
-                <Input 
-                  id="subExpiry" 
-                  type="date" 
-                  className="col-span-3"
-                  value={editForm.subExpiry}
-                  onChange={(e) => setEditForm({...editForm, subExpiry: e.target.value})}
-                />
-              </div>
-            </div>
-          )}
-          <DialogFooter className="flex flex-row justify-between">
-            <Button 
-              variant="destructive" 
-              onClick={() => setIsEditOpen(false)}
-              className="px-6"
-            >
-              Annuler
-            </Button>
-            <Button 
-              onClick={handleUpdateSupplier}
-              className="bg-green-600 hover:bg-green-700 px-6"
-            >
-              Sauvegarder
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </DashboardLayout>
   );
 };

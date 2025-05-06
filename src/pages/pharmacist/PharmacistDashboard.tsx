@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -108,7 +109,7 @@ const PharmacistDashboard = () => {
 
   // Count unread notifications
   const unreadCount = notifications.filter(notif => !notif.read).length;
-  return <DashboardLayout userRole="pharmacien">
+  return <DashboardLayout userRole="pharmacist">
     <div className="p-6">
       {!isUserActive && <div className="mb-6">
           <RegistrationNotice role="pharmacien" />

@@ -1,10 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Store, MapPin, Award } from "lucide-react";
-
 type FeaturedSupplier = {
   id: string;
   name: string;
@@ -14,49 +12,43 @@ type FeaturedSupplier = {
 };
 
 // Dummy featured suppliers with gold subscription
-const dummyFeaturedSuppliers = [
-  {
-    id: "1",
-    name: "MediStock Algérie",
-    image: "/placeholder.svg",
-    wilaya: "Alger",
-    description: "Distributeur leader de produits pharmaceutiques en Algérie"
-  },
-  {
-    id: "2",
-    name: "PharmaSupply",
-    image: "/placeholder.svg",
-    wilaya: "Oran",
-    description: "Plus de 2000 références de médicaments disponibles"
-  },
-  {
-    id: "3",
-    name: "AlgéPharm",
-    image: "/placeholder.svg",
-    wilaya: "Constantine",
-    description: "Spécialiste en produits dermatologiques et cosmétiques"
-  },
-  {
-    id: "4",
-    name: "MedPlus Solutions",
-    image: "/placeholder.svg",
-    wilaya: "Annaba",
-    description: "Fournisseur de matériel médical et produits pharmaceutiques"
-  },
-  {
-    id: "5",
-    name: "Pharma Nord",
-    image: "/placeholder.svg",
-    wilaya: "Tlemcen",
-    description: "Expert en compléments alimentaires et vitamines"
-  }
-];
-
+const dummyFeaturedSuppliers = [{
+  id: "1",
+  name: "MediStock Algérie",
+  image: "/placeholder.svg",
+  wilaya: "Alger",
+  description: "Distributeur leader de produits pharmaceutiques en Algérie"
+}, {
+  id: "2",
+  name: "PharmaSupply",
+  image: "/placeholder.svg",
+  wilaya: "Oran",
+  description: "Plus de 2000 références de médicaments disponibles"
+}, {
+  id: "3",
+  name: "AlgéPharm",
+  image: "/placeholder.svg",
+  wilaya: "Constantine",
+  description: "Spécialiste en produits dermatologiques et cosmétiques"
+}, {
+  id: "4",
+  name: "MedPlus Solutions",
+  image: "/placeholder.svg",
+  wilaya: "Annaba",
+  description: "Fournisseur de matériel médical et produits pharmaceutiques"
+}, {
+  id: "5",
+  name: "Pharma Nord",
+  image: "/placeholder.svg",
+  wilaya: "Tlemcen",
+  description: "Expert en compléments alimentaires et vitamines"
+}];
 const UsersCarousel = () => {
   const [featuredSuppliers, setFeaturedSuppliers] = useState<FeaturedSupplier[]>(dummyFeaturedSuppliers);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex(prevIndex => (prevIndex + 1) % featuredSuppliers.length);
@@ -75,7 +67,7 @@ const UsersCarousel = () => {
         // const response = await fetch('http://localhost:8080/api/users?subscription=or');
         // const data = await response.json();
         // setFeaturedSuppliers(data.users);
-        
+
         setFeaturedSuppliers(dummyFeaturedSuppliers);
       } catch (error) {
         console.error("Error fetching featured suppliers:", error);
@@ -86,10 +78,8 @@ const UsersCarousel = () => {
         });
       }
     };
-    
     fetchFeaturedSuppliers();
   }, [toast]);
-
   const visibleSuppliers = () => {
     const result = [];
     for (let i = 0; i < 3; i++) {
@@ -100,8 +90,7 @@ const UsersCarousel = () => {
   };
 
   // Return the actual JSX component
-  return (
-    <section className="py-12 bg-pharmacy-light">
+  return <section className="py-12 bg-pharmacy-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold mb-4 text-pharmacy-dark">Nos Fournisseurs Vedettes</h2>
@@ -111,8 +100,7 @@ const UsersCarousel = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {visibleSuppliers().map((supplier) => (
-            <Card key={supplier.id} className="overflow-hidden transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
+          {visibleSuppliers().map(supplier => <Card key={supplier.id} className="overflow-hidden transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
               <div className="h-3 bg-pharmacy-accent"></div>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
@@ -122,10 +110,7 @@ const UsersCarousel = () => {
                     </div>
                     <div className="ml-3">
                       <h3 className="font-semibold text-lg text-gray-900">{supplier.name}</h3>
-                      <Badge className="bg-amber-400 text-pharmacy-dark">
-                        <Award size={14} className="mr-1" />
-                        Abonnement Or
-                      </Badge>
+                      
                     </div>
                   </div>
                 </div>
@@ -137,23 +122,13 @@ const UsersCarousel = () => {
                   <span className="text-sm">{supplier.wilaya}</span>
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
         
         <div className="flex justify-center mt-8 space-x-2">
-          {featuredSuppliers.map((_, idx) => (
-            <button 
-              key={idx} 
-              onClick={() => setCurrentIndex(idx)}
-              className={`w-3 h-3 rounded-full ${currentIndex === idx || (currentIndex + 1) % featuredSuppliers.length === idx || (currentIndex + 2) % featuredSuppliers.length === idx ? 'bg-pharmacy-accent' : 'bg-gray-300'}`}
-              aria-label={`Slide ${idx + 1}`}
-            />
-          ))}
+          {featuredSuppliers.map((_, idx) => <button key={idx} onClick={() => setCurrentIndex(idx)} className={`w-3 h-3 rounded-full ${currentIndex === idx || (currentIndex + 1) % featuredSuppliers.length === idx || (currentIndex + 2) % featuredSuppliers.length === idx ? 'bg-pharmacy-accent' : 'bg-gray-300'}`} aria-label={`Slide ${idx + 1}`} />)}
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default UsersCarousel;

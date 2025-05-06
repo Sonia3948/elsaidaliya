@@ -1,3 +1,4 @@
+
 package handlers
 
 import (
@@ -42,6 +43,9 @@ func GetAllUsers(c *gin.Context) {
 			filter["isActive"] = false
 		}
 	}
+	if subscription := c.Query("subscription"); subscription != "" {
+		filter["subscription"] = subscription
+	}
 
 	cursor, err := userCollection.Find(ctx, filter, findOptions)
 	if err != nil {
@@ -57,6 +61,38 @@ func GetAllUsers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"users": users})
+}
+
+// GetFeaturedSuppliers fetches suppliers with gold subscription
+func GetFeaturedSuppliers(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Define options to exclude password field
+	findOptions := options.Find()
+	findOptions.SetProjection(bson.M{"password": 0})
+
+	// Filter for active suppliers with gold subscription
+	filter := bson.M{
+		"role":         "fournisseur",
+		"isActive":     true,
+		"subscription": "or",
+	}
+
+	cursor, err := userCollection.Find(ctx, filter, findOptions)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération des fournisseurs vedettes"})
+		return
+	}
+	defer cursor.Close(ctx)
+
+	var suppliers []models.User
+	if err = cursor.All(ctx, &suppliers); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors du traitement des fournisseurs vedettes"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"suppliers": suppliers})
 }
 
 // GetUserByID fetches a single user by ID

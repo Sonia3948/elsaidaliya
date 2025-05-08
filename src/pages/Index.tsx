@@ -1,11 +1,9 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
 import UsersCarousel from "@/components/home/UsersCarousel";
 import OffersSection from "@/components/offers/OffersSection";
 import { Pill, Package, Store } from "lucide-react";
-
 const Index = () => {
   return <Layout>
       <section className="bg-gradient-to-b from-pharmacy-light to-white">
@@ -15,9 +13,7 @@ const Index = () => {
             <p className="md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto font-medium text-lg">Le trait d'union entre pharmacien et fournisseur. </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/register">
-                <Button size="lg" className="rounded-xl bg-pharmacy-dark hover:bg-pharmacy text-white font-medium">
-                  S'inscrire maintenant
-                </Button>
+                
               </Link>
               <Link to="/about">
                 <Button size="lg" variant="outline" className="rounded-xl bg-pharmacy-accent text-white hover:bg-pharmacy my-0">
@@ -127,5 +123,4 @@ const Index = () => {
       </section>
     </Layout>;
 };
-
 export default Index;

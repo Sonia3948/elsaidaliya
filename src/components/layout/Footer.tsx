@@ -8,7 +8,7 @@ const Footer = () => {
               <img src="/lovable-uploads/416db742-a6a0-481e-8bf5-91b997537eae.png" alt="Elsaidaliya Logo" className="h-8 mr-3" />
             </Link>
             <p className="mt-2 text-sm text-gray-600 max-w-sm">
-              La première plateforme qui connecte pharmaciens et fournisseurs en Algérie
+             La première plateforme au service des pharmaciens et fournisseurs en Algérie.
             </p>
           </div>
           
@@ -32,10 +32,10 @@ const Footer = () => {
               <h2 className="mb-4 text-sm font-semibold uppercase">Suivez-nous</h2>
               <ul className="text-gray-600 space-y-2">
                 <li>
-                  <a href="https://www.facebook.com/" className="hover:underline" target="_blank" rel="noopener noreferrer">Facebook</a>
+                  <a href="https://www.facebook.com/profile.php?id=61576353654046" className="hover:underline" target="_blank" rel="noopener noreferrer">Facebook</a>
                 </li>
                 <li>
-                  <a href="https://www.instagram.com/" className="hover:underline" target="_blank" rel="noopener noreferrer">Instagram</a>
+                  <a href="https://www.instagram.com/elsaidaliya.s/" className="hover:underline" target="_blank" rel="noopener noreferrer">Instagram</a>
                 </li>
                 
               </ul>

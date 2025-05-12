@@ -121,12 +121,12 @@ const ContactPage = () => {
                 <div className="mt-8 border-t border-gray-200 pt-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Suivez-nous sur les réseaux sociaux</h3>
                   <div className="flex space-x-6">
-                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-600 hover:text-pharmacy transition-colors mx-0 my-0 px-0">
+                    <a href="https://www.facebook.com/profile.php?id=61576353654046" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-600 hover:text-pharmacy transition-colors mx-0 my-0 px-0">
                       <Facebook className="h-6 w-6 px-[2px]" />
                       
                     </a>
                     
-                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-600 hover:text-pharmacy transition-colors px-[5px]">
+                    <a href="https://www.instagram.com/elsaidaliya.s/" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-600 hover:text-pharmacy transition-colors px-[5px]">
                       <Instagram className="h-6 w-6 mx-[10px]" />
                       
                     </a>

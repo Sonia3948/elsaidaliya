@@ -77,11 +77,11 @@ const PaymentPage = () => {
     }
   };
   const ribDetails = {
-    bank: "Banque Nationale d'Algérie (BNA)",
-    accountName: "Elsaidaliya SARL",
-    rib: "007 00076 0300000266 80",
-    swift: "BNAADZALXXX",
-    address: "123 Boulevard Mohammed V, Alger, Algérie"
+    bank: "Ma Banque ",
+    accountName: "Elsaidaliya",
+    rib: "000 00000 00000000000 00",
+    swift: "BANQUEDZALXXX",
+    address: "123 Boulevard de l'indépendance, Constantine, Algérie"
   };
   return <Layout>
       <div className="max-w-4xl mx-auto px-4 py-12">

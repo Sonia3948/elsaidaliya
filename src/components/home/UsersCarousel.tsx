@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,41 +11,8 @@ type FeaturedSupplier = {
   description: string;
 };
 
-// Dummy featured suppliers with gold subscription
-const dummyFeaturedSuppliers = [{
-  id: "1",
-  name: "MediStock Algérie",
-  image: "/placeholder.svg",
-  wilaya: "Alger",
-  description: "Distributeur leader de produits pharmaceutiques en Algérie"
-}, {
-  id: "2",
-  name: "PharmaSupply",
-  image: "/placeholder.svg",
-  wilaya: "Oran",
-  description: "Plus de 2000 références de médicaments disponibles"
-}, {
-  id: "3",
-  name: "AlgéPharm",
-  image: "/placeholder.svg",
-  wilaya: "Constantine",
-  description: "Spécialiste en produits dermatologiques et cosmétiques"
-}, {
-  id: "4",
-  name: "MedPlus Solutions",
-  image: "/placeholder.svg",
-  wilaya: "Annaba",
-  description: "Fournisseur de matériel médical et produits pharmaceutiques"
-}, {
-  id: "5",
-  name: "Pharma Nord",
-  image: "/placeholder.svg",
-  wilaya: "Tlemcen",
-  description: "Expert en compléments alimentaires et vitamines"
-}];
-
 const UsersCarousel = () => {
-  const [featuredSuppliers, setFeaturedSuppliers] = useState<FeaturedSupplier[]>(dummyFeaturedSuppliers);
+  const [featuredSuppliers, setFeaturedSuppliers] = useState<FeaturedSupplier[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { toast } = useToast();
 
@@ -57,18 +23,17 @@ const UsersCarousel = () => {
     return () => clearInterval(interval);
   }, [featuredSuppliers]);
 
-  // This would normally fetch from a backend API
   useEffect(() => {
-    // In a real app, we'd fetch featured suppliers from the backend
     const fetchFeaturedSuppliers = async () => {
       try {
-        // Simulating API call
-        // In a real implementation, we would call:
-        // const response = await fetch('http://localhost:8080/api/users/featured');
-        // const data = await response.json();
-        // setFeaturedSuppliers(data.suppliers);
+        const response = await fetch('http://localhost:8080/api/users/featured');
+        const data = await response.json();
 
-        setFeaturedSuppliers(dummyFeaturedSuppliers);
+        if (data && data.suppliers && Array.isArray(data.suppliers)) {
+          setFeaturedSuppliers(data.suppliers);
+        } else {
+          throw new Error("Format de réponse inattendu");
+        }
       } catch (error) {
         console.error("Error fetching featured suppliers:", error);
         toast({
@@ -78,20 +43,23 @@ const UsersCarousel = () => {
         });
       }
     };
+
     fetchFeaturedSuppliers();
   }, [toast]);
 
   const visibleSuppliers = () => {
     const result = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {
       const idx = (currentIndex + i) % featuredSuppliers.length;
       result.push(featuredSuppliers[idx]);
     }
     return result;
   };
 
-  // Return the actual JSX component
-  return <section className="py-12 bg-pharmacy-light">
+  if (featuredSuppliers.length === 0) return null;
+
+  return (
+    <section className="py-12 bg-pharmacy-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold mb-4 text-pharmacy-dark">Nos Fournisseurs Vedettes</h2>
@@ -99,9 +67,10 @@ const UsersCarousel = () => {
             Découvrez nos fournisseurs premium qui proposent une large gamme de produits pharmaceutiques.
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {visibleSuppliers().map(supplier => <Card key={supplier.id} className="overflow-hidden transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
+          {visibleSuppliers().map(supplier => (
+            <Card key={supplier.id} className="overflow-hidden transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
               <div className="h-3 bg-pharmacy-accent"></div>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
@@ -114,22 +83,38 @@ const UsersCarousel = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <p className="text-gray-600 mt-2 line-clamp-2">{supplier.description}</p>
-                
+
                 <div className="flex items-center text-gray-600 mt-3">
                   <MapPin size={16} className="mr-1 text-pharmacy-accent" />
                   <span className="text-sm">{supplier.wilaya}</span>
                 </div>
               </CardContent>
-            </Card>)}
+            </Card>
+          ))}
         </div>
-        
+
         <div className="flex justify-center mt-8 space-x-2">
-          {featuredSuppliers.map((_, idx) => <button key={idx} onClick={() => setCurrentIndex(idx)} className={`w-3 h-3 rounded-full ${currentIndex === idx || (currentIndex + 1) % featuredSuppliers.length === idx || (currentIndex + 2) % featuredSuppliers.length === idx ? 'bg-pharmacy-accent' : 'bg-gray-300'}`} aria-label={`Slide ${idx + 1}`} />)}
+          {featuredSuppliers.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              className={`w-3 h-3 rounded-full ${
+                currentIndex === idx ||
+                (currentIndex + 1) % featuredSuppliers.length === idx ||
+                (currentIndex + 2) % featuredSuppliers.length === idx
+                  ? 'bg-pharmacy-accent'
+                  : 'bg-gray-300'
+              }`}
+              aria-label={`Slide ${idx + 1}`}
+            />
+          ))}
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
 
 export default UsersCarousel;
+

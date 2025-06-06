@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"elsaidaliya/middleware"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,6 +25,9 @@ type Server struct {
 func New(database *mongo.Database) *Server {
 	// Configure gin router
 	r := gin.Default()
+
+	// Add request logging middleware
+	r.Use(middleware.RequestLogger())
 
 	// Get frontend URL from environment
 	frontendURL := os.Getenv("FRONTEND_URL")

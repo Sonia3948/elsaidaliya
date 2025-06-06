@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, User } from "lucide-react";
+import { CheckCircle, XCircle, User, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { userService } from "@/services/user";
@@ -12,11 +12,18 @@ interface PendingUser {
   businessName: string;
   role: string;
   createdAt: string;
+  email?: string;
+  phone?: string;
 }
 
-const PendingApprovalsList = () => {
+interface PendingApprovalsListProps {
+  onUserApproved?: () => void;
+}
+
+const PendingApprovalsList = ({ onUserApproved }: PendingApprovalsListProps) => {
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processingUsers, setProcessingUsers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchPendingUsers();
@@ -39,28 +46,56 @@ const PendingApprovalsList = () => {
   };
 
   const handleApproveUser = async (userId: string) => {
+    setProcessingUsers(prev => new Set(prev).add(userId));
+    
     try {
       await userService.updateUserStatus(userId, true);
       toast.success("Utilisateur approuvé avec succès");
+      
       // Remove the user from the list
       setPendingUsers(pendingUsers.filter(user => user.id !== userId));
+      
+      // Notify parent component if callback provided
+      if (onUserApproved) {
+        onUserApproved();
+      }
     } catch (error) {
       console.error("Error approving user:", error);
       toast.error("Erreur lors de l'approbation de l'utilisateur");
+    } finally {
+      setProcessingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
     }
   };
 
   const handleRejectUser = async (userId: string) => {
+    setProcessingUsers(prev => new Set(prev).add(userId));
+    
     try {
       // For now, we just update the status to false, which is already the case
       // In a real implementation, you might want to delete the user or mark them as rejected
       await userService.updateUserStatus(userId, false);
       toast.success("Utilisateur rejeté");
+      
       // Remove the user from the list
       setPendingUsers(pendingUsers.filter(user => user.id !== userId));
+      
+      // Notify parent component if callback provided
+      if (onUserApproved) {
+        onUserApproved();
+      }
     } catch (error) {
       console.error("Error rejecting user:", error);
       toast.error("Erreur lors du rejet de l'utilisateur");
+    } finally {
+      setProcessingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
     }
   };
 
@@ -75,19 +110,25 @@ const PendingApprovalsList = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Approbations en Attente</CardTitle>
+        <CardTitle className="flex items-center justify-between">
+          <span>Approbations en Attente</span>
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {loading ? (
           <p className="text-center py-4">Chargement...</p>
         ) : pendingUsers.length === 0 ? (
-          <p className="text-center text-muted-foreground py-4">
-            Aucune approbation en attente
-          </p>
+          <div className="text-center py-8">
+            <User className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+            <p className="text-center text-muted-foreground">
+              Aucune approbation en attente
+            </p>
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-96 overflow-y-auto">
             {pendingUsers.map((user) => (
-              <div key={user.id} className="flex items-center justify-between border-b pb-2">
+              <div key={user.id} className="flex items-center justify-between border-b pb-3 last:border-b-0">
                 <div className="flex items-center">
                   <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
                     <User className="h-5 w-5 text-gray-600" />
@@ -97,6 +138,9 @@ const PendingApprovalsList = () => {
                     <p className="text-sm text-gray-500">
                       {getRoleDisplayName(user.role)} • {format(new Date(user.createdAt), 'dd/MM/yyyy')}
                     </p>
+                    {user.email && (
+                      <p className="text-xs text-gray-400">{user.email}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex space-x-2">
@@ -105,16 +149,26 @@ const PendingApprovalsList = () => {
                     variant="outline" 
                     className="h-8 w-8 p-0"
                     onClick={() => handleApproveUser(user.id)}
+                    disabled={processingUsers.has(user.id)}
                   >
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    {processingUsers.has(user.id) ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    )}
                   </Button>
                   <Button 
                     size="sm" 
                     variant="outline" 
                     className="h-8 w-8 p-0"
                     onClick={() => handleRejectUser(user.id)}
+                    disabled={processingUsers.has(user.id)}
                   >
-                    <XCircle className="h-4 w-4 text-red-500" />
+                    {processingUsers.has(user.id) ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-red-500" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -123,7 +177,8 @@ const PendingApprovalsList = () => {
         )}
       </CardContent>
       <CardFooter>
-        <Button onClick={fetchPendingUsers} variant="outline" className="w-full">
+        <Button onClick={fetchPendingUsers} variant="outline" className="w-full" disabled={loading}>
+          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
           Actualiser
         </Button>
       </CardFooter>

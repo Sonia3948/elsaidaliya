@@ -90,8 +90,6 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
         return [
           { name: "Tableau de bord", href: "/admin/dashboard", icon: LayoutDashboard },
           { name: "Utilisateurs", href: "/admin/users", icon: Users },
-          { name: "Fournisseurs", href: "/admin/suppliers", icon: ShieldCheck },
-          { name: "Pharmaciens", href: "/admin/pharmacists", icon: User },
           { name: "Paiements", href: "/admin/payments", icon: FileCheck, badge: unreadNotifications > 0 ? unreadNotifications : undefined },
         ];
       case "supplier":
@@ -115,8 +113,6 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
     }
   };
 
-  const navItems = getNavItems();
-  
   // Function to check if a link is active
   const isActiveLink = (href: string) => {
     return location.pathname.startsWith(href);

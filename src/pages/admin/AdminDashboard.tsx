@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,24 +25,17 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       
-      // Fetch all users to calculate stats
-      const allUsersResponse = await userService.getAllUsers();
+      // Fetch only pending users for the new dashboard focus
       const pendingUsersResponse = await userService.getPendingUsers();
       
-      if (allUsersResponse.users && pendingUsersResponse.users) {
-        const allUsers = allUsersResponse.users;
+      if (pendingUsersResponse.users) {
         const pendingUsers = pendingUsersResponse.users;
         
-        const activeUsers = allUsers.filter(user => user.isActive).length;
-        const premiumUsers = allUsers.filter(user => 
-          user.subscription === 'argent' || user.subscription === 'or'
-        ).length;
-        
         setStats({
-          totalUsers: allUsers.length,
-          activeUsers,
+          totalUsers: 0, // Reset since we're focusing on new registrations only
+          activeUsers: 0,
           pendingUsers: pendingUsers.length,
-          premiumUsers,
+          premiumUsers: 0,
         });
       }
     } catch (error) {
@@ -87,41 +81,11 @@ const AdminDashboard = () => {
           </Button>
         </div>
         
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Stats Cards - Focused on new registrations */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Utilisateurs</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading ? "..." : stats.totalUsers}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Tous les utilisateurs inscrits
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Utilisateurs Actifs</CardTitle>
-              <UserCheck className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {loading ? "..." : stats.activeUsers}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Comptes validés et actifs
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">En Attente</CardTitle>
+              <CardTitle className="text-sm font-medium">Nouvelles Inscriptions</CardTitle>
               <UserX className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
@@ -129,59 +93,58 @@ const AdminDashboard = () => {
                 {loading ? "..." : stats.pendingUsers}
               </div>
               <p className="text-xs text-muted-foreground">
-                Demandes d'approbation
+                En attente d'approbation
               </p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Abonnements Premium</CardTitle>
-              <Trophy className="h-4 w-4 text-yellow-600" />
+              <CardTitle className="text-sm font-medium">Actions Rapides</CardTitle>
+              <Trophy className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
-                {loading ? "..." : stats.premiumUsers}
+              <div className="space-y-2">
+                <a 
+                  href="/admin/users" 
+                  className="block text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                  Gérer tous les utilisateurs
+                </a>
+                <a 
+                  href="/admin/payments" 
+                  className="block text-sm text-green-600 hover:text-green-800 underline"
+                >
+                  Gérer les paiements
+                </a>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Argent et Or
-              </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Pending Approvals Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Main Content - Only Pending Approvals */}
+        <div className="grid grid-cols-1 gap-6">
           <PendingApprovalsList onUserApproved={handleUserApproved} />
           
-          {/* Quick Actions Card */}
+          {/* Info Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Actions Rapides</CardTitle>
+              <CardTitle>Gestion des Nouvelles Inscriptions</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 gap-3">
-                <a 
-                  href="/admin/users" 
-                  className="flex items-center p-3 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
-                >
-                  <Users className="h-5 w-5 text-blue-600 mr-3" />
-                  <div>
-                    <div className="font-medium text-blue-900">Gérer les Utilisateurs</div>
-                    <div className="text-sm text-blue-600">Voir tous les utilisateurs</div>
-                  </div>
-                </a>
-                
-                <a 
-                  href="/admin/payments" 
-                  className="flex items-center p-3 bg-green-50 hover:bg-green-100 rounded-md transition-colors"
-                >
-                  <Trophy className="h-5 w-5 text-green-600 mr-3" />
-                  <div>
-                    <div className="font-medium text-green-900">Paiements</div>
-                    <div className="text-sm text-green-600">Gérer les abonnements</div>
-                  </div>
-                </a>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Cette section affiche uniquement les nouveaux utilisateurs qui s'inscrivent et qui attendent votre approbation. 
+                Une fois approuvés, ils disparaîtront de cette liste et pourront accéder à leur compte.
+              </p>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <UserCheck className="h-4 w-4 text-green-600" />
+                  <span>Approuver l'utilisateur</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <UserX className="h-4 w-4 text-red-600" />
+                  <span>Rejeter l'utilisateur</span>
+                </div>
               </div>
             </CardContent>
           </Card>

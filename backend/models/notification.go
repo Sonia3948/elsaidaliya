@@ -22,7 +22,7 @@ type Notification struct {
 	UserID      primitive.ObjectID `bson:"userID" json:"userID"`
 	FromID      primitive.ObjectID `bson:"fromID" json:"fromID"`
 	FromName    string             `bson:"fromName" json:"fromName"`
-	Type        NotificationType   `bson:"type" json:"type"`
+	Type        string             `bson:"type" json:"type"`
 	Title       string             `bson:"title" json:"title"`
 	Description string             `bson:"description" json:"description"`
 	Read        bool               `bson:"read" json:"read"`

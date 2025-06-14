@@ -78,16 +78,19 @@ func RegisterUser(c *gin.Context) {
 		Title:       "Nouvelle inscription",
 		Description: "Un nouveau " + newUser.Role + " s'est inscrit et attend validation",
 		Read:        false,
-		Status:      "pending",
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
+
+	// Get notification collection from the database
+	notificationCollection := adminCollection.Database().Collection("notifications")
 
 	// Save notification to database
 	_, err = notificationCollection.InsertOne(ctx, adminNotification)
 	if err != nil {
 		// Log error but don't fail the registration
-		c.Logger().Error("Error creating admin notification:", err)
+		// Using a simple print since c.Logger() doesn't exist
+		println("Error creating admin notification:", err.Error())
 	}
 
 	// Don't return the password

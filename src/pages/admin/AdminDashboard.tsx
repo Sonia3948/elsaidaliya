@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, UserCheck, UserX, Trophy, Trash2, Store, Pill } from "lucide-react";
+import { Users, UserCheck, UserX, Trophy, Trash2 } from "lucide-react";
 import PendingApprovalsList from "@/components/admin/PendingApprovalsList";
 import { userService } from "@/services/user";
 import { toast } from "sonner";
@@ -82,7 +82,7 @@ const AdminDashboard = () => {
         </div>
         
         {/* Stats Cards - Focused on new registrations */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Nouvelles Inscriptions</CardTitle>
@@ -100,39 +100,19 @@ const AdminDashboard = () => {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Gestion des Fournisseurs</CardTitle>
-              <Store className="h-4 w-4 text-blue-600" />
+              <CardTitle className="text-sm font-medium">Gestion des Utilisateurs</CardTitle>
+              <Users className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <a 
-                  href="/admin/suppliers" 
+                  href="/admin/users" 
                   className="block text-sm text-blue-600 hover:text-blue-800 underline"
                 >
-                  Voir tous les fournisseurs
+                  Voir tous les utilisateurs
                 </a>
                 <p className="text-xs text-muted-foreground">
-                  Gérer les comptes et abonnements
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Gestion des Pharmaciens</CardTitle>
-              <Pill className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <a 
-                  href="/admin/pharmacists" 
-                  className="block text-sm text-green-600 hover:text-green-800 underline"
-                >
-                  Voir tous les pharmaciens
-                </a>
-                <p className="text-xs text-muted-foreground">
-                  Gérer les comptes pharmaciens
+                  Gérer tous les comptes utilisateurs
                 </p>
               </div>
             </CardContent>
@@ -171,18 +151,6 @@ const AdminDashboard = () => {
                     className="text-sm text-blue-600 hover:text-blue-800 underline"
                   >
                     Gérer tous les utilisateurs
-                  </a>
-                  <a 
-                    href="/admin/suppliers" 
-                    className="text-sm text-blue-600 hover:text-blue-800 underline"
-                  >
-                    Gérer les fournisseurs
-                  </a>
-                  <a 
-                    href="/admin/pharmacists" 
-                    className="text-sm text-green-600 hover:text-green-800 underline"
-                  >
-                    Gérer les pharmaciens
                   </a>
                   <a 
                     href="/admin/payments" 

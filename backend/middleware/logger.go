@@ -3,7 +3,6 @@ package middleware
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"

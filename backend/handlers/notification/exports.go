@@ -3,7 +3,10 @@ package notification
 
 // Export functions to be used in notification_handlers.go
 var InitNotificationHandlersFunc = InitNotificationHandlers
+var CreateNotificationFunc = CreateNotification
 var CreatePaymentNotificationFunc = CreatePaymentNotification
+var GetUserNotificationsFunc = GetUserNotifications
 var GetAdminNotificationsFunc = GetAdminNotifications
 var MarkNotificationAsReadFunc = MarkNotificationAsRead
 var UpdateNotificationStatusFunc = UpdateNotificationStatus
+var CreateSupplierSubscriptionNotificationFunc = CreateSupplierSubscriptionNotification

@@ -3,6 +3,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -107,8 +108,13 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 func GetUserID(c *gin.Context) (primitive.ObjectID, error) {
 	userIDStr, exists := c.Get("userID")
 	if !exists {
-		return primitive.ObjectID{}, http.ErrNotFound
+		return primitive.ObjectID{}, errors.New("user ID not found in context")
 	}
 	
 	return primitive.ObjectIDFromHex(userIDStr.(string))
+}
+
+// AuthMiddleware is an alias for RequireAuth for consistency
+func AuthMiddleware() gin.HandlerFunc {
+	return RequireAuth
 }

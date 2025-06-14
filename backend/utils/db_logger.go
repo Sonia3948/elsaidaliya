@@ -4,7 +4,6 @@ package utils
 import (
 	"context"
 	"log"
-	"time"
 
 	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo/options"

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -26,13 +25,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Store, Eye, CheckCircle, XCircle, MoreHorizontal } from "lucide-react";
+import { Store, Eye, CheckCircle, XCircle, MoreHorizontal, Filter } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import DocumentsViewer from "@/components/admin/DocumentsViewer";
 import PaymentReceiptNotification from "@/components/admin/PaymentReceiptNotification";
+import { algeriasWilayas } from "@/data/wilayas";
 
 // Mock data - in a real app this would come from an API
 const mockSuppliers = [
@@ -108,6 +115,8 @@ const AdminSuppliers = () => {
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedWilaya, setSelectedWilaya] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -171,13 +180,21 @@ const AdminSuppliers = () => {
     });
   };
 
-  const filteredSuppliers = suppliers.filter(
-    (supplier) =>
+  const filteredSuppliers = suppliers.filter((supplier) => {
+    const matchesSearch = 
       supplier.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      supplier.wilaya.toLowerCase().includes(searchQuery.toLowerCase()) ||
       supplier.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (supplier.subscription && subscriptionBadges[supplier.subscription as keyof typeof subscriptionBadges].label.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+      supplier.phone.includes(searchQuery);
+    
+    const matchesWilaya = selectedWilaya === "" || supplier.wilaya.includes(selectedWilaya);
+    
+    const matchesStatus = 
+      statusFilter === "" || 
+      (statusFilter === "active" && supplier.isActive) ||
+      (statusFilter === "inactive" && !supplier.isActive);
+
+    return matchesSearch && matchesWilaya && matchesStatus;
+  });
 
   return (
     <DashboardLayout userRole="admin">
@@ -191,7 +208,7 @@ const AdminSuppliers = () => {
             <div className="flex items-center space-x-2">
               <Store className="h-5 w-5 text-pharmacy-dark" />
               <span className="text-lg font-medium text-pharmacy-dark">
-                {suppliers.length} Fournisseurs
+                {filteredSuppliers.length} Fournisseurs
               </span>
             </div>
             <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200">
@@ -200,13 +217,71 @@ const AdminSuppliers = () => {
           </div>
         </div>
 
-        <div className="mb-6">
-          <Input
-            placeholder="Rechercher par nom, wilaya, email ou abonnement..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-sm"
-          />
+        {/* Search and Filter Section */}
+        <div className="mb-6 bg-white p-4 rounded-lg shadow space-y-4">
+          <div className="flex items-center space-x-2 mb-4">
+            <Filter className="h-5 w-5 text-gray-500" />
+            <h3 className="text-lg font-medium">Filtres de recherche</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Recherche par nom/email/téléphone
+              </label>
+              <Input
+                placeholder="Rechercher..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Wilaya
+              </label>
+              <Select value={selectedWilaya} onValueChange={setSelectedWilaya}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Toutes les wilayas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Toutes les wilayas</SelectItem>
+                  {algeriasWilayas.map((wilaya) => (
+                    <SelectItem key={wilaya.code} value={wilaya.code}>
+                      {wilaya.code} - {wilaya.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Statut
+              </label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Tous les statuts" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Tous les statuts</SelectItem>
+                  <SelectItem value="active">Actif</SelectItem>
+                  <SelectItem value="inactive">Inactif</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedWilaya("");
+                  setStatusFilter("");
+                }}
+                className="w-full"
+              >
+                Réinitialiser
+              </Button>
+            </div>
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow overflow-hidden">

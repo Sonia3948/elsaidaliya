@@ -113,6 +113,8 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
     }
   };
 
+  const navItems = getNavItems();
+
   // Function to check if a link is active
   const isActiveLink = (href: string) => {
     return location.pathname.startsWith(href);

@@ -15,10 +15,12 @@ import (
 )
 
 var userCollection *mongo.Collection
+var listingCollection *mongo.Collection
 
 // InitUserHandlers initializes handlers for user management
 func InitUserHandlers(db *mongo.Database) {
 	userCollection = db.Collection("users")
+	listingCollection = db.Collection("listings")
 }
 
 // GetAllUsers fetches all users
@@ -171,6 +173,33 @@ func DeleteAllUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Tous les utilisateurs ont été supprimés avec succès",
 		"deletedCount": result.DeletedCount,
+	})
+}
+
+// DeleteAllData removes all users and listings from the database (admin only)
+func DeleteAllData(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Delete all users except admins
+	userFilter := bson.M{"role": bson.M{"$ne": "admin"}}
+	userResult, err := userCollection.DeleteMany(ctx, userFilter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la suppression des utilisateurs"})
+		return
+	}
+
+	// Delete all listings
+	listingResult, err := listingCollection.DeleteMany(ctx, bson.M{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la suppression des listings"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Toutes les données ont été supprimées avec succès",
+		"deletedUsers": userResult.DeletedCount,
+		"deletedListings": listingResult.DeletedCount,
 	})
 }
 

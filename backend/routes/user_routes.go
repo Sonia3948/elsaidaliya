@@ -21,4 +21,10 @@ func SetupUserRoutes(r *gin.Engine) {
 		users.PUT("/:id/subscription", middleware.RequireAuth, middleware.RequireRole("admin"), handlers.UpdateUserSubscription)
 		users.DELETE("/all", middleware.RequireAuth, middleware.RequireRole("admin"), handlers.DeleteAllUsers) // New endpoint to delete all users
 	}
+
+	// Admin routes for bulk operations
+	admin := r.Group("/api/admin")
+	{
+		admin.DELETE("/delete-all-data", middleware.RequireAuth, middleware.RequireRole("admin"), handlers.DeleteAllData)
+	}
 }

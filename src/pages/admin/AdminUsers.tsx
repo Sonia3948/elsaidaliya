@@ -43,7 +43,8 @@ import {
   Search,
   Filter,
   Upload,
-  FileText
+  FileText,
+  Trash2
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -273,6 +274,22 @@ const AdminUsers = () => {
     }
   };
 
+  const handleDeleteAllData = async () => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer TOUTES les données (utilisateurs et listings) ? Cette action est irréversible.")) {
+      try {
+        const response = await userService.deleteAllData();
+        if (response.message) {
+          toast.success(`${response.message}. ${response.deletedUsers} utilisateurs et ${response.deletedListings} listings supprimés.`);
+          // Refresh the users list
+          fetchUsers();
+        }
+      } catch (error) {
+        console.error("Error deleting all data:", error);
+        toast.error("Erreur lors de la suppression des données");
+      }
+    }
+  };
+
   const getSubscriptionIcon = (subscription: string) => {
     switch (subscription.toLowerCase()) {
       case 'or':
@@ -356,6 +373,15 @@ const AdminUsers = () => {
              activeTab === "pharmacist" ? "Pharmaciens" : "Fournisseurs"}
           </CardTitle>
           <div className="flex items-center gap-2">
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={handleDeleteAllData}
+              className="flex items-center gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              Supprimer toutes les données
+            </Button>
             <Button variant="outline" size="sm" onClick={() => {
               setSearchQuery("");
               setFilterWilaya("");

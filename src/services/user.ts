@@ -1,4 +1,3 @@
-
 import { getAuthToken, handleResponse, handleFetchError, fetchWithAuth } from "./common";
 
 const API_URL = "http://localhost:8080/api";
@@ -11,6 +10,22 @@ export const userService = {
       const queryString = new URLSearchParams(filters as Record<string, string>).toString();
       const url = `${API_URL}/users${queryString ? `?${queryString}` : ''}`;
       const response = await fetchWithAuth(url);
+      
+      return await handleResponse(response);
+    } catch (error) {
+      return handleFetchError(error);
+    }
+  },
+  
+  // Récupérer les fournisseurs vedettes (public endpoint)
+  getFeaturedSuppliers: async () => {
+    try {
+      const response = await fetch(`${API_URL}/users/featured`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       
       return await handleResponse(response);
     } catch (error) {
@@ -37,7 +52,7 @@ export const userService = {
       return handleFetchError(error);
     }
   },
-
+  
   // Mise à jour d'un utilisateur
   updateUser: async (id: string, userData: any) => {
     try {
@@ -92,7 +107,7 @@ export const userService = {
       return handleFetchError(error);
     }
   },
-
+  
   // Supprimer toutes les données (utilisateurs et listings)
   deleteAllData: async () => {
     try {

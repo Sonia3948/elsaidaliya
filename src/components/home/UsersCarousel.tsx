@@ -1,11 +1,13 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Store, MapPin } from "lucide-react";
+import { userService } from "@/services/user";
 
 type FeaturedSupplier = {
   id: string;
-  name: string;
+  businessName: string;
   image: string;
   wilaya: string;
   description: string;
@@ -26,13 +28,22 @@ const UsersCarousel = () => {
   useEffect(() => {
     const fetchFeaturedSuppliers = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/users/featured');
-        const data = await response.json();
+        console.log("Fetching featured suppliers...");
+        const response = await userService.getFeaturedSuppliers();
+        console.log("Featured suppliers response:", response);
 
-        if (data && data.suppliers && Array.isArray(data.suppliers)) {
-          setFeaturedSuppliers(data.suppliers);
+        if (response && response.suppliers && Array.isArray(response.suppliers)) {
+          const mappedSuppliers = response.suppliers.map((supplier: any) => ({
+            id: supplier.id,
+            businessName: supplier.businessName || supplier.name || "Fournisseur",
+            image: supplier.image || "",
+            wilaya: supplier.wilaya || "",
+            description: supplier.description || "Fournisseur de produits pharmaceutiques"
+          }));
+          setFeaturedSuppliers(mappedSuppliers);
         } else {
-          throw new Error("Format de réponse inattendu");
+          console.log("No suppliers found or invalid response format");
+          setFeaturedSuppliers([]);
         }
       } catch (error) {
         console.error("Error fetching featured suppliers:", error);
@@ -49,14 +60,27 @@ const UsersCarousel = () => {
 
   const visibleSuppliers = () => {
     const result = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 3; i++) {
       const idx = (currentIndex + i) % featuredSuppliers.length;
-      result.push(featuredSuppliers[idx]);
+      if (featuredSuppliers[idx]) {
+        result.push(featuredSuppliers[idx]);
+      }
     }
     return result;
   };
 
-  if (featuredSuppliers.length === 0) return null;
+  if (featuredSuppliers.length === 0) {
+    return (
+      <section className="py-12 bg-pharmacy-light">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold mb-4 text-pharmacy-dark">Nos Fournisseurs Vedettes</h2>
+            <p className="text-gray-600">Aucun fournisseur vedette disponible pour le moment.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-12 bg-pharmacy-light">
@@ -79,7 +103,7 @@ const UsersCarousel = () => {
                       <Store size={24} className="text-pharmacy-dark" />
                     </div>
                     <div className="ml-3">
-                      <h3 className="font-semibold text-lg text-gray-900">{supplier.name}</h3>
+                      <h3 className="font-semibold text-lg text-gray-900">{supplier.businessName}</h3>
                     </div>
                   </div>
                 </div>
@@ -117,4 +141,3 @@ const UsersCarousel = () => {
 };
 
 export default UsersCarousel;
-

@@ -73,15 +73,13 @@ func GetFeaturedSuppliers(c *gin.Context) {
 	findOptions := options.Find()
 	findOptions.SetProjection(bson.M{
 		"password": 0,
-		"subscription": 0,  // Hide subscription info
-		"subExpiry": 0,     // Hide subscription expiry
 	})
 
 	// Filter for active suppliers with gold subscription
 	filter := bson.M{
 		"role":         "fournisseur",
 		"isActive":     true,
-		"subscription": "or",  // Only fetch gold subscription suppliers
+		"subscription": "or",  // Keep as "or" since that's the French term for gold
 	}
 
 	cursor, err := userCollection.Find(ctx, filter, findOptions)

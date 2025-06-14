@@ -11,7 +11,7 @@ import PaymentReceiptNotification from "@/components/admin/PaymentReceiptNotific
 interface PaymentNotification {
   id: string;
   userName: string;
-  userRole: "pharmacist" | "supplier";
+  userRole: "supplier";  // Only suppliers now
   dateSubmitted: string;
   receiptUrl: string;
   status: "pending" | "approved" | "rejected";
@@ -26,20 +26,20 @@ const AdminPayments = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Fetch notifications from API (mock data for now)
+    // Fetch notifications from API (mock data for now) - Only suppliers
     setTimeout(() => {
       const mockNotifications: PaymentNotification[] = [
         {
           id: "1",
-          userName: "Pharmacie Centrale",
-          userRole: "pharmacist",
+          userName: "MediStock Algérie",
+          userRole: "supplier",
           dateSubmitted: "15 mai 2023",
           receiptUrl: "/placeholder.svg",
           status: "pending"
         },
         {
           id: "2",
-          userName: "MediStock Algérie",
+          userName: "PharmaDistrib",
           userRole: "supplier",
           dateSubmitted: "14 mai 2023",
           receiptUrl: "/placeholder.svg",
@@ -55,11 +55,19 @@ const AdminPayments = () => {
         },
         {
           id: "4",
-          userName: "Pharmacie du Sud",
-          userRole: "pharmacist",
+          userName: "MediCorp Algérie",
+          userRole: "supplier",
           dateSubmitted: "10 mai 2023",
           receiptUrl: "/placeholder.svg",
           status: "rejected"
+        },
+        {
+          id: "5",
+          userName: "AlgériaPharma",
+          userRole: "supplier",
+          dateSubmitted: "8 mai 2023",
+          receiptUrl: "/placeholder.svg",
+          status: "approved"
         },
       ];
       
@@ -77,7 +85,7 @@ const AdminPayments = () => {
   };
 
   const handleApprove = async (id: string) => {
-    // Simuler une requête API pour approuver le paiement
+    // Simuler une requête API pour approuver le paiement du fournisseur
     
     // Mise à jour de l'état local
     setNotifications(notifications.map(notification => 
@@ -85,13 +93,13 @@ const AdminPayments = () => {
     ));
     
     toast({
-      title: "Paiement approuvé",
-      description: "Le compte utilisateur a été activé avec succès.",
+      title: "Paiement fournisseur approuvé",
+      description: "Le compte fournisseur a été activé avec succès.",
     });
   };
 
   const handleReject = async (id: string) => {
-    // Simuler une requête API pour rejeter le paiement
+    // Simuler une requête API pour rejeter le paiement du fournisseur
     
     // Mise à jour de l'état local
     setNotifications(notifications.map(notification => 
@@ -99,8 +107,8 @@ const AdminPayments = () => {
     ));
     
     toast({
-      title: "Paiement rejeté",
-      description: "Le paiement a été rejeté. L'utilisateur en sera informé.",
+      title: "Paiement fournisseur rejeté",
+      description: "Le paiement a été rejeté. Le fournisseur en sera informé.",
       variant: "destructive"
     });
   };
@@ -116,7 +124,10 @@ const AdminPayments = () => {
   return (
     <DashboardLayout userRole="admin">
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Gestion des Paiements</h1>
+        <h1 className="text-2xl font-bold mb-2">Gestion des Paiements Fournisseurs</h1>
+        <p className="text-gray-600 mb-6">
+          Gérez les bons de versement soumis par les fournisseurs pour activer leurs comptes d'abonnement.
+        </p>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
@@ -132,11 +143,11 @@ const AdminPayments = () => {
           <TabsContent value={activeTab}>
             {loading ? (
               <div className="py-12 text-center">
-                <p className="text-gray-500">Chargement des paiements...</p>
+                <p className="text-gray-500">Chargement des paiements fournisseurs...</p>
               </div>
             ) : filteredNotifications.length === 0 ? (
               <div className="py-12 text-center">
-                <p className="text-gray-500">Aucun paiement {
+                <p className="text-gray-500">Aucun paiement fournisseur {
                   activeTab === "pending" ? "en attente" : 
                   activeTab === "approved" ? "approuvé" : "rejeté"
                 } pour le moment.</p>

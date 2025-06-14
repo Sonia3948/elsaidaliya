@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, User, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, User, Loader2, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { userService } from "@/services/user";
@@ -23,6 +23,7 @@ interface PendingApprovalsListProps {
 const PendingApprovalsList = ({ onUserApproved }: PendingApprovalsListProps) => {
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [processingUsers, setProcessingUsers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -32,14 +33,22 @@ const PendingApprovalsList = ({ onUserApproved }: PendingApprovalsListProps) => 
   const fetchPendingUsers = async () => {
     try {
       setLoading(true);
-      const response = await userService.getPendingUsers();
+      setError(null);
+      console.log("Fetching pending users...");
       
-      if (response.users) {
+      const response = await userService.getPendingUsers();
+      console.log("Pending users response:", response);
+      
+      if (response && response.users) {
         setPendingUsers(response.users);
+      } else if (response === null) {
+        setError("Impossible de se connecter au serveur backend");
+      } else {
+        setPendingUsers([]);
       }
     } catch (error) {
       console.error("Error fetching pending users:", error);
-      toast.error("Erreur lors de la récupération des utilisateurs en attente");
+      setError("Erreur lors de la récupération des utilisateurs en attente");
     } finally {
       setLoading(false);
     }
@@ -118,6 +127,14 @@ const PendingApprovalsList = ({ onUserApproved }: PendingApprovalsListProps) => 
       <CardContent>
         {loading ? (
           <p className="text-center py-4">Chargement...</p>
+        ) : error ? (
+          <div className="text-center py-8">
+            <AlertTriangle className="h-12 w-12 text-red-300 mx-auto mb-2" />
+            <p className="text-center text-red-600 mb-4">{error}</p>
+            <Button onClick={fetchPendingUsers} variant="outline">
+              Réessayer
+            </Button>
+          </div>
         ) : pendingUsers.length === 0 ? (
           <div className="text-center py-8">
             <User className="h-12 w-12 text-gray-300 mx-auto mb-2" />

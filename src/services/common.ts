@@ -29,17 +29,32 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  return fetch(url, {
-    ...options,
-    headers,
-    credentials: "include",
-  });
+  console.log("Making request to:", url);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      credentials: "include",
+    });
+    
+    console.log("Response status:", response.status);
+    return response;
+  } catch (error) {
+    console.error("Fetch error for URL:", url, error);
+    throw error;
+  }
 };
 
 // Fonction générique pour gérer les erreurs des requêtes
 export const handleFetchError = (error: any) => {
-  console.error("API Error:", error);
-  toast.error("Une erreur est survenue lors de la communication avec le serveur");
+  console.error("API Error details:", error);
+  
+  if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+    toast.error("Impossible de se connecter au serveur. Vérifiez que le serveur backend est en cours d'exécution sur localhost:8080");
+  } else {
+    toast.error("Une erreur est survenue lors de la communication avec le serveur");
+  }
   return null;
 };
 

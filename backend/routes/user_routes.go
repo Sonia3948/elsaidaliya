@@ -19,5 +19,6 @@ func SetupUserRoutes(r *gin.Engine) {
 		users.PUT("/:id", middleware.RequireAuth, handlers.UpdateUser)
 		users.PUT("/:id/status", middleware.RequireAuth, middleware.RequireRole("admin"), handlers.UpdateUserStatus)
 		users.PUT("/:id/subscription", middleware.RequireAuth, middleware.RequireRole("admin"), handlers.UpdateUserSubscription)
+		users.DELETE("/all", middleware.RequireAuth, middleware.RequireRole("admin"), handlers.DeleteAllUsers) // New endpoint to delete all users
 	}
 }

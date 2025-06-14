@@ -1,4 +1,3 @@
-
 import { getAuthToken, handleResponse, handleFetchError, fetchWithAuth } from "./common";
 
 const API_URL = "http://localhost:8080/api";
@@ -72,6 +71,19 @@ export const userService = {
       const response = await fetchWithAuth(`${API_URL}/users/${id}/subscription`, {
         method: "PUT",
         body: JSON.stringify({ subscription, subExpiry }),
+      });
+      
+      return await handleResponse(response);
+    } catch (error) {
+      return handleFetchError(error);
+    }
+  },
+  
+  // Supprimer tous les utilisateurs (admin seulement)
+  deleteAllUsers: async () => {
+    try {
+      const response = await fetchWithAuth(`${API_URL}/users/all`, {
+        method: "DELETE",
       });
       
       return await handleResponse(response);

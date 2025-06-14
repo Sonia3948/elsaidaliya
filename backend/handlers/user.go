@@ -154,6 +154,26 @@ func GetUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"user": user})
 }
 
+// DeleteAllUsers removes all users from the database (admin only)
+func DeleteAllUsers(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Delete all users except admins
+	filter := bson.M{"role": bson.M{"$ne": "admin"}}
+	
+	result, err := userCollection.DeleteMany(ctx, filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la suppression des utilisateurs"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Tous les utilisateurs ont été supprimés avec succès",
+		"deletedCount": result.DeletedCount,
+	})
+}
+
 // UpdateUserStatus updates a user's active status
 func UpdateUserStatus(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

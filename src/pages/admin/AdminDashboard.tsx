@@ -1,10 +1,11 @@
-
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserCheck, UserX, Trophy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, UserCheck, UserX, Trophy, Trash2 } from "lucide-react";
 import PendingApprovalsList from "@/components/admin/PendingApprovalsList";
 import { userService } from "@/services/user";
+import { toast } from "sonner";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -50,6 +51,22 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteAllUsers = async () => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer tous les utilisateurs ? Cette action est irréversible.")) {
+      try {
+        const response = await userService.deleteAllUsers();
+        if (response.message) {
+          toast.success(response.message);
+          // Refresh stats after deletion
+          fetchDashboardStats();
+        }
+      } catch (error) {
+        console.error("Error deleting all users:", error);
+        toast.error("Erreur lors de la suppression des utilisateurs");
+      }
+    }
+  };
+
   const handleUserApproved = () => {
     // Refresh stats when a user is approved
     fetchDashboardStats();
@@ -58,7 +75,17 @@ const AdminDashboard = () => {
   return (
     <DashboardLayout userRole="admin">
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Tableau de Bord Administrateur</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Tableau de Bord Administrateur</h1>
+          <Button 
+            variant="destructive" 
+            onClick={handleDeleteAllUsers}
+            className="flex items-center gap-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            Supprimer tous les utilisateurs
+          </Button>
+        </div>
         
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

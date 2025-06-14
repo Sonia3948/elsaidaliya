@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, UserCheck, UserX, Trophy, Trash2, FileCheck, CreditCard, TrendingUp, AlertCircle } from "lucide-react";
+import { Users, UserCheck, UserX, Trophy, Trash2, FileCheck, CreditCard, TrendingUp, AlertCircle, UserPlus, Calendar } from "lucide-react";
 import PendingApprovalsList from "@/components/admin/PendingApprovalsList";
 import { userService } from "@/services/user";
 import { toast } from "sonner";
@@ -18,6 +17,15 @@ const AdminDashboard = () => {
     approvedPayments: 0,
     rejectedPayments: 0,
     totalRevenue: 0,
+    // Nouvelles statistiques d'inscription
+    totalPharmacists: 0,
+    totalSuppliers: 0,
+    pendingPharmacists: 0,
+    pendingSuppliers: 0,
+    activePharmacists: 0,
+    activeSuppliers: 0,
+    monthlyRegistrations: 0,
+    weeklyRegistrations: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -35,7 +43,11 @@ const AdminDashboard = () => {
       if (pendingUsersResponse.users) {
         const pendingUsers = pendingUsersResponse.users;
         
-        // Mock payment statistics - in real app, this would come from API
+        // Calculer les statistiques d'inscription par rôle
+        const pendingPharmacists = pendingUsers.filter(user => user.role === 'pharmacien').length;
+        const pendingSuppliers = pendingUsers.filter(user => user.role === 'fournisseur').length;
+        
+        // Mock data pour les statistiques complètes d'inscription
         setStats({
           totalUsers: 0, // Reset since we're focusing on new registrations only
           activeUsers: 0,
@@ -45,6 +57,15 @@ const AdminDashboard = () => {
           approvedPayments: 8, // Mock data for approved payments
           rejectedPayments: 1, // Mock data for rejected payments
           totalRevenue: 24000, // Mock revenue from subscriptions
+          // Statistiques d'inscription détaillées
+          totalPharmacists: 45, // Mock: total pharmaciens inscrits
+          totalSuppliers: 32, // Mock: total fournisseurs inscrits
+          pendingPharmacists,
+          pendingSuppliers,
+          activePharmacists: 42, // Mock: pharmaciens actifs
+          activeSuppliers: 28, // Mock: fournisseurs actifs
+          monthlyRegistrations: 15, // Mock: inscriptions ce mois
+          weeklyRegistrations: 4, // Mock: inscriptions cette semaine
         });
       }
     } catch (error) {
@@ -90,7 +111,7 @@ const AdminDashboard = () => {
           </Button>
         </div>
         
-        {/* Stats Cards - Enhanced with payment statistics */}
+        {/* Statistiques d'inscription principales */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -107,6 +128,139 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Inscriptions ce Mois</CardTitle>
+              <Calendar className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {loading ? "..." : stats.monthlyRegistrations}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                +{stats.weeklyRegistrations} cette semaine
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Pharmaciens</CardTitle>
+              <UserCheck className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {loading ? "..." : stats.totalPharmacists}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {stats.activePharmacists} actifs
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Fournisseurs</CardTitle>
+              <Users className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">
+                {loading ? "..." : stats.totalSuppliers}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {stats.activeSuppliers} actifs
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Statistiques détaillées par rôle */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                Répartition des Inscriptions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Pharmaciens en attente</span>
+                  <span className="font-semibold text-orange-600">{stats.pendingPharmacists}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Fournisseurs en attente</span>
+                  <span className="font-semibold text-orange-600">{stats.pendingSuppliers}</span>
+                </div>
+                <div className="pt-2 border-t">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Total en attente</span>
+                    <span className="font-bold text-orange-600">{stats.pendingUsers}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Taux d'Activité
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-muted-foreground">Pharmaciens</span>
+                    <span className="text-sm font-medium">
+                      {stats.totalPharmacists > 0 
+                        ? `${Math.round((stats.activePharmacists / stats.totalPharmacists) * 100)}%`
+                        : '0%'
+                      }
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-600 h-2 rounded-full" 
+                      style={{ 
+                        width: stats.totalPharmacists > 0 
+                          ? `${(stats.activePharmacists / stats.totalPharmacists) * 100}%`
+                          : '0%'
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-muted-foreground">Fournisseurs</span>
+                    <span className="text-sm font-medium">
+                      {stats.totalSuppliers > 0 
+                        ? `${Math.round((stats.activeSuppliers / stats.totalSuppliers) * 100)}%`
+                        : '0%'
+                      }
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-purple-600 h-2 rounded-full" 
+                      style={{ 
+                        width: stats.totalSuppliers > 0 
+                          ? `${(stats.activeSuppliers / stats.totalSuppliers) * 100}%`
+                          : '0%'
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Stats Cards - Paiements */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Paiements en Attente</CardTitle>

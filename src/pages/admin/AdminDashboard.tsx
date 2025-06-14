@@ -6,7 +6,6 @@ import { Users, UserCheck, UserX, Trophy, Trash2, FileCheck, CreditCard, Trendin
 import PendingApprovalsList from "@/components/admin/PendingApprovalsList";
 import { userService } from "@/services/user";
 import { toast } from "sonner";
-
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -25,47 +24,54 @@ const AdminDashboard = () => {
     activePharmacists: 0,
     activeSuppliers: 0,
     monthlyRegistrations: 0,
-    weeklyRegistrations: 0,
+    weeklyRegistrations: 0
   });
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     fetchDashboardStats();
   }, []);
-
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch only pending users for the new dashboard focus
       const pendingUsersResponse = await userService.getPendingUsers();
-      
       if (pendingUsersResponse.users) {
         const pendingUsers = pendingUsersResponse.users;
-        
+
         // Calculer les statistiques d'inscription par rôle
         const pendingPharmacists = pendingUsers.filter(user => user.role === 'pharmacien').length;
         const pendingSuppliers = pendingUsers.filter(user => user.role === 'fournisseur').length;
-        
+
         // Mock data pour les statistiques complètes d'inscription
         setStats({
-          totalUsers: 0, // Reset since we're focusing on new registrations only
+          totalUsers: 0,
+          // Reset since we're focusing on new registrations only
           activeUsers: 0,
           pendingUsers: pendingUsers.length,
           premiumUsers: 0,
-          pendingPayments: 2, // Mock data for pending supplier payments
-          approvedPayments: 8, // Mock data for approved payments
-          rejectedPayments: 1, // Mock data for rejected payments
-          totalRevenue: 24000, // Mock revenue from subscriptions
+          pendingPayments: 2,
+          // Mock data for pending supplier payments
+          approvedPayments: 8,
+          // Mock data for approved payments
+          rejectedPayments: 1,
+          // Mock data for rejected payments
+          totalRevenue: 24000,
+          // Mock revenue from subscriptions
           // Statistiques d'inscription détaillées
-          totalPharmacists: 45, // Mock: total pharmaciens inscrits
-          totalSuppliers: 32, // Mock: total fournisseurs inscrits
+          totalPharmacists: 45,
+          // Mock: total pharmaciens inscrits
+          totalSuppliers: 32,
+          // Mock: total fournisseurs inscrits
           pendingPharmacists,
           pendingSuppliers,
-          activePharmacists: 42, // Mock: pharmaciens actifs
-          activeSuppliers: 28, // Mock: fournisseurs actifs
-          monthlyRegistrations: 15, // Mock: inscriptions ce mois
-          weeklyRegistrations: 4, // Mock: inscriptions cette semaine
+          activePharmacists: 42,
+          // Mock: pharmaciens actifs
+          activeSuppliers: 28,
+          // Mock: fournisseurs actifs
+          monthlyRegistrations: 15,
+          // Mock: inscriptions ce mois
+          weeklyRegistrations: 4 // Mock: inscriptions cette semaine
         });
       }
     } catch (error) {
@@ -74,7 +80,6 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
-
   const handleDeleteAllUsers = async () => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer tous les utilisateurs ? Cette action est irréversible.")) {
       try {
@@ -90,25 +95,15 @@ const AdminDashboard = () => {
       }
     }
   };
-
   const handleUserApproved = () => {
     // Refresh stats when a user is approved
     fetchDashboardStats();
   };
-
-  return (
-    <DashboardLayout userRole="admin">
+  return <DashboardLayout userRole="admin">
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Tableau de Bord Administrateur</h1>
-          <Button 
-            variant="destructive" 
-            onClick={handleDeleteAllUsers}
-            className="flex items-center gap-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            Supprimer tous les utilisateurs
-          </Button>
+          
         </div>
         
         {/* Statistiques d'inscription principales */}
@@ -216,42 +211,26 @@ const AdminDashboard = () => {
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-muted-foreground">Pharmaciens</span>
                     <span className="text-sm font-medium">
-                      {stats.totalPharmacists > 0 
-                        ? `${Math.round((stats.activePharmacists / stats.totalPharmacists) * 100)}%`
-                        : '0%'
-                      }
+                      {stats.totalPharmacists > 0 ? `${Math.round(stats.activePharmacists / stats.totalPharmacists * 100)}%` : '0%'}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-green-600 h-2 rounded-full" 
-                      style={{ 
-                        width: stats.totalPharmacists > 0 
-                          ? `${(stats.activePharmacists / stats.totalPharmacists) * 100}%`
-                          : '0%'
-                      }}
-                    ></div>
+                    <div className="bg-green-600 h-2 rounded-full" style={{
+                    width: stats.totalPharmacists > 0 ? `${stats.activePharmacists / stats.totalPharmacists * 100}%` : '0%'
+                  }}></div>
                   </div>
                 </div>
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-muted-foreground">Fournisseurs</span>
                     <span className="text-sm font-medium">
-                      {stats.totalSuppliers > 0 
-                        ? `${Math.round((stats.activeSuppliers / stats.totalSuppliers) * 100)}%`
-                        : '0%'
-                      }
+                      {stats.totalSuppliers > 0 ? `${Math.round(stats.activeSuppliers / stats.totalSuppliers * 100)}%` : '0%'}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-purple-600 h-2 rounded-full" 
-                      style={{ 
-                        width: stats.totalSuppliers > 0 
-                          ? `${(stats.activeSuppliers / stats.totalSuppliers) * 100}%`
-                          : '0%'
-                      }}
-                    ></div>
+                    <div className="bg-purple-600 h-2 rounded-full" style={{
+                    width: stats.totalSuppliers > 0 ? `${stats.activeSuppliers / stats.totalSuppliers * 100}%` : '0%'
+                  }}></div>
                   </div>
                 </div>
               </div>
@@ -343,10 +322,7 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <a 
-                  href="/admin/payments" 
-                  className="block p-3 bg-yellow-50 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition-colors"
-                >
+                <a href="/admin/payments" className="block p-3 bg-yellow-50 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition-colors">
                   <div className="flex items-center gap-2">
                     <CreditCard className="h-4 w-4 text-yellow-600" />
                     <span className="text-sm font-medium">Gérer les paiements</span>
@@ -355,10 +331,7 @@ const AdminDashboard = () => {
                     {stats.pendingPayments} en attente
                   </p>
                 </a>
-                <a 
-                  href="/admin/users" 
-                  className="block p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
-                >
+                <a href="/admin/users" className="block p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-blue-600" />
                     <span className="text-sm font-medium">Gérer les utilisateurs</span>
@@ -381,21 +354,13 @@ const AdminDashboard = () => {
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-muted-foreground">Paiements</span>
                     <span className="text-sm font-medium">
-                      {stats.approvedPayments + stats.rejectedPayments > 0 
-                        ? `${Math.round((stats.approvedPayments / (stats.approvedPayments + stats.rejectedPayments)) * 100)}%`
-                        : '0%'
-                      }
+                      {stats.approvedPayments + stats.rejectedPayments > 0 ? `${Math.round(stats.approvedPayments / (stats.approvedPayments + stats.rejectedPayments) * 100)}%` : '0%'}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-green-600 h-2 rounded-full" 
-                      style={{ 
-                        width: stats.approvedPayments + stats.rejectedPayments > 0 
-                          ? `${(stats.approvedPayments / (stats.approvedPayments + stats.rejectedPayments)) * 100}%`
-                          : '0%'
-                      }}
-                    ></div>
+                    <div className="bg-green-600 h-2 rounded-full" style={{
+                    width: stats.approvedPayments + stats.rejectedPayments > 0 ? `${stats.approvedPayments / (stats.approvedPayments + stats.rejectedPayments) * 100}%` : '0%'
+                  }}></div>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -434,8 +399,6 @@ const AdminDashboard = () => {
           </Card>
         </div>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default AdminDashboard;

@@ -14,6 +14,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminPayments from "./pages/admin/AdminPayments";
+import AdminSuppliers from "./pages/admin/AdminSuppliers";
+import AdminPharmacists from "./pages/admin/AdminPharmacists";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import SupplierListings from "./pages/supplier/SupplierListings";
 import SupplierOffers from "./pages/supplier/SupplierOffers";
@@ -51,6 +53,8 @@ const App = () => (
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/suppliers" element={<AdminSuppliers />} />
+          <Route path="/admin/pharmacists" element={<AdminPharmacists />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/payments" element={<AdminPayments />} />
           

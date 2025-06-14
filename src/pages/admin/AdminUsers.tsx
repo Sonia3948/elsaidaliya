@@ -49,6 +49,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { algeriasWilayas } from "@/data/wilayas";
+import { userService } from "@/services/user";
 
 interface User {
   id: string;

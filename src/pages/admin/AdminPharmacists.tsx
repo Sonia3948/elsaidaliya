@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -88,8 +89,8 @@ const AdminPharmacists = () => {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedWilaya, setSelectedWilaya] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [selectedWilaya, setSelectedWilaya] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedPharmacist, setSelectedPharmacist] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -133,10 +134,10 @@ const AdminPharmacists = () => {
       pharmacist.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pharmacist.phone.includes(searchQuery);
     
-    const matchesWilaya = selectedWilaya === "" || pharmacist.wilaya.includes(selectedWilaya);
+    const matchesWilaya = selectedWilaya === "all" || pharmacist.wilaya.includes(selectedWilaya);
     
     const matchesStatus = 
-      statusFilter === "" || 
+      statusFilter === "all" || 
       (statusFilter === "active" && pharmacist.isActive) ||
       (statusFilter === "inactive" && !pharmacist.isActive);
 
@@ -188,7 +189,7 @@ const AdminPharmacists = () => {
                   <SelectValue placeholder="Toutes les wilayas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Toutes les wilayas</SelectItem>
+                  <SelectItem value="all">Toutes les wilayas</SelectItem>
                   {algeriasWilayas.map((wilaya) => (
                     <SelectItem key={wilaya.code} value={wilaya.code}>
                       {wilaya.code} - {wilaya.name}
@@ -206,7 +207,7 @@ const AdminPharmacists = () => {
                   <SelectValue placeholder="Tous les statuts" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tous les statuts</SelectItem>
+                  <SelectItem value="all">Tous les statuts</SelectItem>
                   <SelectItem value="active">Actif</SelectItem>
                   <SelectItem value="inactive">Inactif</SelectItem>
                 </SelectContent>
@@ -217,8 +218,8 @@ const AdminPharmacists = () => {
                 variant="outline"
                 onClick={() => {
                   setSearchQuery("");
-                  setSelectedWilaya("");
-                  setStatusFilter("");
+                  setSelectedWilaya("all");
+                  setStatusFilter("all");
                 }}
                 className="w-full"
               >

@@ -82,8 +82,8 @@ func RegisterUser(c *gin.Context) {
 		UpdatedAt:   time.Now(),
 	}
 
-	// Get notification collection from the database
-	notificationCollection := adminCollection.Database().Collection("notifications")
+	// Get notification collection from the database using userCollection
+	notificationCollection := userCollection.Database().Collection("notifications")
 
 	// Save notification to database
 	_, err = notificationCollection.InsertOne(ctx, adminNotification)

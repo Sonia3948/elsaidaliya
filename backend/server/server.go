@@ -1,3 +1,4 @@
+
 package server
 
 import (
@@ -33,9 +34,16 @@ func New(database *mongo.Database) *Server {
 		frontendURL = "http://localhost:5173"
 	}
 
-	// Configure CORS
+	// Configure CORS with multiple allowed origins
+	allowedOrigins := []string{
+		frontendURL,
+		"http://localhost:5173",
+		"http://localhost:8080",
+		"https://id-preview--ea9bef20-e4c1-40e2-be12-a22bd2bb3083.lovable.app",
+	}
+
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{frontendURL},
+		AllowOrigins:     allowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

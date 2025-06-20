@@ -33,10 +33,11 @@ const AdminLoginPage = () => {
     try {
       // Check for the hardcoded admin account
       if (formData.identifier === "0549050018" && formData.password === "Ned@0820") {
-        // Simulate successful login with admin account
+        // Simulate successful login with admin account including session token
         const adminUser = {
           id: "admin-id",
-          role: "admin"
+          role: "admin",
+          token: "dev-admin-session-token-12345" // Add session token for development
         };
         localStorage.setItem("user", JSON.stringify(adminUser));
         toast({

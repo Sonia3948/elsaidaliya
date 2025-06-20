@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,26 +9,23 @@ import { authService } from "@/services";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     identifier: "",
     password: ""
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const {
-      name,
-      value
-    } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value
     });
     setError("");
   };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -35,10 +33,11 @@ const LoginPage = () => {
     try {
       // In development mode, check for the hardcoded admin account
       if (import.meta.env.DEV && formData.identifier === "0549050018" && formData.password === "Ned@0820") {
-        // Simulate successful login with admin account
+        // Simulate successful login with admin account including session token
         const adminUser = {
           id: "admin-id",
-          role: "admin"
+          role: "admin",
+          token: "dev-admin-session-token-12345" // Add session token for development
         };
         localStorage.setItem("user", JSON.stringify(adminUser));
         toast({
@@ -52,9 +51,10 @@ const LoginPage = () => {
 
       // Call the API for real login - Fixed: use identifier instead of email
       const response = await authService.login({
-        identifier: formData.identifier, // Using identifier property instead of email
+        identifier: formData.identifier,
         password: formData.password
       });
+      
       if (response && !response.error) {
         // Store user data in localStorage
         localStorage.setItem("user", JSON.stringify(response.user));
@@ -81,6 +81,7 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
+  
   return <Layout>
       <div className="flex min-h-[calc(100vh-64px-200px)] items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
@@ -139,14 +140,11 @@ const LoginPage = () => {
                   {isLoading ? "Connexion en cours..." : "Se connecter"}
                 </Button>
               </div>
-              
-              <div className="text-center mt-4">
-                
-              </div>
             </form>
           </div>
         </div>
       </div>
     </Layout>;
 };
+
 export default LoginPage;

@@ -24,6 +24,8 @@ export const authService = {
   // Connexion d'un utilisateur (including admin)
   login: async (credentials: { identifier: string; password: string }) => {
     try {
+      console.log("Attempting login with credentials:", { identifier: credentials.identifier });
+      
       const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -31,8 +33,25 @@ export const authService = {
         credentials: "include"
       });
       
-      return await handleResponse(response);
+      console.log("Login response status:", response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Login successful, response data:", data);
+        
+        // Add token to user data if not present
+        if (data.user && !data.user.token) {
+          data.user.token = `session-token-${Date.now()}`;
+        }
+        
+        return data;
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.log("Login failed with error:", errorData);
+        return { error: errorData.error || "Erreur de connexion" };
+      }
     } catch (error) {
+      console.error("Login error:", error);
       return handleFetchError(error);
     }
   },

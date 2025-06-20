@@ -9,6 +9,7 @@ export const getAuthToken = () => {
   if (user) {
     try {
       const userData = JSON.parse(user);
+      console.log("Getting auth token for user:", userData);
       return userData.token;
     } catch (e) {
       console.error("Error parsing user data:", e);
@@ -27,6 +28,9 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
+    console.log("Adding auth header with token:", token);
+  } else {
+    console.log("No auth token found");
   }
 
   console.log("Making request to:", url);
@@ -39,6 +43,15 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     });
     
     console.log("Response status:", response.status);
+    
+    // Handle 401 responses by redirecting to login
+    if (response.status === 401) {
+      console.log("Unauthorized - redirecting to login");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+      return response;
+    }
+    
     return response;
   } catch (error) {
     console.error("Fetch error for URL:", url, error);

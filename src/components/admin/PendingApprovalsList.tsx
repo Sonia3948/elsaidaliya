@@ -5,16 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, User, Loader2, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { userService } from "@/services/user";
-
-interface PendingUser {
-  id: string;
-  businessName: string;
-  role: string;
-  createdAt: string;
-  email?: string;
-  phone?: string;
-}
+import { pendingUsersAPI, type PendingUser } from "@/api/users";
 
 interface PendingApprovalsListProps {
   onUserApproved?: () => void;
@@ -34,10 +25,8 @@ const PendingApprovalsList = ({ onUserApproved }: PendingApprovalsListProps) => 
     try {
       setLoading(true);
       setError(null);
-      console.log("Fetching pending users...");
       
-      const response = await userService.getPendingUsers();
-      console.log("Pending users response:", response);
+      const response = await pendingUsersAPI.getPendingUsers();
       
       if (response && response.users) {
         setPendingUsers(response.users);
@@ -58,7 +47,7 @@ const PendingApprovalsList = ({ onUserApproved }: PendingApprovalsListProps) => 
     setProcessingUsers(prev => new Set(prev).add(userId));
     
     try {
-      await userService.updateUserStatus(userId, true);
+      await pendingUsersAPI.approveUser(userId);
       toast.success("Utilisateur approuvé avec succès");
       
       // Remove the user from the list
@@ -84,9 +73,7 @@ const PendingApprovalsList = ({ onUserApproved }: PendingApprovalsListProps) => 
     setProcessingUsers(prev => new Set(prev).add(userId));
     
     try {
-      // For now, we just update the status to false, which is already the case
-      // In a real implementation, you might want to delete the user or mark them as rejected
-      await userService.updateUserStatus(userId, false);
+      await pendingUsersAPI.rejectUser(userId);
       toast.success("Utilisateur rejeté");
       
       // Remove the user from the list

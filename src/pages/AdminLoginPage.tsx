@@ -37,9 +37,16 @@ const AdminLoginPage = () => {
         const adminUser = {
           id: "admin-id",
           role: "admin",
-          token: "dev-admin-session-token-12345" // Add session token for development
+          token: "dev-admin-session-token-12345" // Ensure token is properly set
         };
+        
+        console.log("Storing admin user data:", adminUser);
         localStorage.setItem("user", JSON.stringify(adminUser));
+        
+        // Verify storage
+        const storedUser = localStorage.getItem("user");
+        console.log("Verified stored user data:", storedUser);
+        
         toast({
           title: "Connexion réussie",
           description: "Bienvenue sur le tableau de bord administrateur!"
@@ -53,7 +60,9 @@ const AdminLoginPage = () => {
         });
         
         if (response && response.user && response.user.role === "admin") {
+          console.log("Storing API user data:", response.user);
           localStorage.setItem("user", JSON.stringify(response.user));
+          
           toast({
             title: "Connexion réussie",
             description: "Bienvenue sur le tableau de bord administrateur!"

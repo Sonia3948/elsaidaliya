@@ -6,15 +6,24 @@ const API_URL = "http://localhost:8080/api";
 // Function to get auth token from localStorage
 export const getAuthToken = () => {
   const user = localStorage.getItem("user");
+  console.log("Raw user data from localStorage:", user);
+  
   if (user) {
     try {
       const userData = JSON.parse(user);
-      console.log("Getting auth token for user:", userData);
-      return userData.token;
+      console.log("Parsed user data:", userData);
+      
+      // Check for token in different possible locations
+      const token = userData.token || userData.sessionToken || userData.accessToken;
+      console.log("Extracted token:", token);
+      
+      return token;
     } catch (e) {
       console.error("Error parsing user data:", e);
     }
   }
+  
+  console.log("No user data found in localStorage");
   return null;
 };
 
@@ -26,14 +35,17 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     ...options.headers,
   };
 
+  console.log("Token for request:", token);
+  
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
     console.log("Adding auth header with token:", token);
   } else {
-    console.log("No auth token found");
+    console.log("No auth token found - request will be unauthenticated");
   }
 
-  console.log("Making request to:", url);
+  console.log("Making authenticated request to:", url);
+  console.log("Request headers:", headers);
   
   try {
     const response = await fetch(url, {
@@ -43,12 +55,16 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     });
     
     console.log("Response status:", response.status);
+    console.log("Response headers:", Object.fromEntries(response.headers.entries()));
     
     // Handle 401 responses by redirecting to login
     if (response.status === 401) {
-      console.log("Unauthorized - redirecting to login");
+      console.log("Unauthorized - clearing localStorage and redirecting to login");
       localStorage.removeItem("user");
-      window.location.href = "/login";
+      // Only redirect if not already on login page
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = "/login";
+      }
       return response;
     }
     
@@ -73,10 +89,26 @@ export const handleFetchError = (error: any) => {
 
 // Fonction pour gérer les réponses des requêtes
 export const handleResponse = async (response: Response) => {
+  console.log("Handling response with status:", response.status);
+  
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch (e) {
+      errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+    }
+    
+    console.log("Error response data:", errorData);
     throw new Error(errorData.error || "Une erreur est survenue");
   }
   
-  return response.json();
+  try {
+    const data = await response.json();
+    console.log("Success response data:", data);
+    return data;
+  } catch (e) {
+    console.error("Error parsing response JSON:", e);
+    return {};
+  }
 };

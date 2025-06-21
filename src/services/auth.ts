@@ -39,9 +39,13 @@ export const authService = {
         const data = await response.json();
         console.log("Login successful, response data:", data);
         
-        // Add token to user data if not present
-        if (data.user && !data.user.token) {
-          data.user.token = `session-token-${Date.now()}`;
+        // Ensure the user object has a token field
+        if (data.user) {
+          if (!data.user.token && !data.user.sessionToken) {
+            // Generate a session token if none provided by backend
+            data.user.token = `session-token-${Date.now()}`;
+            console.log("Generated token for user:", data.user.token);
+          }
         }
         
         return data;

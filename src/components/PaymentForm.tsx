@@ -14,9 +14,12 @@ interface PaymentFormProps {
   amount: number;
   userRole: "pharmacist" | "supplier";
   onSuccess: () => void;
+  userName?: string;
+  userEmail?: string;
+  userId?: string;
 }
 
-const PaymentForm = ({ amount, userRole, onSuccess }: PaymentFormProps) => {
+const PaymentForm = ({ amount, userRole, onSuccess, userName, userEmail, userId }: PaymentFormProps) => {
   const { toast } = useToast();
   const [paymentType, setPaymentType] = useState<string>("virement");
   const [selectedReceipt, setSelectedReceipt] = useState<File | null>(null);
@@ -61,18 +64,24 @@ const PaymentForm = ({ amount, userRole, onSuccess }: PaymentFormProps) => {
 
     // Simuler un appel API pour soumettre le paiement et notifier l'administrateur
     try {
-      // Dans un cas réel, nous enverrions le fichier à l'API
-      // const formData = new FormData();
-      // formData.append('receipt', selectedReceipt);
+      // Envoyer une notification à l'administrateur avec les informations utilisateur
+      const notificationData = {
+        type: 'payment_receipt',
+        userRole: userRole,
+        userName: userName || 'Utilisateur inconnu',
+        userEmail: userEmail || '',
+        userId: userId || '',
+        paymentType: paymentType,
+        amount: amount,
+        description: `Paiement de ${amount} DZD soumis par ${userName || userEmail || 'Utilisateur inconnu'}`,
+      };
       
-      // Envoyer une notification à l'administrateur (API simulée)
+      console.log('Sending payment notification with user info:', notificationData);
+      
+      // Dans un cas réel, nous enverrions le fichier et les données utilisateur à l'API
       // await fetch('/api/admin/notifications', {
       //   method: 'POST',
-      //   body: JSON.stringify({
-      //     type: 'payment_receipt',
-      //     userRole: userRole,
-      //     paymentType: paymentType,
-      //   }),
+      //   body: JSON.stringify(notificationData),
       //   headers: {
       //     'Content-Type': 'application/json'
       //   }
@@ -85,8 +94,8 @@ const PaymentForm = ({ amount, userRole, onSuccess }: PaymentFormProps) => {
       toast({
         title: "Paiement traité avec succès",
         description: userRole === "supplier" 
-          ? "Veuillez patienter de 24h à 48h pour l'activation de votre compte. Vous pourrez profiter de votre semaine gratuite dès l'activation."
-          : "Votre paiement a été traité avec succès. Veuillez patienter pendant que l'administrateur valide votre inscription.",
+          ? `Paiement de ${userName || userEmail} enregistré. Veuillez patienter de 24h à 48h pour l'activation de votre compte.`
+          : `Paiement de ${userName || userEmail} traité avec succès. Veuillez patienter pendant que l'administrateur valide votre inscription.`,
       });
       onSuccess();
     } catch (error) {
@@ -101,6 +110,21 @@ const PaymentForm = ({ amount, userRole, onSuccess }: PaymentFormProps) => {
 
   return (
     <form onSubmit={handleSubmit}>
+      {/* Afficher les informations utilisateur */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Informations de l'utilisateur</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <p><span className="font-medium">Nom/Entreprise:</span> {userName || 'Non spécifié'}</p>
+            <p><span className="font-medium">Email:</span> {userEmail || 'Non spécifié'}</p>
+            <p><span className="font-medium">Type:</span> {userRole === "supplier" ? "Fournisseur" : "Pharmacien"}</p>
+            <p><span className="font-medium">Montant:</span> {amount} DZD</p>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="virement" value={paymentType} onValueChange={setPaymentType}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="virement">Virement Bancaire</TabsTrigger>

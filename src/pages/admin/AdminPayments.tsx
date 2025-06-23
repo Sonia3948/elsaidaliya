@@ -11,9 +11,12 @@ import PaymentReceiptNotification from "@/components/admin/PaymentReceiptNotific
 interface PaymentNotification {
   id: string;
   userName: string;
-  userRole: "supplier";  // Only suppliers now
+  userEmail?: string;
+  userId?: string;
+  userRole: "supplier";
   dateSubmitted: string;
   receiptUrl: string;
+  amount?: string;
   status: "pending" | "approved" | "rejected";
 }
 
@@ -26,47 +29,62 @@ const AdminPayments = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Fetch notifications from API (mock data for now) - Only suppliers
+    // Fetch notifications from API with user details
     setTimeout(() => {
       const mockNotifications: PaymentNotification[] = [
         {
           id: "1",
           userName: "MediStock Algérie",
+          userEmail: "contact@medistock-dz.com",
+          userId: "user_001",
           userRole: "supplier",
           dateSubmitted: "15 mai 2023",
           receiptUrl: "/placeholder.svg",
+          amount: "25000",
           status: "pending"
         },
         {
           id: "2",
           userName: "PharmaDistrib",
+          userEmail: "admin@pharmadistrib.dz",
+          userId: "user_002",
           userRole: "supplier",
           dateSubmitted: "14 mai 2023",
           receiptUrl: "/placeholder.svg",
+          amount: "15000",
           status: "pending"
         },
         {
           id: "3",
           userName: "PharmaSupply",
+          userEmail: "info@pharmasupply.com",
+          userId: "user_003",
           userRole: "supplier",
           dateSubmitted: "12 mai 2023",
           receiptUrl: "/placeholder.svg",
+          amount: "10000",
           status: "approved"
         },
         {
           id: "4",
           userName: "MediCorp Algérie",
+          userEmail: "contact@medicorp-dz.com",
+          userId: "user_004",
           userRole: "supplier",
           dateSubmitted: "10 mai 2023",
           receiptUrl: "/placeholder.svg",
+          amount: "25000",
           status: "rejected"
         },
         {
           id: "5",
           userName: "AlgériaPharma",
+          userEmail: "admin@algeriapharma.dz",
+          userId: "user_005",
           userRole: "supplier",
           dateSubmitted: "8 mai 2023",
           receiptUrl: "/placeholder.svg",
+          amount: "15000",
           status: "approved"
         },
       ];
@@ -85,7 +103,7 @@ const AdminPayments = () => {
   };
 
   const handleApprove = async (id: string) => {
-    // Simuler une requête API pour approuver le paiement du fournisseur
+    const notification = notifications.find(n => n.id === id);
     
     // Mise à jour de l'état local
     setNotifications(notifications.map(notification => 
@@ -94,12 +112,12 @@ const AdminPayments = () => {
     
     toast({
       title: "Paiement fournisseur approuvé",
-      description: "Le compte fournisseur a été activé avec succès.",
+      description: `Le paiement de ${notification?.userName || 'l\'utilisateur'} (${notification?.userEmail}) a été approuvé avec succès.`,
     });
   };
 
   const handleReject = async (id: string) => {
-    // Simuler une requête API pour rejeter le paiement du fournisseur
+    const notification = notifications.find(n => n.id === id);
     
     // Mise à jour de l'état local
     setNotifications(notifications.map(notification => 
@@ -108,7 +126,7 @@ const AdminPayments = () => {
     
     toast({
       title: "Paiement fournisseur rejeté",
-      description: "Le paiement a été rejeté. Le fournisseur en sera informé.",
+      description: `Le paiement de ${notification?.userName || 'l\'utilisateur'} (${notification?.userEmail}) a été rejeté.`,
       variant: "destructive"
     });
   };
@@ -159,9 +177,12 @@ const AdminPayments = () => {
                     key={notification.id}
                     id={notification.id}
                     userName={notification.userName}
+                    userEmail={notification.userEmail}
+                    userId={notification.userId}
                     userRole={notification.userRole}
                     dateSubmitted={notification.dateSubmitted}
                     receiptUrl={notification.receiptUrl}
+                    amount={notification.amount}
                     onView={handleViewReceipt}
                     onApprove={handleApprove}
                     onReject={handleReject}

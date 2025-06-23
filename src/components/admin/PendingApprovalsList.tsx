@@ -138,9 +138,9 @@ const PendingApprovalsList = ({ onUserApproved }: PendingApprovalsListProps) => 
                     <User className="h-5 w-5 text-gray-600" />
                   </div>
                   <div>
-                    <p className="font-medium">{user.businessName}</p>
+                    <p className="font-medium">{user.business_name}</p>
                     <p className="text-sm text-gray-500">
-                      {getRoleDisplayName(user.role)} • {format(new Date(user.createdAt), 'dd/MM/yyyy')}
+                      {getRoleDisplayName(user.role)} • {format(new Date(user.created_at), 'dd/MM/yyyy')}
                     </p>
                     {user.email && (
                       <p className="text-xs text-gray-400">{user.email}</p>

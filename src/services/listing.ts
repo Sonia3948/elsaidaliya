@@ -166,4 +166,31 @@ export const listingService = {
       return handleFetchError(error);
     }
   },
+
+  // Search medicines - added to fix the missing method error
+  searchMedicines: async (query: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('listings')
+        .select(`
+          *,
+          profiles:supplier_id (
+            business_name,
+            phone,
+            email
+          )
+        `)
+        .or(`medications.cs.{name:"${query}"}`)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error("Error searching medicines:", error);
+        return null;
+      }
+      
+      return { listings: data || [] };
+    } catch (error) {
+      return handleFetchError(error);
+    }
+  },
 };

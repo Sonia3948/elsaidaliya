@@ -9,7 +9,189 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      listings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          medications: Json | null
+          pdf_url: string | null
+          status: string | null
+          supplier_id: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          medications?: Json | null
+          pdf_url?: string | null
+          status?: string | null
+          supplier_id?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          medications?: Json | null
+          pdf_url?: string | null
+          status?: string | null
+          supplier_id?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          status: string | null
+          title: string
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          status?: string | null
+          title: string
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          status?: string | null
+          title?: string
+          type?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          discount_percentage: number | null
+          id: string
+          medications: Json | null
+          status: string | null
+          supplier_id: string | null
+          title: string
+          updated_at: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          id?: string
+          medications?: Json | null
+          status?: string | null
+          supplier_id?: string | null
+          title: string
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          id?: string
+          medications?: Json | null
+          status?: string | null
+          supplier_id?: string | null
+          title?: string
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          business_name: string
+          created_at: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          phone: string | null
+          register_image_url: string | null
+          register_number: string | null
+          role: string
+          sub_expiry: string | null
+          subscription: string | null
+          updated_at: string | null
+          wilaya: string | null
+        }
+        Insert: {
+          business_name: string
+          created_at?: string | null
+          email?: string | null
+          id: string
+          is_active?: boolean | null
+          phone?: string | null
+          register_image_url?: string | null
+          register_number?: string | null
+          role: string
+          sub_expiry?: string | null
+          subscription?: string | null
+          updated_at?: string | null
+          wilaya?: string | null
+        }
+        Update: {
+          business_name?: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          phone?: string | null
+          register_image_url?: string | null
+          register_number?: string | null
+          role?: string
+          sub_expiry?: string | null
+          subscription?: string | null
+          updated_at?: string | null
+          wilaya?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

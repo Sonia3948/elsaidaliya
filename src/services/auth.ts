@@ -64,6 +64,18 @@ export const authService = {
         return { error: error.message };
       }
 
+      // Get user profile data to include role
+      let profileData = null;
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, business_name, is_active')
+          .eq('id', data.user.id)
+          .single();
+        
+        profileData = profile;
+      }
+
       console.log("Login successful:", data);
       
       return {
@@ -71,7 +83,9 @@ export const authService = {
         user: {
           id: data.user?.id,
           email: data.user?.email,
-          ...data.user?.user_metadata,
+          role: profileData?.role || data.user?.user_metadata?.role,
+          business_name: profileData?.business_name || data.user?.user_metadata?.business_name,
+          is_active: profileData?.is_active,
           token: data.session?.access_token,
         }
       };

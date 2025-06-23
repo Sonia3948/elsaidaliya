@@ -1,77 +1,117 @@
 
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getAuthToken, handleResponse, handleFetchError } from "./common";
 
-const API_URL = "http://localhost:8080/api";
-
-// Services d'authentification
 export const authService = {
   // Inscription d'un nouvel utilisateur
-  register: async (userData: any) => {
+  register: async (userData: {
+    businessName: string;
+    role: string;
+    phone: string;
+    email: string;
+    password: string;
+    wilaya: string;
+    registerImageUrl?: string;
+    registerNumber?: string;
+  }) => {
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      });
+      console.log("Attempting registration with Supabase:", { email: userData.email, role: userData.role });
       
-      return await handleResponse(response);
-    } catch (error) {
-      return handleFetchError(error);
+      const { data, error } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            business_name: userData.businessName,
+            role: userData.role,
+            phone: userData.phone,
+            wilaya: userData.wilaya,
+            register_image_url: userData.registerImageUrl,
+            register_number: userData.registerNumber,
+          },
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+
+      if (error) {
+        console.error("Registration error:", error);
+        return { error: error.message };
+      }
+
+      console.log("Registration successful:", data);
+      return { 
+        message: "Utilisateur enregistré avec succès. Vérifiez votre email pour confirmer votre compte.",
+        user: data.user 
+      };
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      return { error: "Une erreur est survenue lors de l'inscription" };
     }
   },
   
-  // Connexion d'un utilisateur (including admin)
+  // Connexion d'un utilisateur
   login: async (credentials: { identifier: string; password: string }) => {
     try {
-      console.log("Attempting login with credentials:", { identifier: credentials.identifier });
+      console.log("Attempting login with Supabase:", { identifier: credentials.identifier });
       
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials),
-        credentials: "include"
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.identifier,
+        password: credentials.password,
       });
       
-      console.log("Login response status:", response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Login successful, response data:", data);
-        
-        // Ensure the user object has a token field
-        if (data.user) {
-          if (!data.user.token && !data.user.sessionToken) {
-            // Generate a session token if none provided by backend
-            data.user.token = `session-token-${Date.now()}`;
-            console.log("Generated token for user:", data.user.token);
-          }
-        }
-        
-        return data;
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.log("Login failed with error:", errorData);
-        return { error: errorData.error || "Erreur de connexion" };
+      if (error) {
+        console.error("Login error:", error);
+        return { error: error.message };
       }
-    } catch (error) {
+
+      console.log("Login successful:", data);
+      
+      return {
+        message: "Connexion réussie",
+        user: {
+          id: data.user?.id,
+          email: data.user?.email,
+          ...data.user?.user_metadata,
+          token: data.session?.access_token,
+        }
+      };
+    } catch (error: any) {
       console.error("Login error:", error);
-      return handleFetchError(error);
+      return { error: "Une erreur est survenue lors de la connexion" };
+    }
+  },
+  
+  // Déconnexion
+  logout: async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Logout error:", error);
+        return { error: error.message };
+      }
+      return { message: "Déconnexion réussie" };
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      return { error: "Une erreur est survenue lors de la déconnexion" };
     }
   },
   
   // Demande de réinitialisation de mot de passe
   forgotPassword: async (email: string) => {
     try {
-      const response = await fetch(`${API_URL}/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
       
-      return await handleResponse(response);
-    } catch (error) {
-      return handleFetchError(error);
+      if (error) {
+        console.error("Password reset error:", error);
+        return { error: error.message };
+      }
+      
+      return { message: "Un email de réinitialisation a été envoyé à votre adresse" };
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      return { error: "Une erreur est survenue lors de la demande de réinitialisation" };
     }
   },
 };

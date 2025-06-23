@@ -1,70 +1,59 @@
 
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const API_URL = "http://localhost:8080/api";
-
-// Function to get auth token from localStorage
-export const getAuthToken = () => {
-  const user = localStorage.getItem("user");
-  console.log("Raw user data from localStorage:", user);
-  
-  if (user) {
-    try {
-      const userData = JSON.parse(user);
-      console.log("Parsed user data:", userData);
-      
-      // Check for token in different possible locations
-      const token = userData.token || userData.sessionToken || userData.accessToken;
-      console.log("Extracted token:", token);
-      
-      return token;
-    } catch (e) {
-      console.error("Error parsing user data:", e);
+// Function to get current user session
+export const getCurrentUser = async () => {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error("Error getting current user:", error);
+      return null;
     }
+    return user;
+  } catch (error) {
+    console.error("Error getting current user:", error);
+    return null;
   }
-  
-  console.log("No user data found in localStorage");
-  return null;
 };
 
-// Standard fetch with authorization headers
+// Function to get auth session
+export const getSession = async () => {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error("Error getting session:", error);
+      return null;
+    }
+    return session;
+  } catch (error) {
+    console.error("Error getting session:", error);
+    return null;
+  }
+};
+
+// Standard fetch with authorization headers (now using Supabase session)
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-  const token = getAuthToken();
+  const session = await getSession();
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...options.headers,
   };
 
-  console.log("Token for request:", token);
-  
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-    console.log("Adding auth header with token:", token);
-  } else {
-    console.log("No auth token found - request will be unauthenticated");
+  if (session?.access_token) {
+    headers["Authorization"] = `Bearer ${session.access_token}`;
   }
 
-  console.log("Making authenticated request to:", url);
-  console.log("Request headers:", headers);
-  
   try {
     const response = await fetch(url, {
       ...options,
       headers,
-      credentials: "include",
     });
-    
-    console.log("Response status:", response.status);
-    console.log("Response headers:", Object.fromEntries(response.headers.entries()));
     
     // Handle 401 responses by redirecting to login
     if (response.status === 401) {
-      console.log("Unauthorized - clearing localStorage and redirecting to login");
-      localStorage.removeItem("user");
-      // Only redirect if not already on login page
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = "/login";
-      }
+      console.log("Unauthorized - redirecting to login");
+      window.location.href = "/login";
       return response;
     }
     
@@ -80,7 +69,7 @@ export const handleFetchError = (error: any) => {
   console.error("API Error details:", error);
   
   if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-    toast.error("Impossible de se connecter au serveur. Vérifiez que le serveur backend est en cours d'exécution sur localhost:8080");
+    toast.error("Impossible de se connecter au serveur.");
   } else {
     toast.error("Une erreur est survenue lors de la communication avec le serveur");
   }
@@ -111,4 +100,10 @@ export const handleResponse = async (response: Response) => {
     console.error("Error parsing response JSON:", e);
     return {};
   }
+};
+
+// Legacy function for backward compatibility
+export const getAuthToken = () => {
+  console.warn("getAuthToken is deprecated, use getSession instead");
+  return null;
 };

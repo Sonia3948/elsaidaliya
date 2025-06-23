@@ -1,14 +1,13 @@
 
-import { fetchWithAuth, handleResponse, handleFetchError } from "@/services/common";
-
-const API_URL = "http://localhost:8080/api";
+import { supabase } from "@/integrations/supabase/client";
+import { handleFetchError } from "@/services/common";
 
 export interface PendingUser {
   id: string;
-  businessName: string;
+  business_name: string;
   role: string;
   email?: string;
-  createdAt: string;
+  created_at: string;
 }
 
 export interface PendingUsersResponse {
@@ -21,10 +20,18 @@ export const pendingUsersAPI = {
   getPendingUsers: async (): Promise<PendingUsersResponse | null> => {
     try {
       console.log("Fetching pending users...");
-      const response = await fetchWithAuth(`${API_URL}/users/pending`);
-      const data = await handleResponse(response);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('is_active', false);
+      
+      if (error) {
+        console.error("Error fetching pending users:", error);
+        return null;
+      }
+      
       console.log("Pending users response:", data);
-      return data;
+      return { users: data || [], total: data?.length || 0 };
     } catch (error) {
       console.error("Error in getPendingUsers:", error);
       return handleFetchError(error);
@@ -35,10 +42,19 @@ export const pendingUsersAPI = {
   approveUser: async (userId: string): Promise<any> => {
     try {
       console.log("Approving user:", userId);
-      const response = await fetchWithAuth(`${API_URL}/users/${userId}/approve`, {
-        method: "PUT"
-      });
-      return await handleResponse(response);
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ is_active: true })
+        .eq('id', userId)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error approving user:", error);
+        return null;
+      }
+      
+      return { user: data, message: "Utilisateur approuvé avec succès" };
     } catch (error) {
       console.error("Error approving user:", error);
       return handleFetchError(error);
@@ -49,10 +65,17 @@ export const pendingUsersAPI = {
   rejectUser: async (userId: string): Promise<any> => {
     try {
       console.log("Rejecting user:", userId);
-      const response = await fetchWithAuth(`${API_URL}/users/${userId}/reject`, {
-        method: "DELETE"
-      });
-      return await handleResponse(response);
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+      
+      if (error) {
+        console.error("Error rejecting user:", error);
+        return null;
+      }
+      
+      return { message: "Utilisateur rejeté avec succès" };
     } catch (error) {
       console.error("Error rejecting user:", error);
       return handleFetchError(error);
@@ -65,8 +88,16 @@ export const usersAPI = {
   // Get all users
   getUsers: async (): Promise<any> => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/users`);
-      return await handleResponse(response);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*');
+      
+      if (error) {
+        console.error("Error fetching users:", error);
+        return null;
+      }
+      
+      return { users: data || [] };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -75,8 +106,18 @@ export const usersAPI = {
   // Get user by ID
   getUserById: async (userId: string): Promise<any> => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/users/${userId}`);
-      return await handleResponse(response);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching user:", error);
+        return null;
+      }
+      
+      return { user: data };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -85,11 +126,19 @@ export const usersAPI = {
   // Update user
   updateUser: async (userId: string, userData: any): Promise<any> => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/users/${userId}`, {
-        method: "PUT",
-        body: JSON.stringify(userData)
-      });
-      return await handleResponse(response);
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(userData)
+        .eq('id', userId)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error updating user:", error);
+        return null;
+      }
+      
+      return { user: data, message: "Utilisateur mis à jour avec succès" };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -98,10 +147,17 @@ export const usersAPI = {
   // Delete user
   deleteUser: async (userId: string): Promise<any> => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/users/${userId}`, {
-        method: "DELETE"
-      });
-      return await handleResponse(response);
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+      
+      if (error) {
+        console.error("Error deleting user:", error);
+        return null;
+      }
+      
+      return { message: "Utilisateur supprimé avec succès" };
     } catch (error) {
       return handleFetchError(error);
     }

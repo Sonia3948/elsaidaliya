@@ -1,18 +1,38 @@
 
-import { getAuthToken, handleResponse, handleFetchError, fetchWithAuth } from "./common";
+import { supabase } from "@/integrations/supabase/client";
+import { handleFetchError } from "./common";
 
-const API_URL = "http://localhost:8080/api";
-
-// Services pour les offres
 export const offerService = {
   // Récupérer toutes les offres
   getAllOffers: async (filters = {}) => {
     try {
-      const queryString = new URLSearchParams(filters as Record<string, string>).toString();
-      const url = `${API_URL}/offers${queryString ? `?${queryString}` : ''}`;
-      const response = await fetchWithAuth(url);
+      let query = supabase
+        .from('offers')
+        .select(`
+          *,
+          profiles:supplier_id (
+            business_name,
+            phone,
+            email
+          )
+        `)
+        .order('created_at', { ascending: false });
       
-      return await handleResponse(response);
+      // Apply filters if provided
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) {
+          query = query.eq(key, value);
+        }
+      });
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error("Error fetching offers:", error);
+        return null;
+      }
+      
+      return { offers: data || [] };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -21,8 +41,25 @@ export const offerService = {
   // Récupérer une offre par ID
   getOfferById: async (id: string) => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/offers/${id}`);
-      return await handleResponse(response);
+      const { data, error } = await supabase
+        .from('offers')
+        .select(`
+          *,
+          profiles:supplier_id (
+            business_name,
+            phone,
+            email
+          )
+        `)
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching offer:", error);
+        return null;
+      }
+      
+      return { offer: data };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -31,40 +68,30 @@ export const offerService = {
   // Créer une nouvelle offre
   createOffer: async (offerData: any) => {
     try {
-      // Handle image upload if present
-      if (offerData.image) {
-        const formData = new FormData();
-        formData.append("image", offerData.image);
-        formData.append("data", JSON.stringify({
-          title: offerData.title,
-          description: offerData.description,
-          price: offerData.price,
-          expiresAt: offerData.expiresAt,
-        }));
-        
-        const token = getAuthToken();
-        const headers: HeadersInit = {};
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-        
-        const response = await fetch(`${API_URL}/offers`, {
-          method: "POST",
-          headers,
-          body: formData,
-          credentials: "include",
-        });
-        
-        return await handleResponse(response);
-      } else {
-        // Regular JSON request if no image
-        const response = await fetchWithAuth(`${API_URL}/offers`, {
-          method: "POST",
-          body: JSON.stringify(offerData),
-        });
-        
-        return await handleResponse(response);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return { error: "Utilisateur non authentifié" };
       }
+
+      const { data, error } = await supabase
+        .from('offers')
+        .insert({
+          ...offerData,
+          supplier_id: user.id,
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error creating offer:", error);
+        return { error: error.message };
+      }
+      
+      return { 
+        offer: data, 
+        message: "Offre créée avec succès" 
+      };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -73,40 +100,22 @@ export const offerService = {
   // Mettre à jour une offre
   updateOffer: async (id: string, offerData: any) => {
     try {
-      // Handle image upload if present
-      if (offerData.image) {
-        const formData = new FormData();
-        formData.append("image", offerData.image);
-        formData.append("data", JSON.stringify({
-          title: offerData.title,
-          description: offerData.description,
-          price: offerData.price,
-          expiresAt: offerData.expiresAt,
-        }));
-        
-        const token = getAuthToken();
-        const headers: HeadersInit = {};
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-        
-        const response = await fetch(`${API_URL}/offers/${id}`, {
-          method: "PUT",
-          headers,
-          body: formData,
-          credentials: "include",
-        });
-        
-        return await handleResponse(response);
-      } else {
-        // Regular JSON request if no image
-        const response = await fetchWithAuth(`${API_URL}/offers/${id}`, {
-          method: "PUT",
-          body: JSON.stringify(offerData),
-        });
-        
-        return await handleResponse(response);
+      const { data, error } = await supabase
+        .from('offers')
+        .update(offerData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error updating offer:", error);
+        return { error: error.message };
       }
+      
+      return { 
+        offer: data, 
+        message: "Offre mise à jour avec succès" 
+      };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -115,11 +124,17 @@ export const offerService = {
   // Supprimer une offre
   deleteOffer: async (id: string) => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/offers/${id}`, {
-        method: "DELETE",
-      });
+      const { error } = await supabase
+        .from('offers')
+        .delete()
+        .eq('id', id);
       
-      return await handleResponse(response);
+      if (error) {
+        console.error("Error deleting offer:", error);
+        return { error: error.message };
+      }
+      
+      return { message: "Offre supprimée avec succès" };
     } catch (error) {
       return handleFetchError(error);
     }

@@ -1,14 +1,29 @@
 
-import { getAuthToken, handleResponse, handleFetchError, fetchWithAuth } from "./common";
-
-const API_URL = "http://localhost:8080/api";
+import { supabase } from "@/integrations/supabase/client";
+import { handleFetchError } from "./common";
 
 export const notificationService = {
   // Get all notifications for the current user
   getUserNotifications: async () => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/notifications/user`);
-      return await handleResponse(response);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return { error: "Utilisateur non authentifié" };
+      }
+
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching notifications:", error);
+        return null;
+      }
+      
+      return { notifications: data || [] };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -17,10 +32,19 @@ export const notificationService = {
   // Mark a notification as read
   markAsRead: async (id: string) => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/notifications/${id}/read`, {
-        method: "PUT",
-      });
-      return await handleResponse(response);
+      const { data, error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error marking notification as read:", error);
+        return null;
+      }
+      
+      return { notification: data, message: "Notification marquée comme lue" };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -29,11 +53,39 @@ export const notificationService = {
   // Update notification status
   updateStatus: async (id: string, status: string) => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/notifications/${id}/status`, {
-        method: "PUT",
-        body: JSON.stringify({ status }),
-      });
-      return await handleResponse(response);
+      const { data, error } = await supabase
+        .from('notifications')
+        .update({ status })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error updating notification status:", error);
+        return null;
+      }
+      
+      return { notification: data, message: "Statut de la notification mis à jour" };
+    } catch (error) {
+      return handleFetchError(error);
+    }
+  },
+
+  // Create a new notification
+  createNotification: async (notificationData: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .insert(notificationData)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error creating notification:", error);
+        return null;
+      }
+      
+      return { notification: data, message: "Notification créée avec succès" };
     } catch (error) {
       return handleFetchError(error);
     }

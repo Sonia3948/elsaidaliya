@@ -1,18 +1,38 @@
 
-import { getAuthToken, handleResponse, handleFetchError, fetchWithAuth } from "./common";
+import { supabase } from "@/integrations/supabase/client";
+import { handleFetchError } from "./common";
 
-const API_URL = "http://localhost:8080/api";
-
-// Services pour les listings
 export const listingService = {
   // Récupérer tous les listings
   getAllListings: async (filters = {}) => {
     try {
-      const queryString = new URLSearchParams(filters as Record<string, string>).toString();
-      const url = `${API_URL}/listings${queryString ? `?${queryString}` : ''}`;
-      const response = await fetchWithAuth(url);
+      let query = supabase
+        .from('listings')
+        .select(`
+          *,
+          profiles:supplier_id (
+            business_name,
+            phone,
+            email
+          )
+        `)
+        .order('created_at', { ascending: false });
       
-      return await handleResponse(response);
+      // Apply filters if provided
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) {
+          query = query.eq(key, value);
+        }
+      });
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error("Error fetching listings:", error);
+        return null;
+      }
+      
+      return { listings: data || [] };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -21,8 +41,25 @@ export const listingService = {
   // Récupérer un listing par ID
   getListingById: async (id: string) => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/listings/${id}`);
-      return await handleResponse(response);
+      const { data, error } = await supabase
+        .from('listings')
+        .select(`
+          *,
+          profiles:supplier_id (
+            business_name,
+            phone,
+            email
+          )
+        `)
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching listing:", error);
+        return null;
+      }
+      
+      return { listing: data };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -31,39 +68,30 @@ export const listingService = {
   // Créer un nouveau listing
   createListing: async (listingData: any) => {
     try {
-      // Handle file upload if present
-      if (listingData.file) {
-        const formData = new FormData();
-        formData.append("file", listingData.file);
-        formData.append("data", JSON.stringify({
-          title: listingData.title,
-          description: listingData.description,
-          medications: listingData.medications || [],
-        }));
-        
-        const token = getAuthToken();
-        const headers: HeadersInit = {};
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-        
-        const response = await fetch(`${API_URL}/listings`, {
-          method: "POST",
-          headers,
-          body: formData,
-          credentials: "include",
-        });
-        
-        return await handleResponse(response);
-      } else {
-        // Regular JSON request if no file
-        const response = await fetchWithAuth(`${API_URL}/listings`, {
-          method: "POST",
-          body: JSON.stringify(listingData),
-        });
-        
-        return await handleResponse(response);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return { error: "Utilisateur non authentifié" };
       }
+
+      const { data, error } = await supabase
+        .from('listings')
+        .insert({
+          ...listingData,
+          supplier_id: user.id,
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error creating listing:", error);
+        return { error: error.message };
+      }
+      
+      return { 
+        listing: data, 
+        message: "Listing créé avec succès" 
+      };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -72,39 +100,22 @@ export const listingService = {
   // Mettre à jour un listing
   updateListing: async (id: string, listingData: any) => {
     try {
-      // Handle file upload if present
-      if (listingData.file) {
-        const formData = new FormData();
-        formData.append("file", listingData.file);
-        formData.append("data", JSON.stringify({
-          title: listingData.title,
-          description: listingData.description,
-          medications: listingData.medications || [],
-        }));
-        
-        const token = getAuthToken();
-        const headers: HeadersInit = {};
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-        
-        const response = await fetch(`${API_URL}/listings/${id}`, {
-          method: "PUT",
-          headers,
-          body: formData,
-          credentials: "include",
-        });
-        
-        return await handleResponse(response);
-      } else {
-        // Regular JSON request if no file
-        const response = await fetchWithAuth(`${API_URL}/listings/${id}`, {
-          method: "PUT",
-          body: JSON.stringify(listingData),
-        });
-        
-        return await handleResponse(response);
+      const { data, error } = await supabase
+        .from('listings')
+        .update(listingData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error updating listing:", error);
+        return { error: error.message };
       }
+      
+      return { 
+        listing: data, 
+        message: "Listing mis à jour avec succès" 
+      };
     } catch (error) {
       return handleFetchError(error);
     }
@@ -113,21 +124,44 @@ export const listingService = {
   // Supprimer un listing
   deleteListing: async (id: string) => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/listings/${id}`, {
-        method: "DELETE",
-      });
+      const { error } = await supabase
+        .from('listings')
+        .delete()
+        .eq('id', id);
       
-      return await handleResponse(response);
+      if (error) {
+        console.error("Error deleting listing:", error);
+        return { error: error.message };
+      }
+      
+      return { message: "Listing supprimé avec succès" };
     } catch (error) {
       return handleFetchError(error);
     }
   },
   
-  // Rechercher des médicaments
-  searchMedicines: async (query: string) => {
+  // Rechercher des listings
+  searchListings: async (query: string) => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/listings/search?q=${encodeURIComponent(query)}`);
-      return await handleResponse(response);
+      const { data, error } = await supabase
+        .from('listings')
+        .select(`
+          *,
+          profiles:supplier_id (
+            business_name,
+            phone,
+            email
+          )
+        `)
+        .or(`title.ilike.%${query}%,description.ilike.%${query}%,medications.cs.{name:"${query}"}`)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error("Error searching listings:", error);
+        return null;
+      }
+      
+      return { listings: data || [] };
     } catch (error) {
       return handleFetchError(error);
     }

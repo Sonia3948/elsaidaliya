@@ -19,11 +19,11 @@ export const listingService = {
         .order('created_at', { ascending: false });
       
       // Apply filters if provided
-      Object.entries(filters).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(filters)) {
         if (value) {
           query = query.eq(key, value);
         }
-      });
+      }
       
       const { data, error } = await query;
       

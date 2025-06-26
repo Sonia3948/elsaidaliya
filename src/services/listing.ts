@@ -4,7 +4,7 @@ import { handleFetchError } from "./common";
 
 export const listingService = {
   // Récupérer tous les listings
-  getAllListings: async (filters = {}) => {
+  getAllListings: async (filters: Record<string, any> = {}) => {
     try {
       let query = supabase
         .from('listings')

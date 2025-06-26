@@ -4,7 +4,7 @@ import { handleFetchError } from "./common";
 
 export const userService = {
   // Récupérer tous les utilisateurs (admin)
-  getAllUsers: async (filters = {}) => {
+  getAllUsers: async (filters: Record<string, any> = {}) => {
     try {
       let query = supabase.from('profiles').select('*');
       

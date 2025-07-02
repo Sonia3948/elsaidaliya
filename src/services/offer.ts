@@ -19,10 +19,13 @@ export const offerService = {
         .order('created_at', { ascending: false });
       
       // Apply filters if provided
-      for (const [key, value] of Object.entries(filters)) {
-        if (value) {
-          query = query.eq(key, value);
-        }
+      if (filters && Object.keys(filters).length > 0) {
+        Object.keys(filters).forEach(key => {
+          const value = filters[key];
+          if (value) {
+            query = query.eq(key, value);
+          }
+        });
       }
       
       const { data, error } = await query;

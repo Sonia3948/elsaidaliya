@@ -1,21 +1,26 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { handleFetchError } from "./common";
 
+interface UserFilters {
+  [key: string]: any;
+}
+
 export const userService = {
   // Récupérer tous les utilisateurs (admin)
-  getAllUsers: async (filters: Record<string, any> = {}) => {
+  getAllUsers: async (filters: UserFilters = {}) => {
     try {
       let query = supabase.from('profiles').select('*');
       
       // Apply filters if provided
-      if (filters && Object.keys(filters).length > 0) {
-        Object.keys(filters).forEach(key => {
+      if (filters) {
+        const filterKeys = Object.keys(filters);
+        for (let i = 0; i < filterKeys.length; i++) {
+          const key = filterKeys[i];
           const value = filters[key];
           if (value) {
             query = query.eq(key, value);
           }
-        });
+        }
       }
       
       const { data, error } = await query;

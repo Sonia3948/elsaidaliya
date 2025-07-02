@@ -1,10 +1,13 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { handleFetchError } from "./common";
 
+interface ListingFilters {
+  [key: string]: any;
+}
+
 export const listingService = {
   // Récupérer tous les listings
-  getAllListings: async (filters: Record<string, any> = {}) => {
+  getAllListings: async (filters: ListingFilters = {}) => {
     try {
       let query = supabase
         .from('listings')
@@ -19,13 +22,15 @@ export const listingService = {
         .order('created_at', { ascending: false });
       
       // Apply filters if provided
-      if (filters && Object.keys(filters).length > 0) {
-        Object.keys(filters).forEach(key => {
+      if (filters) {
+        const filterKeys = Object.keys(filters);
+        for (let i = 0; i < filterKeys.length; i++) {
+          const key = filterKeys[i];
           const value = filters[key];
           if (value) {
             query = query.eq(key, value);
           }
-        });
+        }
       }
       
       const { data, error } = await query;

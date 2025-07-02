@@ -1,7 +1,11 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { handleFetchError } from "./common";
 
 interface UserFilters {
+  role?: string;
+  is_active?: boolean;
+  wilaya?: string;
   [key: string]: any;
 }
 
@@ -12,12 +16,14 @@ export const userService = {
       let query = supabase.from('profiles').select('*');
       
       // Apply filters if provided
-      if (filters) {
-        for (const [key, value] of Object.entries(filters)) {
-          if (value !== undefined && value !== null && value !== '') {
-            query = query.eq(key as any, value);
-          }
-        }
+      if (filters.role) {
+        query = query.eq('role', filters.role);
+      }
+      if (filters.is_active !== undefined) {
+        query = query.eq('is_active', filters.is_active);
+      }
+      if (filters.wilaya) {
+        query = query.eq('wilaya', filters.wilaya);
       }
       
       const { data, error } = await query;

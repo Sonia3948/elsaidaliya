@@ -1,7 +1,10 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { handleFetchError } from "./common";
 
 interface ListingFilters {
+  status?: string;
+  supplier_id?: string;
   [key: string]: any;
 }
 
@@ -22,12 +25,11 @@ export const listingService = {
         .order('created_at', { ascending: false });
       
       // Apply filters if provided
-      if (filters) {
-        for (const [key, value] of Object.entries(filters)) {
-          if (value !== undefined && value !== null && value !== '') {
-            query = query.eq(key as any, value);
-          }
-        }
+      if (filters.status) {
+        query = query.eq('status', filters.status);
+      }
+      if (filters.supplier_id) {
+        query = query.eq('supplier_id', filters.supplier_id);
       }
       
       const { data, error } = await query;

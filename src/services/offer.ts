@@ -23,12 +23,9 @@ export const offerService = {
       
       // Apply filters if provided
       if (filters) {
-        const filterKeys = Object.keys(filters);
-        for (let i = 0; i < filterKeys.length; i++) {
-          const key = filterKeys[i];
-          const value = filters[key];
-          if (value) {
-            query = query.eq(key, value);
+        for (const [key, value] of Object.entries(filters)) {
+          if (value !== undefined && value !== null && value !== '') {
+            query = query.eq(key as any, value);
           }
         }
       }

@@ -30,6 +30,7 @@ const AdminLoginPage = () => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    
     try {
       // Check for the hardcoded admin account
       if (formData.identifier === "0549050018" && formData.password === "Ned@0820") {
@@ -80,7 +81,8 @@ const AdminLoginPage = () => {
     }
   };
 
-  return <Layout>
+  return (
+    <Layout>
       <div className="flex min-h-[calc(100vh-64px-200px)] items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
@@ -96,23 +98,25 @@ const AdminLoginPage = () => {
           </div>
           
           <div className="mt-8 bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
-            {error && <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {error && (
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
                 {error}
-              </div>}
+              </div>
+            )}
             
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
                   Identifiant
                 </label>
-                <Input 
-                  id="identifier" 
-                  name="identifier" 
-                  type="text" 
-                  required 
-                  value={formData.identifier} 
-                  onChange={handleChange} 
-                  className="mt-1" 
+                <Input
+                  id="identifier"
+                  name="identifier"
+                  type="text"
+                  required
+                  value={formData.identifier}
+                  onChange={handleChange}
+                  className="mt-1"
                 />
               </div>
 
@@ -120,21 +124,21 @@ const AdminLoginPage = () => {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Mot de passe
                 </label>
-                <Input 
-                  id="password" 
-                  name="password" 
-                  type="password" 
-                  required 
-                  value={formData.password} 
-                  onChange={handleChange} 
-                  className="mt-1" 
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="mt-1"
                 />
               </div>
 
               <div>
-                <Button 
-                  type="submit" 
-                  disabled={isLoading} 
+                <Button
+                  type="submit"
+                  disabled={isLoading}
                   className="w-full bg-pharmacy hover:bg-pharmacy-dark bg-pharmacy-accent"
                 >
                   {isLoading ? "Connexion en cours..." : "Se connecter"}
@@ -150,7 +154,8 @@ const AdminLoginPage = () => {
           </div>
         </div>
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
 
 export default AdminLoginPage;

@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -11,6 +12,7 @@ import { Loader2 } from "lucide-react";
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
+const AdminLoginPage = lazy(() => import("./pages/AdminLoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const PaymentPage = lazy(() => import("./pages/PaymentPage"));
@@ -75,6 +77,7 @@ function App() {
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/legal" element={<LegalPage />} />
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/admin/login" element={<AdminLoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/payment" element={<PaymentPage />} />

@@ -1,21 +1,31 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Layout from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/services";
+import { useAuth } from "@/hooks/useAuth";
 
 const AdminLoginPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, profile } = useAuth();
   const [formData, setFormData] = useState({
     identifier: "",
     password: ""
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Redirect if already logged in as admin
+  useEffect(() => {
+    if (user && profile && profile.role === 'admin') {
+      console.log('Admin already logged in, redirecting to dashboard');
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [user, profile, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -54,7 +64,10 @@ const AdminLoginPage = () => {
           title: "Connexion réussie",
           description: "Bienvenue sur le tableau de bord administrateur!"
         });
-        navigate("/admin/dashboard");
+        
+        // Redirect to admin dashboard
+        console.log("Redirecting to admin dashboard");
+        navigate("/admin/dashboard", { replace: true });
       } else {
         // Try to login with real API
         const response = await authService.login({
@@ -70,7 +83,7 @@ const AdminLoginPage = () => {
             title: "Connexion réussie",
             description: "Bienvenue sur le tableau de bord administrateur!"
           });
-          navigate("/admin/dashboard");
+          navigate("/admin/dashboard", { replace: true });
         } else {
           setError("Identifiants administrateur invalides");
         }
@@ -120,6 +133,7 @@ const AdminLoginPage = () => {
                   onChange={handleChange}
                   className="mt-1"
                   placeholder="admin@elsaidaliya.dz"
+                  disabled={isLoading}
                 />
               </div>
 
@@ -135,13 +149,14 @@ const AdminLoginPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className="mt-1"
+                  disabled={isLoading}
                 />
               </div>
 
               <div>
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || !formData.identifier || !formData.password}
                   className="w-full bg-pharmacy hover:bg-pharmacy-dark bg-pharmacy-accent"
                 >
                   {isLoading ? "Connexion en cours..." : "Se connecter"}

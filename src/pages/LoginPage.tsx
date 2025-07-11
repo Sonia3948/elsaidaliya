@@ -26,8 +26,11 @@ const LoginPage = () => {
         ? '/admin/dashboard'
         : profile.role === 'pharmacien' 
         ? '/pharmacist/dashboard'
-        : '/supplier/dashboard';
+        : profile.role === 'fournisseur'
+        ? '/supplier/dashboard'
+        : '/';
       
+      console.log('Redirecting user to:', redirectPath, 'based on role:', profile.role);
       navigate(redirectPath, { replace: true });
     }
   }, [user, profile, navigate]);
@@ -40,7 +43,8 @@ const LoginPage = () => {
     try {
       const { error } = await signIn(email, password);
       if (!error) {
-        // Navigation is handled by useEffect
+        // Navigation is handled by useEffect after profile is loaded
+        console.log('Login successful, waiting for profile to load for redirection');
       }
     } finally {
       setIsLoading(false);
@@ -139,6 +143,11 @@ const LoginPage = () => {
               <Link to="/forgot-password" className="text-sm text-pharmacy-dark hover:underline">
                 Mot de passe oublié ?
               </Link>
+              <div className="pt-2 border-t">
+                <Link to="/admin/login" className="text-sm text-pharmacy-dark hover:underline font-medium">
+                  Connexion Administrateur
+                </Link>
+              </div>
             </div>
 
             <div className="mt-6 pt-6 border-t">

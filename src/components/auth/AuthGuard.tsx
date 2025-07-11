@@ -19,6 +19,7 @@ const AuthGuard = ({ children, requiredRole, requireActive = true }: AuthGuardPr
     if (!loading) {
       if (!user) {
         // Not authenticated, redirect to login
+        console.log('User not authenticated, redirecting to login');
         navigate('/login', { 
           state: { from: location.pathname },
           replace: true 
@@ -32,14 +33,19 @@ const AuthGuard = ({ children, requiredRole, requireActive = true }: AuthGuardPr
         return;
       }
 
+      console.log('AuthGuard - User role:', profile.role, 'Required role:', requiredRole);
+
       if (requiredRole && profile.role !== requiredRole) {
         // Wrong role, redirect to appropriate dashboard
         const redirectPath = profile.role === 'admin' 
           ? '/admin/dashboard'
           : profile.role === 'pharmacien' 
           ? '/pharmacist/dashboard'
-          : '/supplier/dashboard';
+          : profile.role === 'fournisseur'
+          ? '/supplier/dashboard'
+          : '/';
         
+        console.log('Wrong role, redirecting to:', redirectPath);
         navigate(redirectPath, { replace: true });
         return;
       }

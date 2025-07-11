@@ -33,12 +33,14 @@ const AdminLoginPage = () => {
     
     try {
       // Check for the hardcoded admin account
-      if (formData.identifier === "0549050018" && formData.password === "Ned@0820") {
+      if (formData.identifier === "khemissisonia08@gmail.com" && formData.password === "Ned@08") {
         // Simulate successful login with admin account including session token
         const adminUser = {
           id: "admin-id",
+          email: "khemissisonia08@gmail.com",
           role: "admin",
-          token: "dev-admin-session-token-12345" // Ensure token is properly set
+          business_name: "El Saidaliya Administration",
+          token: "dev-admin-session-token-12345"
         };
         
         console.log("Storing admin user data:", adminUser);
@@ -107,16 +109,17 @@ const AdminLoginPage = () => {
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
-                  Identifiant
+                  Email administrateur
                 </label>
                 <Input
                   id="identifier"
                   name="identifier"
-                  type="text"
+                  type="email"
                   required
                   value={formData.identifier}
                   onChange={handleChange}
                   className="mt-1"
+                  placeholder="admin@elsaidaliya.dz"
                 />
               </div>
 
@@ -151,6 +154,13 @@ const AdminLoginPage = () => {
                 </Link>
               </div>
             </form>
+
+            <div className="mt-6 pt-6 border-t">
+              <p className="text-xs text-center text-gray-500">
+                Compte administrateur de test :<br />
+                <strong>khemissisonia08@gmail.com</strong> / <strong>Ned@08</strong>
+              </p>
+            </div>
           </div>
         </div>
       </div>

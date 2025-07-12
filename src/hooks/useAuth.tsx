@@ -126,9 +126,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const profileData = await fetchProfile(data.user.id);
         setProfile(profileData);
         
+        // Show role-specific welcome message
+        const welcomeMessage = profileData?.role === 'admin' 
+          ? "Bienvenue au tableau de bord administrateur"
+          : profileData?.role === 'pharmacien'
+          ? "Bienvenue dans votre espace pharmacien"
+          : profileData?.role === 'fournisseur'
+          ? "Bienvenue dans votre espace fournisseur"
+          : "Bienvenue sur El Saidaliya";
+        
         toast({
           title: "Connexion réussie",
-          description: "Bienvenue sur El Saidaliya",
+          description: welcomeMessage,
         });
       }
 
